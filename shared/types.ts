@@ -14,13 +14,13 @@ export type GameStatus = 'waiting' | 'ongoing' | 'finished'
 
 export interface Lobby {
   code: string
-  hostId: string
+  hostID: string
   players: Player[]
   flashcards: Flashcard[]
   status: GameStatus
   settings: {
     shuffle: boolean
-    fuzzyTolerance: number
+    fuzzyTolerance: boolean
   }
 }
 
