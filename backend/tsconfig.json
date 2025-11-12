@@ -2,8 +2,13 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
-    "rootDir": "./src",
+    "moduleResolution": "NodeNext",
+    "rootDir": "..",
     "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    },
     "lib": ["ES2022"],
     "types": ["node"],
     "sourceMap": true,
@@ -15,5 +20,5 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src"]
+  "include": ["src", "../shared"]
 }
