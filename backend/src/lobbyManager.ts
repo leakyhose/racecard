@@ -43,6 +43,8 @@ export function updateFlashcard(socketId: string, flashcards: Flashcard[]){
     return lobby
 }
 
+// Updates settings in a lobby
+// @returns updated lobby
 export function updateSettings(socketId: string, settings: Settings){
     const lobby = getLobbySocket(socketId);
     if (!lobby){
