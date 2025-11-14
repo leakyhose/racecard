@@ -10,6 +10,11 @@ export interface Player {
   score: number;
 }
 
+export interface Settings {
+  shuffle: boolean;
+  fuzzyTolerance: boolean;
+}
+
 export type GameStatus = "waiting" | "ongoing" | "finished";
 
 export interface Lobby {
@@ -18,10 +23,7 @@ export interface Lobby {
   players: Player[];
   flashcards: Flashcard[];
   status: GameStatus;
-  settings: {
-    shuffle: boolean;
-    fuzzyTolerance: boolean;
-  };
+  settings: Settings;
 }
 
 export interface ServerToClientEvents {
@@ -37,7 +39,8 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   createLobby: (nickname: string) => void;
   joinLobby: (code: string, nickname: string) => void;
-  loadFlashcards: (cards: Flashcard[]) => void;
+  updateFlashcard: (cards: Flashcard[]) => void;
+  updateSettings: (settings: Settings) => void;
   startGame: () => void;
   answer: (text: string) => void;
   sendChat: (msg: string) => void;

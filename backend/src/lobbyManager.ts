@@ -1,4 +1,4 @@
-import type { Flashcard, Lobby } from "@shared/types.js";
+import type { Flashcard, Lobby, Settings } from "@shared/types.js";
 import { generateCode, deleteCode } from "./codeGenerator.js";
 import { addPlayer } from "./playerManager.js";
 
@@ -40,6 +40,15 @@ export function updateFlashcard(socketId: string, flashcards: Flashcard[]){
         return false;
     }
     lobby.flashcards = flashcards;
+    return lobby
+}
+
+export function updateSettings(socketId: string, settings: Settings){
+    const lobby = getLobbySocket(socketId);
+    if (!lobby){
+        return false;
+    }
+    lobby.settings = settings;
     return lobby
 }
 

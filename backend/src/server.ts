@@ -13,6 +13,7 @@ import {
   getLobbyCode,
   addPlayerToLobby,
   updateFlashcard,
+  updateSettings,
 } from "./lobbyManager.js";
 
 const app = express();
@@ -45,11 +46,20 @@ io.on("connection", (socket) => {
     io.to(code).emit("lobbyUpdated", lobby);
   });
 
-  // Loads flashcards, doesnt take code rather figures it out itself
-  socket.on("loadFlashcards", (cards) => {
+  // Loads flashcards
+  socket.on("updateFlashcard", (cards) => {
     const lobby = updateFlashcard(socket.id, cards)
     if (!lobby) {
       console.log(`Failed to update flashcards`);
+      return;
+    }
+    io.to(lobby.code).emit("lobbyUpdated", lobby);
+  });
+
+  socket.on("updateSettings", (settings) => {
+    const lobby = updateSettings(socket.id, settings)
+    if (!lobby) {
+      console.log(`Failed to update settings`);
       return;
     }
     io.to(lobby.code).emit("lobbyUpdated", lobby);
