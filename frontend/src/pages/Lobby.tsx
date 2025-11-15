@@ -1,11 +1,12 @@
 import { useParams, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import { useCodeValidation } from "../hooks/useCodeValidation";
 import { useLobbyData } from "../hooks/useLobbyData";
-import { Tabs } from "./Tabs";
-import { Players } from "./Players";
-import { Chat } from "./Chat";
+import { Tabs } from "../components/Tabs";
+import { Players } from "../components/Players";
+import { Chat } from "../components/Chat";
+import { UploadFlashcard } from "../components/UploadFlashcard";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -15,10 +16,20 @@ export default function Lobby() {
   );
   const [nicknameInput, setNicknameInput] = useState("");
   const [tabNum, setTabNum] = useState(0);
+  const [isLeader, setIsLeader] = useState(false);
 
   useCodeValidation(code);
 
   const lobby = useLobbyData(code);
+
+  // Checks if player user is the leader
+  useEffect(() => {
+    if (lobby && lobby.players[0]?.id === socket.id) {
+      setIsLeader(true);
+    } else {
+      setIsLeader(false);
+    }
+  }, [lobby]);
 
   const handleJoinLobby = () => {
     if (!nicknameInput.trim()) return;
@@ -33,7 +44,7 @@ export default function Lobby() {
   if (lobby === null) {
     return null;
   }
-
+  
   const isInLobby = lobby.players.some((player) => player.id === socket.id);
 
   if (!nickname || !isInLobby) {
@@ -62,6 +73,7 @@ export default function Lobby() {
       <h2>Your name: {nickname}</h2>
       <Tabs tabNum={tabNum} setTabNum={setTabNum} />
       <div>{tabNum === 0 ? <Chat /> : <Players players={lobby.players} />}</div>
+      <UploadFlashcard isLeader={isLeader} />
     </div>
   );
 }

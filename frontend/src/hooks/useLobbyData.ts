@@ -11,6 +11,10 @@ export function useLobbyData(code: string | undefined) {
   useEffect(() => {
     if (!code) return;
 
+    // Ensure code is uppercase before fetching
+    const normalizedCode = code.toUpperCase();
+    if (code !== normalizedCode) return; // Fixes race condition
+
     const handleLobbyData = (lobbyData: Lobby | null) => {
       setLobby(lobbyData);
       if (lobbyData === null) {
