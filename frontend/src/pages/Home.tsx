@@ -36,21 +36,16 @@ export default function Home() {
     if (!nickname.trim() || !codeInput.trim()) return;
 
     const handleLobbyData = (lobby: Lobby | null) => {
-      socket.off("lobbyData", handleLobbyData);
-      socket.off("lobbyUpdated", handleLobbyUpdated);
-
       if (lobby === null) {
         alert("Lobby not found! Please check the code.");
       } else {
-        // Lobby exists, now join it
         socket.emit("joinLobby", lobby.code, nickname);
       }
     };
 
     const handleLobbyUpdated = (lobby: Lobby) => {
-      socket.off("lobbyUpdated", handleLobbyUpdated);
       socket.off("lobbyData", handleLobbyData);
-      
+      socket.off("lobbyUpdated", handleLobbyUpdated);
       navigate(`/${lobby.code}`, {
         replace: true,
         state: { nickname },

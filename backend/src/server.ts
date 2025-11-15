@@ -77,7 +77,7 @@ io.on("connection", (socket) => {
       return;
     }
     io.to(lobby.code).emit("lobbyUpdated", lobby);
-  })
+  });
 
   socket.on("getLobby", (code) => {
     const lobby = getLobbyByCode(code);
@@ -86,7 +86,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     const lobby = removePlayerFromLobby(socket.id);
-    
+
     if (!lobby) return;
     io.to(lobby.code).emit("lobbyUpdated", lobby);
   });

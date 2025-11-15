@@ -77,12 +77,12 @@ export function removePlayerFromLobby(socketId: string) {
 
 export function updateLeader(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
-  
+
   if (!lobby) {
     return null;
   }
 
-  const index = lobby.players.findIndex(player => player.id === socketId);
+  const index = lobby.players.findIndex((player) => player.id === socketId);
 
   if (index !== -1 && index !== undefined) {
     const [removedItem] = lobby.players.splice(index, 1);

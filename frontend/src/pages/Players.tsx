@@ -6,18 +6,19 @@ interface PlayersProps {
 }
 
 export function Players({ players }: PlayersProps) {
-
   const handleUpdateLeader = (nextLeaderId: string) => {
     if (players[0].id !== socket.id) return; // Only current leader can change leader
     socket.emit("updateLeader", nextLeaderId);
   };
 
   return (
-    <div>      
+    <div>
       <ul>
         {players.map((player) => (
           <li key={player.id}>
-            <div onClick={() => handleUpdateLeader(player.id)}>{player.name} - Score: {player.score}</div>
+            <div onClick={() => handleUpdateLeader(player.id)}>
+              {player.name} - Score: {player.score}
+            </div>
           </li>
         ))}
       </ul>

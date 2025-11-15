@@ -1,3 +1,3 @@
-export function Chat(){
-    return <div></div>;
+export function Chat() {
+  return <div></div>;
 }

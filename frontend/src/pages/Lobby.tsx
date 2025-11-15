@@ -3,9 +3,9 @@ import { useState } from "react";
 import { socket } from "../socket";
 import { useCodeValidation } from "../hooks/useCodeValidation";
 import { useLobbyData } from "../hooks/useLobbyData";
-import { Tabs } from "./Tabs"
-import { Players } from "./Players"
-import { Chat } from "./Chat"
+import { Tabs } from "./Tabs";
+import { Players } from "./Players";
+import { Chat } from "./Chat";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -34,7 +34,7 @@ export default function Lobby() {
     return null;
   }
 
-  const isInLobby = lobby.players.some(player => player.id === socket.id);
+  const isInLobby = lobby.players.some((player) => player.id === socket.id);
 
   if (!nickname || !isInLobby) {
     return (
@@ -61,13 +61,7 @@ export default function Lobby() {
       <h2>Lobby Code: {lobby.code}</h2>
       <h2>Your name: {nickname}</h2>
       <Tabs tabNum={tabNum} setTabNum={setTabNum} />
-      <div>
-      {tabNum === 0 ? (
-        <Chat />
-      ) : (
-        <Players players={lobby.players}/>
-      )}
-        </div>
+      <div>{tabNum === 0 ? <Chat /> : <Players players={lobby.players} />}</div>
     </div>
   );
 }

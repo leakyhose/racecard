@@ -13,7 +13,7 @@ export function addPlayer(
   code: string,
   id: string,
   name: string,
-  score: number = 0, 
+  score: number = 0,
 ): Lobby | null {
   const lobby = getLobbyByCode(code);
   if (!lobby) return null;
@@ -32,4 +32,3 @@ export function removePlayer(socketId: string): Lobby | null {
   untrackSocket(socketId);
   return lobby;
 }
-
