@@ -18,7 +18,10 @@ export default function Home() {
   }, [location]);
 
   const handleCreateLobby = () => {
-    if (!nickname.trim()) return;
+    if (!nickname.trim()) {
+      alert("Missing nickname")
+      return;
+    }
 
     const handleLobbyUpdated = (lobby: Lobby) => {
       socket.off("lobbyUpdated", handleLobbyUpdated);
@@ -33,11 +36,14 @@ export default function Home() {
   };
 
   const handleJoinLobby = () => {
-    if (!nickname.trim() || !codeInput.trim()) return;
+    if (!nickname.trim() || !codeInput.trim()) {
+      alert("Missing nickname or lobby code")
+      return;
+    }
 
     const handleLobbyData = (lobby: Lobby | null) => {
       if (lobby === null) {
-        alert("Lobby not found! Please check the code.");
+        alert("Lobby invalid");
       } else {
         socket.emit("joinLobby", lobby.code, nickname);
       }
@@ -68,8 +74,6 @@ export default function Home() {
           value={nickname}
           onChange={(name) => setNickname(name.target.value)}
         />
-
-        
           <button onClick={handleCreateLobby}>Create Lobby</button>
         </div>
 
