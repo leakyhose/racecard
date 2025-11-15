@@ -69,7 +69,7 @@ export default function Lobby() {
 
   return (
     <div className="flex flex-col h-screen">
-      <LobbyHeader code={code!} nickname={nickname} />
+      <LobbyHeader code={code!} nickname={nickname} isLeader={isLeader} lobby={lobby} />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="w-64 border-r flex flex-col">
