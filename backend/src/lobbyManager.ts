@@ -27,7 +27,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
     players: [{ id: hostID, name: hostName, score: 0 }],
     flashcards: [],
     status: "waiting",
-    settings: { shuffle: false, fuzzyTolerance: true },
+    settings: { shuffle: true, fuzzyTolerance: true },
   };
   lobbies.set(code, newLobby);
   socketToLobby.set(hostID, code);

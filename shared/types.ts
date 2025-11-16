@@ -44,7 +44,7 @@ export interface ServerToClientEvents {
   scoreUpdate: (players: Player[]) => void;
   chatMessage: (msg: { player: string; text: string }) => void;
   lobbyData: (lobby: Lobby | null) => void;
-  startCountdown: (secondsRemaining: number) => void;
+  startCountdown: (secondsRemaining: number | string) => void;
 
   newFlashcard: (question: string) => void;
   correctGuess: (answer: Number) => void; // Time it took to answer correctly

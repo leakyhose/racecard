@@ -18,7 +18,7 @@ export default function Lobby() {
   );
   const [nicknameInput, setNicknameInput] = useState("");
   const [isLeader, setIsLeader] = useState(false);
-  const [countdown, setCountdown] = useState<number | null>(null);
+  const [countdown, setCountdown] = useState<number | string | null>(null);
 
   useCodeValidation(code);
 
@@ -34,7 +34,7 @@ export default function Lobby() {
   }, [lobby]);
 
   useEffect(() => {
-    const handleCountdown = (seconds: number) => {
+    const handleCountdown = (seconds: number | string) => {
       setCountdown(seconds);
     };
 

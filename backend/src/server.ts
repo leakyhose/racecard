@@ -20,6 +20,8 @@ import {
 
 import {
   startGame,
+  shuffleGameCards,
+  setRoundStart,
   getCurrentQuestion,
   validateAnswer,
   getRoundResults,
@@ -109,24 +111,26 @@ io.on("connection", (socket) => {
     lobby.status = "starting";
     io.to(lobby.code).emit("lobbyUpdated", lobby);
 
-    // 3-second countdown - emit first immediately
+    // Start countdown: 3, 2, 1
     let countdown = 3;
     io.to(lobby.code).emit("startCountdown", countdown);
     countdown--;
     
+    // Shuffle cards asynchronously during countdown
+    shuffleGameCards(lobby.code);
+    
     const countdownInterval = setInterval(() => {
-      io.to(lobby.code).emit("startCountdown", countdown);
-      countdown--;
-      
-      if (countdown < 0) {
+      if (countdown >= 1) {
+        io.to(lobby.code).emit("startCountdown", countdown);
+        countdown--;
+      } else {
         clearInterval(countdownInterval);
         
-        // Now actually start the game
+        // Start the game after 1 is shown
         lobby.status = "ongoing";
         io.to(lobby.code).emit("lobbyUpdated", lobby);
 
         const runGameplayLoop = (lobbyCode: string) => {
-
           const currentQuestion = getCurrentQuestion(lobbyCode);
           if (!currentQuestion) {
             const finalLobby = getLobbyByCode(lobbyCode);
@@ -138,6 +142,8 @@ io.on("connection", (socket) => {
             return;
           }
           
+          // Set round start time when emitting question
+          setRoundStart(lobbyCode);
           io.to(lobbyCode).emit("newFlashcard", currentQuestion);
 
           // Wait 5 seconds for answers

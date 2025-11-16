@@ -5,25 +5,40 @@ import { shuffle } from "./util.js";
 
 const codeToGamestate = new Map<string, Gamestate>();
 
-// Initialize game for a lobby
+// Initialize game for a lobby (without shuffling yet)
 export function startGame(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) return null;
 
-  lobby.status = "ongoing";
-
-  const flashcards = lobby.settings.shuffle
-    ? shuffle([...lobby.flashcards])
-    : [...lobby.flashcards];
-
+  // Don't set status or shuffle yet - just prepare the state
   codeToGamestate.set(lobby.code, {
-    flashcards,
-    roundStart: Date.now(),
+    flashcards: [...lobby.flashcards], // Will be shuffled later
+    roundStart: 0,
     wrongAnswers: [],
     correctAnswers: [],
   });
 
   return lobby;
+}
+
+// Shuffle cards for a lobby (called after countdown)
+export function shuffleGameCards(lobbyCode: string) {
+  const lobby = getLobbyByCode(lobbyCode);
+  if (!lobby) return;
+
+  const gs = codeToGamestate.get(lobbyCode);
+  if (!gs) return;
+
+  if (lobby.settings.shuffle) {
+    gs.flashcards = shuffle([...gs.flashcards]);
+  }
+}
+
+// Set round start time when question is emitted
+export function setRoundStart(lobbyCode: string) {
+  const gs = codeToGamestate.get(lobbyCode);
+  if (!gs) return;
+  gs.roundStart = Date.now();
 }
 
 // Get the current question for a lobby
@@ -94,7 +109,7 @@ export function advanceToNextFlashcard(lobbyCode: string): string | null {
 
   gs.correctAnswers = [];
   gs.wrongAnswers = [];
-  gs.roundStart = Date.now();
+  // roundStart will be set when newFlashcard is emitted
 
   return gs.flashcards[0]?.question || null;
 }
