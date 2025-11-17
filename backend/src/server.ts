@@ -29,6 +29,7 @@ import {
   getRoundResults,
   advanceToNextFlashcard,
   endGame,
+  allPlayersAnswered,
 } from "./gameManager.js";
 
 const app = express();
@@ -37,6 +38,13 @@ const httpServer = createServer(app);
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   cors: { origin: "*" },
 });
+
+// Store callbacks for active rounds to enable event-driven early ending
+const activeRounds = new Map<string, { 
+  endRound: () => void;
+  roundStartTime: number;
+  roundEnded: boolean;
+}>();
 
 /*
  All socket.on that change lobby should emit, "lobbyUpdated", with accomanying lobby
@@ -148,8 +156,15 @@ io.on("connection", (socket) => {
           setRoundStart(lobbyCode);
           io.to(lobbyCode).emit("newFlashcard", currentQuestion);
 
-          // Wait 5 seconds for answers
-          setTimeout(() => {
+          const roundStartTime = Date.now();
+          const ROUND_DURATION = 10000; // 10 seconds
+          let roundEnded = false;
+
+          const endRound = () => {
+            if (roundEnded) return;
+            roundEnded = true;
+            activeRounds.delete(lobbyCode); // Clean up
+
             const results = getRoundResults(lobbyCode);
             if (results) {
               io.to(lobbyCode).emit("endFlashcard", results);
@@ -157,7 +172,8 @@ io.on("connection", (socket) => {
             
             const lobby = wipeMiniStatus(lobbyCode);
             if (lobby) io.to(lobbyCode).emit("lobbyUpdated", lobby);
-            // Wait 3 seconds to show results
+            
+            // Wait 5 seconds to show results
             setTimeout(() => {
               const nextQuestion = advanceToNextFlashcard(lobbyCode);
 
@@ -173,8 +189,15 @@ io.on("connection", (socket) => {
                   endGame(lobbyCode);
                 }
               }
-            }, 5000);
-          }, 10000);
+            }, 3000);
+          };
+
+          // Store round info for event-driven checks
+          activeRounds.set(lobbyCode, { endRound, roundStartTime, roundEnded });
+
+          setTimeout(() => {
+            endRound();
+          }, ROUND_DURATION);
         };
 
         runGameplayLoop(lobby.code);
@@ -189,6 +212,18 @@ io.on("connection", (socket) => {
       socket.emit("correctGuess", result.timeTaken);
     }
     io.to(result.lobby.code).emit("lobbyUpdated", result.lobby);
+
+    // Check if all players have answered
+    const roundInfo = activeRounds.get(result.lobby.code);
+    if (roundInfo && !roundInfo.roundEnded && allPlayersAnswered(result.lobby.code)) {
+      const elapsedTime = Date.now() - roundInfo.roundStartTime;
+      const ROUND_DURATION = 10000;
+      const MIN_DELAY_AFTER_ALL_ANSWERED = 1000;
+      const timeUntilEnd = ROUND_DURATION - elapsedTime;
+      const delay = Math.min(timeUntilEnd, MIN_DELAY_AFTER_ALL_ANSWERED);
+      
+      setTimeout(() => roundInfo.endRound(), delay);
+    }
   });
 });
 httpServer.listen(3000, () => console.log("Server running on :3000"));
