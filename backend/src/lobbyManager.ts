@@ -77,7 +77,7 @@ export function removePlayerFromLobby(socketId: string) {
 
 export function wipeMiniStatus(lobbyCode: string) {
   const lobby = getLobbyByCode(lobbyCode)
-
+  
   for(const player of lobby?.players || []) {
     player.miniStatus = null;
   }

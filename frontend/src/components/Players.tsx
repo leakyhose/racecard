@@ -51,7 +51,7 @@ export function Players({ players, gameStatus }: PlayersProps) {
                 </div>
                 
                 <div className="w-16 shrink-0 flex items-center justify-center">
-                  {gameStatus === "" ? (
+                  {gameStatus === "waiting" || gameStatus === "finished" ? (
                     <div className="w-16 shrink-0 flex items-center justify-center"> {player.wins} </div>) : (
                     <div className="w-16 shrink-0 flex items-center justify-center"> {player.score} </div>
                     )}

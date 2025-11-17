@@ -135,7 +135,7 @@ export function Game() {
                     >
                       <span className="font-medium">{player.player}</span>
                       <span className="text-sm text-gray-600">
-                        {(Number(player.time) / 1000).toFixed(2)}s
+                        {(Number(player.time) / 1000).toFixed(3)}s
                       </span>
                     </div>
                   ))}
@@ -156,9 +156,9 @@ export function Game() {
                         {wrong.answer.map((ans, ansIndex) => (
                           <div
                             key={ansIndex}
-                            className="text-sm text-gray-600 italic"
+                            className="text-sm text-gray-600 italic truncate"
                           >
-                            "{ans}"
+                            {ans}
                           </div>
                         ))}
                       </div>
