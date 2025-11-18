@@ -26,6 +26,7 @@ export interface Lobby {
   flashcards: Flashcard[];
   status: GameStatus;
   settings: Settings;
+  leader: string; // ID of leader
 }
 
 export interface FlashcardEnd {

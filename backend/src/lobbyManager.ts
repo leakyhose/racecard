@@ -28,6 +28,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
     flashcards: [],
     status: "waiting",
     settings: { shuffle: true, fuzzyTolerance: true },
+    leader: hostID
   };
   lobbies.set(code, newLobby);
   socketToLobby.set(hostID, code);
@@ -87,20 +88,8 @@ export function wipeMiniStatus(lobbyCode: string) {
 
 export function updateLeader(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
-
-  if (!lobby) {
-    return null;
-  }
-
-  const index = lobby.players.findIndex((player) => player.id === socketId);
-
-  if (index !== -1 && index !== undefined) {
-    const [removedItem] = lobby.players.splice(index, 1);
-    if (removedItem) {
-      lobby.players.unshift(removedItem);
-    }
-  }
-
+  if (!lobby){return;}
+  lobby.leader = socketId;
   return lobby;
 }
 

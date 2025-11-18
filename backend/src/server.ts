@@ -121,7 +121,7 @@ io.on("connection", (socket) => {
     lobby.status = "starting";
     io.to(lobby.code).emit("lobbyUpdated", lobby);
 
-    // Start countdown: 3, 2, 1
+    // Start countdown
     let countdown = 3;
     io.to(lobby.code).emit("startCountdown", countdown);
     countdown--;
@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
           io.to(lobbyCode).emit("newFlashcard", currentQuestion);
 
           const roundStartTime = Date.now();
-          const ROUND_DURATION = 10000; // 10 seconds
+          const ROUND_DURATION = 10000;
           let roundEnded = false;
 
           const endRound = () => {
@@ -192,7 +192,7 @@ io.on("connection", (socket) => {
             }, 3000);
           };
 
-          // Store round info for event-driven checks
+          // Store round info, callback endRound is called if answers are given faster than round
           activeRounds.set(lobbyCode, { endRound, roundStartTime, roundEnded });
 
           setTimeout(() => {

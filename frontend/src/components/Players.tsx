@@ -4,15 +4,16 @@ import { socket } from "../socket";
 interface PlayersProps {
   players: Player[];
   gameStatus: string;
+  isLeader: boolean;
+  leader: string;
 }
 
-export function Players({ players, gameStatus }: PlayersProps) {
+export function Players({ players, gameStatus, isLeader, leader }: PlayersProps) {
   const handleUpdateLeader = (nextLeaderId: string) => {
-    if (players[0].id !== socket.id) return; // Only current leader can change leader
+    if (!isLeader){return;}
     socket.emit("updateLeader", nextLeaderId);
   };
 
-  const isLeader = players[0]?.id === socket.id;
   const isOngoing = gameStatus === "ongoing";
 
   return (
@@ -33,9 +34,16 @@ export function Players({ players, gameStatus }: PlayersProps) {
                 <div className="flex-1 flex flex-col justify-center overflow-hidden p-2">
                   {hasMiniStatus ? (
                     <>
-                      <div className="truncate leading-tight">
+                      {player.id === leader ? (
+                        <div className="truncate leading-tight">
+                        👑{player.name}
+                        </div>
+                      ) : (
+                        <div className="truncate leading-tight">
                         {player.name}
-                      </div>
+                        </div>
+                      )}
+                      
                       <div className="text-sm truncate leading-tight mt-1">
                         {(typeof player.miniStatus) === 'number'
                           ? `${(Number(player.miniStatus) / 1000).toFixed(3)}s`
@@ -45,7 +53,15 @@ export function Players({ players, gameStatus }: PlayersProps) {
                     </>
                   ) : (
                     <div className="truncate">
-                      {player.name}
+                      {player.id === leader ? (
+                        <div className="truncate leading-tight">
+                        👑 {player.name}
+                        </div>
+                      ) : (
+                        <div className="truncate leading-tight">
+                        {player.name}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

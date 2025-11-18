@@ -25,11 +25,7 @@ export default function Lobby() {
 
   // Checks if player user is the leader
   useEffect(() => {
-    if (lobby && lobby.players[0]?.id === socket.id) {
-      setIsLeader(true);
-    } else {
-      setIsLeader(false);
-    }
+    setIsLeader(lobby?.leader === socket.id)
   }, [lobby]);
 
   const handleJoinLobby = () => {
@@ -80,7 +76,7 @@ export default function Lobby() {
 
       <div className="flex flex-1 overflow-hidden">
         <div className="w-64 flex flex-col">
-          <Players players={lobby.players} gameStatus={lobby.status} />
+          <Players players={lobby.players} gameStatus={lobby.status} isLeader={isLeader} leader={lobby.leader}/>
           <UploadFlashcard isLeader={isLeader} />
         </div>
 
