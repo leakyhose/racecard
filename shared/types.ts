@@ -31,7 +31,7 @@ export interface Lobby {
 
 export interface FlashcardEnd {
   Answer: string;
-  fastestPlayers: { player: string; time: Number }[];
+  fastestPlayers: { player: string; time: number }[];
   wrongAnswers: { player: string; answer: string[] }[];
 }
 
@@ -50,7 +50,7 @@ export interface ServerToClientEvents {
   startCountdown: (secondsRemaining: number | string) => void;
 
   newFlashcard: (question: string) => void;
-  correctGuess: (answer: Number) => void; // Time it took to answer correctly
+  correctGuess: (answer: number) => void; // Time it took to answer correctly
   endFlashcard: (flashcardEnd: FlashcardEnd) => void;
 }
 

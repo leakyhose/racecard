@@ -124,32 +124,21 @@ export function Game() {
 
           <div className="flex gap-6 flex-1 p-8 pt-0 justify-center">
             {results && results.fastestPlayers.length > 0 && (
-              <MiniLeaderboard results={results} />
+              <MiniLeaderboard leaderboardName = "Fastest Answers" 
+              playerList={results.fastestPlayers.map(player => ({
+                player: player.player,
+                value: `${(Number(player.time) / 1000).toFixed(3)}s`
+              }))} />
             )}
 
             {results.wrongAnswers.length > 0 && (
-              <div className="border-2 border-red-300 rounded-lg p-4 bg-red-50 flex-1 max-w-md">
-                <h3 className="text-xl font-semibold mb-3 text-red-800">
-                  Wall of Shame
-                </h3>
-                <div className="space-y-2">
-                  {results.wrongAnswers.map((wrong, index) => (
-                    <div key={index} className="p-2 bg-white rounded border">
-                      <div className="font-medium">{wrong.player}</div>
-                      <div className="space-y-1">
-                        {wrong.answer.map((ans, ansIndex) => (
-                          <div
-                            key={ansIndex}
-                            className="text-sm text-gray-600 italic truncate"
-                          >
-                            {ans}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <MiniLeaderboard
+                leaderboardName="Wrong Answers"
+                playerList={results.wrongAnswers.map(player => ({
+                  player: player.player,
+                  value: player.answer
+                }))}
+              />
             )}
           </div>
         </div>
