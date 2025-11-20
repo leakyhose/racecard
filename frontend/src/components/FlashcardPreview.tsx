@@ -13,15 +13,15 @@ export function FlashcardPreview({ flashcards, answerByTerm }: FlashcardPreviewP
       {flashcards.map((flashcard) => (
         <div
           key={flashcard.id}
-          className="group relative border p-4 flex items-stretch transition-transform duration-50 ease-out hover:scale-[1.005]"
+          className="group relative border-2 border-coffee p-4 flex items-stretch transition-transform duration-50 ease-out hover:scale-[1.005] bg-vanilla shadow-[4px_4px_0px_0px_#644536]"
         >
           <div className="grid grid-cols-2 gap-4 grow pr-0 ">
-            <div className="whitespace-pre-wrap wrap-break-word p-1 rounded text-center">
+            <div className="whitespace-pre-wrap wrap-break-word p-1 rounded-none text-center font-bold text-coffee">
               {answerByTerm ? flashcard.answer :
               flashcard.question
               }
             </div>
-            <div className="whitespace-pre-wrap wrap-break-word p-1 rounded text-center">
+            <div className="whitespace-pre-wrap wrap-break-word p-1 rounded-none text-center font-bold text-coffee">
               {answerByTerm ? flashcard.question :
               flashcard.answer
               }

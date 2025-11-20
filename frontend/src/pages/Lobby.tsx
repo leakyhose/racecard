@@ -67,7 +67,7 @@ export default function Lobby() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-vanilla text-coffee font-executive overflow-hidden">
       <LobbyHeader
         code={code!}
         nickname={nickname}
@@ -75,8 +75,8 @@ export default function Lobby() {
         lobby={lobby}
       />
 
-      <div className="flex flex-1 overflow-hidden ">
-        <div className="w-64 flex flex-col">
+      <div className="flex flex-1 overflow-hidden border-t-4 border-coffee">
+        <div className="w-72 flex flex-col border-r-4 border-coffee bg-vanilla">
           <Players
             players={lobby.players}
             gameStatus={lobby.status}
@@ -85,22 +85,25 @@ export default function Lobby() {
           />
 
           {isLeader && lobby.status === "waiting" && (
-            <div>
-            <ChangeSettings isLeader={isLeader} currentSettings={lobby.settings} />
-            <UploadFlashcard isLeader={isLeader} />
-          </div>)}
+            <div className="p-4 border-t-4 border-coffee flex flex-row justify-center gap-15 bg-vanilla">
+              <ChangeSettings isLeader={isLeader} currentSettings={lobby.settings} />
+              <UploadFlashcard isLeader={isLeader} />
+            </div>
+          )}
           
         </div>
 
-        <div className="flex-1 p-4 overflow-auto">
+        <div className="flex-1 p-0 overflow-y-auto overflow-x-hidden bg-light-vanilla relative">
           {lobby.status === "starting" || lobby.status === "ongoing" || lobby.status === "finished" ? (
             <Game />
           ) : (
-            <FlashcardPreview flashcards={lobby.flashcards} answerByTerm={lobby.settings.answerByTerm} />
+            <div className="h-full p-8 bg-light-vanilla">
+                <FlashcardPreview flashcards={lobby.flashcards} answerByTerm={lobby.settings.answerByTerm} />
+            </div>
           )}
         </div>
 
-        <div className="w-80 border-l">
+        <div className="w-80 border-l-4 border-coffee bg-vanilla">
           <Chat />
         </div>
       </div>

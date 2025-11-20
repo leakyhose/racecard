@@ -1,1 +1,37 @@
 @import "tailwindcss";
+
+@theme {
+  --color-vanilla: #f3eaca;
+  --color-coffee: #644536;
+  --color-terracotta: #B2675E;
+  --color-powder: #B4CDED;
+  --color-thistle: #E7C8DD;
+  --color-light-vanilla: #EEE1B3;   
+
+  --font-executive: "F25 Executive", monospace;
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-full: 0px;
+}
+
+@font-face {
+  font-family: 'F25 Executive';
+  src: url('/fonts/F25_Executive.ttf') format('truetype');
+}
+
+@layer base {
+  body {
+    background-color: var(--color-vanilla);
+    color: var(--color-coffee);
+    font-family: var(--font-executive);
+  }
+  
+  *, ::before, ::after {
+    border-radius: 0px;
+  }
+}

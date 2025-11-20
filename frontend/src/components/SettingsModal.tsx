@@ -48,30 +48,30 @@ export function SettingsModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center z-50 bg-coffee/50 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div
-        className="border border-black bg-white p-4 max-w-md w-full"
+        className="border-4 border-coffee bg-vanilla p-6 max-w-md w-full shadow-[8px_8px_0px_0px_#644536]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Game Settings</h2>
-          <button onClick={handleClose} className="text-xl font-bold">
+        <div className="flex justify-between items-center mb-6 border-b-4 border-coffee pb-2">
+          <h2 className="text-xl font-bold uppercase tracking-wide text-coffee">Game Settings</h2>
+          <button onClick={handleClose} className="text-xl font-bold text-coffee hover:text-terracotta transition-colors">
             ✕
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 text-coffee">
           {SETTINGS_DEFINITIONS.map((def) => (
             <div key={def.key} className="flex items-center justify-between">
-              <label className="font-medium">{def.label}</label>
+              <label className="font-bold uppercase text-sm">{def.label}</label>
               {def.type === "boolean" && (
                 <input
                   type="checkbox"
                   checked={!!settings[def.key]}
                   onChange={(e) => handleChange(def.key, e.target.checked)}
-                  className="h-5 w-5"
+                  className="h-6 w-6 accent-terracotta border-2 border-coffee rounded-none focus:ring-0 cursor-pointer"
                 />
               )}
             </div>

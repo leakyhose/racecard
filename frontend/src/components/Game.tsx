@@ -65,7 +65,7 @@ export function Game() {
   if (countdown !== null) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-9xl font-bold">{countdown}</div>
+        <div className="text-9xl font-bold text-coffee animate-pulse">{countdown}</div>
       </div>
     );
   }
@@ -78,7 +78,7 @@ export function Game() {
 
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 gap-8">
-        <h2 className="text-4xl font-bold">Game Finished!</h2>
+        <h2 className="text-4xl font-bold text-coffee tracking-widest uppercase">Game Finished</h2>
         <MiniLeaderboard 
           leaderboardName="Final Scores" 
           playerList={leaderboardData}
@@ -87,12 +87,12 @@ export function Game() {
           {isLeader ? (
             <button
               onClick={() => socket.emit("continueGame")}
-              className="px-8 py-4 bg-blue-500 text-white text-xl font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+              className="px-8 py-4 bg-terracotta text-vanilla text-xl font-bold hover:bg-coffee hover:text-vanilla transition-all uppercase tracking-wider border-4 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
             >
               Continue
             </button>
           ) : (
-            <div className="text-xl text-gray-500">
+            <div className="text-xl text-coffee/50 font-bold uppercase">
               Waiting for leader to continue...
             </div>
           )}
@@ -103,7 +103,7 @@ export function Game() {
 
   if (!currentQuestion) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-500">
+      <div className="flex items-center justify-center h-full text-coffee/50 font-bold uppercase">
         Waiting for game to start...
       </div>
     );
@@ -112,7 +112,7 @@ export function Game() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-6xl font-bold text-center max-w-4xl">
+        <div className="text-6xl font-bold text-center max-w-4xl text-coffee leading-tight drop-shadow-sm uppercase">
           {currentQuestion}
         </div>
       </div>
@@ -124,8 +124,8 @@ export function Game() {
               type="text"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Type your answer..."
-              className="w-full px-6 py-4 text-2xl border-2 border-blue-400 rounded-lg focus:outline-none focus:border-blue-600"
+              placeholder="TYPE YOUR ANSWER..."
+              className="w-full px-6 py-4 text-2xl bg-vanilla border-4 border-coffee text-coffee placeholder-coffee/30 focus:outline-none focus:bg-white/50 transition-colors text-center uppercase font-bold"
               autoFocus
             />
           </form>
@@ -135,9 +135,9 @@ export function Game() {
       {!showResults && hasAnsweredCorrectly && (
         <div className="p-8 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-6xl mb-4">✓</div>
-            <div className="text-2xl font-bold text-green-600">Correct!</div>
-            <div className="text-gray-600 mt-2">
+            <div className="text-6xl mb-4 text-coffee">✓</div>
+            <div className="text-2xl font-bold text-coffee uppercase tracking-widest">Correct</div>
+            <div className="text-coffee/50 mt-2 font-bold uppercase">
               Waiting for round to end...
             </div>
           </div>
@@ -150,9 +150,9 @@ export function Game() {
             className="flex items-center justify-center p-8"
             style={{ height: "30%" }}
           >
-            <div className="text-center">
-              <h3 className="text-xl font-semibold mb-2">Correct Answer:</h3>
-              <div className="text-4xl font-bold text-green-600 p-4 bg-green-50 rounded-lg border-2 border-green-300 max-h-32 overflow-auto">
+            <div className="text-center w-full max-w-2xl ">
+              <h3 className="text-xl font-semibold mb-4 text-coffee uppercase tracking-wider">Correct Answer</h3>
+              <div className="text-4xl font-bold text-coffee p-6 bg-vanilla border-4 border-coffee max-h-48 overflow-auto shadow-[4px_4px_0px_0px_#644536] uppercase">
                 {results.Answer}
               </div>
             </div>
