@@ -29,7 +29,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
     ],
     flashcards: [],
     status: "waiting",
-    settings: { shuffle: true, fuzzyTolerance: true },
+    settings: { shuffle: true, fuzzyTolerance: true, answerByTerm: false },    // DEFAULT SETTINGS HERE WHEN CREATING LOBBY
     leader: hostID,
   };
   lobbies.set(code, newLobby);

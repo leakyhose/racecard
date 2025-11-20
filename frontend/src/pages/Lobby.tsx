@@ -96,7 +96,7 @@ export default function Lobby() {
           {lobby.status === "starting" || lobby.status === "ongoing" || lobby.status === "finished" ? (
             <Game />
           ) : (
-            <FlashcardPreview flashcards={lobby.flashcards} />
+            <FlashcardPreview flashcards={lobby.flashcards} answerByTerm={lobby.settings.answerByTerm} />
           )}
         </div>
 

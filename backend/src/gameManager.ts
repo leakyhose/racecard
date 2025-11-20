@@ -1,7 +1,7 @@
-import type { Flashcard, Gamestate } from "@shared/types.js";
+import type { Gamestate } from "@shared/types.js";
 import { getLobbyBySocket, getLobbyByCode } from "./lobbyManager.js";
 
-import { shuffle } from "./util.js";
+import { shuffle, swap } from "./util.js";
 
 const codeToGamestate = new Map<string, Gamestate>();
 
@@ -10,9 +10,14 @@ export function startGame(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) return null;
 
-  // Shuffling will be done alongside countdown later o ne
+
+  let gameFlashcards = [...lobby.flashcards];
+  if (lobby.settings.answerByTerm) {
+    gameFlashcards = swap(gameFlashcards);
+  }
+
   codeToGamestate.set(lobby.code, {
-    flashcards: [...lobby.flashcards],
+    flashcards: gameFlashcards,
     roundStart: 0,
     wrongAnswers: [],
     correctAnswers: [],
@@ -30,7 +35,7 @@ export function shuffleGameCards(lobbyCode: string) {
   if (!gs) return;
 
   if (lobby.settings.shuffle) {
-    gs.flashcards = shuffle([...gs.flashcards]);
+    gs.flashcards = shuffle(gs.flashcards);
   }
 }
 

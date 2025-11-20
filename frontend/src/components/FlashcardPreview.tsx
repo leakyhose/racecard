@@ -1,8 +1,9 @@
 interface FlashcardPreviewProps {
-  flashcards: { id: string; question: string; answer: string }[];
+  flashcards: { id: string; question: string; answer: string }[]
+  answerByTerm?: boolean;
 }
 
-export function FlashcardPreview({ flashcards }: FlashcardPreviewProps) {
+export function FlashcardPreview({ flashcards, answerByTerm }: FlashcardPreviewProps) {
   if (!flashcards.length) {
     return <div className="flex items-center h-full justify-center text-sm italic text-center">No flashcards uploaded yet.</div>;
   }
@@ -16,10 +17,14 @@ export function FlashcardPreview({ flashcards }: FlashcardPreviewProps) {
         >
           <div className="grid grid-cols-2 gap-4 grow pr-0 ">
             <div className="whitespace-pre-wrap wrap-break-word p-1 rounded text-center">
-              {flashcard.question}
+              {answerByTerm ? flashcard.answer :
+              flashcard.question
+              }
             </div>
             <div className="whitespace-pre-wrap wrap-break-word p-1 rounded text-center">
-              {flashcard.answer}
+              {answerByTerm ? flashcard.question :
+              flashcard.answer
+              }
             </div>
           </div>
         </div>

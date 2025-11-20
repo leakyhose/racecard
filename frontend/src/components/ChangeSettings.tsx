@@ -17,7 +17,7 @@ export function ChangeSettings({ isLeader, currentSettings }: ChangeSettingsProp
   };
 
   // Default settings if undefined
-  const settingsToUse = currentSettings || { shuffle: true, fuzzyTolerance: true };
+  const settingsToUse = currentSettings || { shuffle: true, fuzzyTolerance: true, answerByTerm: false };
 
   return (
     <div>

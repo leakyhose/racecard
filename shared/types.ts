@@ -15,6 +15,7 @@ export interface Player {
 export interface Settings {
   shuffle: boolean;
   fuzzyTolerance: boolean;
+  answerByTerm: boolean;
 }
 
 export type GameStatus = "waiting" | "ongoing" | "finished" | "starting";

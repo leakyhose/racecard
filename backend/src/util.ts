@@ -1,3 +1,6 @@
+import type { Flashcard } from "@shared/types.js";
+
+// Fisher-Yates shuffle algorithm 
 export function shuffle<T>(array: T[]): T[] {
   const length = array.length;
 
@@ -11,3 +14,13 @@ export function shuffle<T>(array: T[]): T[] {
 
   return array;
 }
+
+// Swaps question answer pairs
+export function swap(array: Flashcard[]): Flashcard[] {
+  return array.map(flashcard => ({
+    id: flashcard.id,
+    question: flashcard.answer,
+    answer: flashcard.question
+  }));
+}
+

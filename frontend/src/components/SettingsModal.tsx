@@ -11,12 +11,13 @@ interface SettingsModalProps {
 interface SettingDefinition {
   key: keyof Settings;
   label: string;
-  type: "boolean"; // Can be extended to 'text', 'number'
+  type: "boolean"; // Can be extended to text and number in the future
 }
 
 const SETTINGS_DEFINITIONS: SettingDefinition[] = [
   { key: "shuffle", label: "Shuffle Flashcards", type: "boolean" },
   { key: "fuzzyTolerance", label: "Fuzzy Tolerance", type: "boolean" },
+  { key: "answerByTerm", label: "Use term for answer?", type: "boolean" },
 ];
 
 export function SettingsModal({
@@ -34,12 +35,15 @@ export function SettingsModal({
   if (!isOpen) return null;
 
   const handleClose = () => {
-    onUpdate(settings);
     onClose();
   };
 
   const handleChange = (key: keyof Settings, value: Settings[keyof Settings]) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      const updatedSettings = { ...prev, [key]: value };
+      onUpdate(updatedSettings);
+      return updatedSettings;
+    });
   };
 
   return (
