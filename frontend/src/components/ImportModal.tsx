@@ -5,6 +5,8 @@ import {
   type RowSeparator,
 } from "../utils/flashcardUtils";
 import type { Flashcard } from "@shared/types";
+import step1Image from "@shared/images/step1.png";
+import step2Image from "@shared/images/step2.png";
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -63,16 +65,30 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
             <h3 className="font-bold text-lg mb-4 uppercase">How to Import</h3>
             <div className="space-y-4 text-sm font-bold">
               <p>
-                PLACEHOLDER PLACEHOLDER
+                How to import from Quizlet
               </p>
+              <div>
+                <p className="mb-2">
+                  1. Make sure that the set you want to import is in your own library. If it isn't, click the "Make a copy" then "Create"
+                </p>
+                <img 
+                  src={step1Image} 
+                  alt="Step 1: Make a copy" 
+                  className="w-full border-2 border-coffee mb-4"
+                />
+              </div>
+              <div>
+                <p className="mb-2">
+                  2. Click the three dot menu button the flashcard set, then click "Export".
+                </p>
+                <img 
+                  src={step2Image} 
+                  alt="Step 2: Export flashcards" 
+                  className="w-full border-2 border-coffee mb-4"
+                />
+              </div>
               <p>
-                1. PLACEHOLDER PLACEHOLDER
-                <br />
-                2. PLACEHOLDER PLACEHOLDER
-                <br />
-                3. PLACEHOLDER PLACEHOLDER
-                <br />
-                4. PLACEHOLDER PLACEHOLDER
+                3. Copy the text over and import!
               </p>
             </div>
           </div>

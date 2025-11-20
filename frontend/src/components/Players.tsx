@@ -61,7 +61,7 @@ export function Players({
                     <div className="truncate">
                       {player.id === leader ? (
                         <div className="truncate leading-tight text-coffee font-bold uppercase">
-                          {player.name} 👑 
+                           👑 {player.name}
                         </div>
                       ) : (
                         <div className="truncate leading-tight text-coffee font-bold uppercase">

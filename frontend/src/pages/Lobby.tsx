@@ -76,7 +76,7 @@ export default function Lobby() {
       />
 
       <div className="flex flex-1 overflow-hidden border-t-4 border-coffee">
-        <div className="w-72 flex flex-col border-r-4 border-coffee bg-vanilla">
+        <div className="w-60 flex flex-col border-r-4 border-coffee bg-vanilla">
           <Players
             players={lobby.players}
             gameStatus={lobby.status}
