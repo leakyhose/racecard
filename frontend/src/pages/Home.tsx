@@ -64,7 +64,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-vanilla text-coffee font-executive p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-light-vanilla text-coffee font-executive p-4">
       {notFound && (
         <div className="mb-4 text-terracotta font-bold text-xl uppercase">
           That lobby doesnt exist!
@@ -72,7 +72,7 @@ export default function Home() {
       )}
       <div className="w-full max-w-md border-4 border-coffee p-8 bg-vanilla shadow-[8px_8px_0px_0px_#644536]">
         <h1 className="text-4xl mb-8 text-center uppercase tracking-widest border-b-4 border-coffee pb-4">
-          Flashcard
+          RaceCard
         </h1>
 
         <div className="mb-8 flex flex-col gap-4">
