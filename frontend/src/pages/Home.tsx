@@ -13,6 +13,10 @@ export default function Home() {
   const [codeInput, setCodeInput] = useState("");
 
   useEffect(() => {
+    document.title = "RaceCard";
+  }, []);
+
+  useEffect(() => {
     if (location.state?.notFound) {
       setNotFound(true);
       window.history.replaceState({}, document.title);

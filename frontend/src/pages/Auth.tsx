@@ -12,6 +12,11 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
+  // Set page title
+  useEffect(() => {
+    document.title = "RaceCard";
+  }, []);
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {

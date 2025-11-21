@@ -30,6 +30,16 @@ export default function Lobby() {
 
   const lobby = useLobbyData(code);
 
+  // Update page title with lobby code
+  useEffect(() => {
+    if (code) {
+      document.title = `RaceCard: ${code.toUpperCase()}`;
+    }
+    return () => {
+      document.title = "RaceCard";
+    };
+  }, [code]);
+
   // Checks if player user is the leader
   useEffect(() => {
     setIsLeader(lobby?.leader === socket.id);
