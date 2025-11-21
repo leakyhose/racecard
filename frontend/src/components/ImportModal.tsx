@@ -67,13 +67,12 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         <div className="flex flex-1 gap-8 overflow-hidden text-coffee">
           {/* Left Column */}
           <div className="w-3/7 border-r-4 border-coffee pr-6 overflow-y-auto">
-            <h3 className="font-bold text-lg mb-4 uppercase">How to Import</h3>
+            <h3 className="font-bold text-lg mb-4 uppercase">How to Import From Quizlet</h3>
             <div className="space-y-4 text-sm font-bold">
-              <p>How to import from Quizlet</p>
               <div>
-                <p className="mb-2">
-                  1. Make sure that the set you want to import is in your own
-                  library. If it isn't, click the "Make a copy" then "Create"
+                <p className="mb-8">
+                  1. Make sure that the set you want to import is <span className="font-bold">in your own
+                  library</span>. If it isn't, click the "Make a copy" then "Create".
                 </p>
                 <img
                   src={step1Image}
@@ -82,7 +81,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 />
               </div>
               <div>
-                <p className="mb-2">
+                <p className="mb-8">
                   2. Click the three dot menu button the flashcard set, then
                   click "Export".
                 </p>

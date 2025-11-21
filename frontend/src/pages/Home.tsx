@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { socket } from "../socket";
 import type { Lobby } from "@shared/types";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [notFound, setNotFound] = useState(false);
   const [nickname, setNickname] = useState("");
   const [codeInput, setCodeInput] = useState("");
@@ -65,13 +67,36 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-light-vanilla text-coffee font-executive p-4">
+      {user ? (
+        <div className="absolute top-4 right-4 flex items-center gap-4 border-2 border-coffee bg-vanilla px-4 py-2">
+          <span className="text-sm uppercase">
+            Signed in as: <span className="font-bold">{user.email}</span>
+          </span>
+          <button
+            onClick={signOut}
+            className="border-2 border-coffee bg-terracotta text-vanilla px-3 py-1 hover:bg-coffee transition-colors uppercase text-xs font-bold"
+          >
+            Sign Out
+          </button>
+        </div>
+      ) : (
+        <div className="absolute top-4 right-4">
+          <button
+            onClick={() => navigate("/auth")}
+            className="border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
+          >
+            Sign In / Sign Up
+          </button>
+        </div>
+      )}
+      
       {notFound && (
         <div className="mb-4 text-terracotta font-bold text-xl uppercase">
           That lobby doesnt exist!
         </div>
       )}
       <div className="w-full max-w-md border-4 border-coffee p-8 bg-vanilla shadow-[8px_8px_0px_0px_#644536]">
-        <h1 className="text-4xl mb-8 text-center uppercase tracking-widest border-b-4 border-coffee pb-4">
+        <h1 className="text-4xl mb-8 text-center uppercase tracking-widest border-b-4 border-coffee pb-4 font-bold">
           RaceCard
         </h1>
 

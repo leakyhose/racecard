@@ -8,7 +8,7 @@
   --color-thistle: #e7c8dd;
   --color-light-vanilla: #eee1b3;
 
-  --font-executive: "F25 Executive", monospace;
+  --font-executive: "Courier New", Courier, monospace;
 
   --radius-sm: 0px;
   --radius-md: 0px;
@@ -17,11 +17,6 @@
   --radius-2xl: 0px;
   --radius-3xl: 0px;
   --radius-full: 0px;
-}
-
-@font-face {
-  font-family: "F25 Executive";
-  src: url("/fonts/F25_Executive.ttf") format("truetype");
 }
 
 @layer base {

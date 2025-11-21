@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import { useCodeValidation } from "../hooks/useCodeValidation";
 import { useLobbyData } from "../hooks/useLobbyData";
+import { useAuth } from "../hooks/useAuth";
 import { Players } from "../components/Players";
 import { Chat } from "../components/Chat";
 import { UploadFlashcard } from "../components/UploadFlashcard";
@@ -10,15 +11,20 @@ import { ChangeSettings } from "../components/ChangeSettings";
 import { LobbyHeader } from "../components/LobbyHeader";
 import { FlashcardPreview } from "../components/FlashcardPreview";
 import { Game } from "../components/Game";
+import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
+import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
 
 export default function Lobby() {
   const { code } = useParams();
   const location = useLocation();
+  const { user } = useAuth();
   const [nickname, setNickname] = useState<string>(
     location.state?.nickname || "",
   );
   const [nicknameInput, setNicknameInput] = useState("");
   const [isLeader, setIsLeader] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showLoadModal, setShowLoadModal] = useState(false);
 
   useCodeValidation(code);
 
@@ -85,12 +91,33 @@ export default function Lobby() {
           />
 
           {isLeader && lobby.status === "waiting" && (
-            <div className="p-4 border-t-4 border-coffee flex flex-row justify-center gap-15 bg-vanilla">
-              <ChangeSettings
-                isLeader={isLeader}
-                currentSettings={lobby.settings}
-              />
-              <UploadFlashcard isLeader={isLeader} />
+            <div className="p-4 border-t-4 border-coffee flex flex-col gap-4 bg-vanilla">
+              <div className="flex flex-row justify-center gap-15">
+                <ChangeSettings
+                  isLeader={isLeader}
+                  currentSettings={lobby.settings}
+                />
+                <UploadFlashcard isLeader={isLeader} />
+              </div>
+              {user && (
+                <button
+                  onClick={() => setShowLoadModal(true)}
+                  className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
+                >
+                  📂 Load Saved Flashcards
+                </button>
+              )}
+            </div>
+          )}
+
+          {user && lobby.flashcards.length > 0 && lobby.status === "waiting" && (
+            <div className="p-4 border-t-4 border-coffee bg-vanilla">
+              <button
+                onClick={() => setShowSaveModal(true)}
+                className="w-full border-2 border-coffee bg-thistle text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
+              >
+                💾 Save Flashcards
+              </button>
             </div>
           )}
         </div>
@@ -114,6 +141,17 @@ export default function Lobby() {
           <Chat />
         </div>
       </div>
+
+      <SaveFlashcardsModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        flashcards={lobby.flashcards}
+      />
+
+      <LoadFlashcardsModal
+        isOpen={showLoadModal}
+        onClose={() => setShowLoadModal(false)}
+      />
     </div>
   );
 }
