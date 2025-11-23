@@ -45,7 +45,7 @@ export default function Auth() {
         setError(error.message);
       }
     } else if (!isLogin) {
-      setSuccess("✉️ Check your email to confirm your account!");
+      setSuccess("Check your email to confirm your account!");
       setEmail("");
       setPassword("");
     }

@@ -110,7 +110,7 @@ export default function Home() {
           </label>
           <div className="flex gap-2">
             <input
-              className="flex-1 border-2 border-coffee bg-transparent p-3 placeholder-coffee/50 focus:outline-none focus:bg-white/20 uppercase"
+              className="flex-1 border-2 border-coffee bg-transparent p-3 placeholder-coffee/50 focus:outline-none focus:bg-white/20"
               maxLength={15}
               placeholder="YOUR NICKNAME"
               value={nickname}

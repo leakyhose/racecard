@@ -113,8 +113,8 @@ export function Game() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-6xl font-bold text-center max-w-4xl text-coffee leading-tight drop-shadow-sm uppercase">
+      <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-light-vanilla [&::-webkit-scrollbar-thumb]:bg-coffee [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-light-vanilla">
+        <div className="text-6xl font-bold text-center max-w-4xl text-coffee leading-tight drop-shadow-sm uppercase wrap-break-word">
           {currentQuestion}
         </div>
       </div>
@@ -149,22 +149,19 @@ export function Game() {
       )}
 
       {showResults && results && (
-        <div className="flex flex-col h-full">
-          <div
-            className="flex items-center justify-center p-8"
-            style={{ height: "30%" }}
-          >
+        <>
+          <div className="flex items-center justify-center p-8 shrink-0">
             <div className="text-center w-full max-w-2xl ">
               <h3 className="text-xl font-semibold mb-4 text-coffee uppercase tracking-wider">
                 Correct Answer
               </h3>
-              <div className="text-4xl font-bold text-coffee p-6 bg-vanilla border-3 border-coffee max-h-48 overflow-auto shadow-[4px_4px_0px_0px_#644536] uppercase">
+              <div className="text-4xl font-bold text-coffee p-6 bg-vanilla border-3 border-coffee shadow-[4px_4px_0px_0px_#644536] uppercase wrap-break-word">
                 {results.Answer}
               </div>
             </div>
           </div>
 
-          <div className="flex gap-6 flex-1 p-8 pt-0 justify-center">
+          <div className="flex gap-6 flex-1 p-8 pt-0 justify-center overflow-y-auto">
             {results && results.fastestPlayers.length > 0 && (
               <MiniLeaderboard
                 leaderboardName="Fastest Answers"
@@ -185,7 +182,7 @@ export function Game() {
               />
             )}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

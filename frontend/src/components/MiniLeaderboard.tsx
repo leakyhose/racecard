@@ -11,11 +11,11 @@ export function MiniLeaderboard({
   playerList,
 }: FlashcardEndProps) {
   return (
-    <div className="border-3 border-coffee p-4 bg-vanilla w-80 min-h-80 shadow-[8px_8px_0px_0px_#644536]">
-      <h3 className="text-xl font-bold mb-3 text-coffee uppercase tracking-wide border-b-2 border-coffee pb-2">
+    <div className="border-3 border-coffee p-4 bg-vanilla w-80 shadow-[8px_8px_0px_0px_#644536] flex flex-col max-h-full">
+      <h3 className="text-xl font-bold mb-3 text-coffee uppercase tracking-wide border-b-2 border-coffee pb-2 shrink-0">
         {leaderboardName}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-2 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-vanilla [&::-webkit-scrollbar-thumb]:bg-coffee [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-vanilla">
         {playerList.map((player, index) => (
           <div
             key={index}
@@ -29,14 +29,14 @@ export function MiniLeaderboard({
                 {player.value.map((item, idx) => (
                   <div
                     key={idx}
-                    className="text-sm text-coffee/70 italic truncate"
+                    className="text-sm text-coffee/70 italic wrap-break-word"
                   >
                     "{item}"
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-coffee/70 italic font-bold">
+              <div className="text-sm text-coffee/70 italic font-bold wrap-break-word">
                 {player.value}
               </div>
             )}
