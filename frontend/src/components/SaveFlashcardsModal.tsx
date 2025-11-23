@@ -95,10 +95,10 @@ export function SaveFlashcardsModal({
       onClick={handleClose}
     >
       <div
-        className="bg-vanilla border-4 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536]"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536]"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl uppercase tracking-widest border-b-4 border-coffee pb-4 mb-6">
+        <h2 className="text-2xl uppercase tracking-widest border-b-3 border-coffee pb-4 mb-6">
           Save Flashcard Set
         </h2>
 

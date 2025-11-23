@@ -99,8 +99,8 @@ export default function Home() {
           That lobby doesnt exist!
         </div>
       )}
-      <div className="w-full max-w-md border-4 border-coffee p-8 bg-vanilla shadow-[8px_8px_0px_0px_#644536]">
-        <h1 className="text-4xl mb-8 text-center uppercase tracking-widest border-b-4 border-coffee pb-4 font-bold">
+      <div className="w-full max-w-md border-3 border-coffee p-8 bg-vanilla shadow-[8px_8px_0px_0px_#644536]">
+        <h1 className="text-4xl mb-8 text-center uppercase tracking-widest border-b-3 border-coffee pb-4 font-bold">
           RaceCard
         </h1>
 

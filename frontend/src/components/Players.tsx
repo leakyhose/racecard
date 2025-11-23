@@ -34,7 +34,7 @@ export function Players({
           return (
             <li
               key={player.id}
-              className={`border-b-4 border-coffee flex w-full group relative h-16 hover:bg-terracotta/20 transition-colors ${hasCorrectAnswer ? "bg-coffee/30" : "bg-vanilla"}`}
+              className={`border-b-3 border-coffee flex w-full group relative h-16 hover:bg-terracotta/20 transition-colors ${hasCorrectAnswer ? "bg-coffee/30" : "bg-vanilla"}`}
             >
               <div
                 className={`flex w-full ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}
@@ -74,7 +74,7 @@ export function Players({
                   )}
                 </div>
 
-                <div className="w-16 shrink-0 flex items-center justify-center font-bold text-lg text-coffee bg-coffee/10 border-l-4 border-coffee">
+                <div className="w-16 shrink-0 flex items-center justify-center font-bold text-lg text-coffee bg-coffee/10 border-l-3 border-coffee">
                   {gameStatus === "waiting" || gameStatus === "finished" ? (
                     <div className="w-16 shrink-0 flex items-center justify-center">
                       {" "}

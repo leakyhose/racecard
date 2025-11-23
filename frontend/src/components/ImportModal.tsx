@@ -48,11 +48,11 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       onClick={onClose}
     >
       <div
-        className="border-4 border-coffee bg-vanilla p-6 max-w-5xl w-full h-[80vh] flex flex-col shadow-[8px_8px_0px_0px_#644536]"
+        className="border-3 border-coffee bg-vanilla p-6 max-w-5xl w-full h-[80vh] flex flex-col shadow-[8px_8px_0px_0px_#644536]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 border-b-4 border-coffee pb-2">
+        <div className="flex justify-between items-center mb-6 border-b-3 border-coffee pb-2">
           <h2 className="text-2xl font-bold uppercase tracking-wide text-coffee">
             Import Flashcards
           </h2>
@@ -66,7 +66,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
         <div className="flex flex-1 gap-8 overflow-hidden text-coffee">
           {/* Left Column */}
-          <div className="w-3/7 border-r-4 border-coffee pr-6 overflow-y-auto">
+          <div className="w-3/7 border-r-3 border-coffee pr-6 overflow-y-auto">
             <h3 className="font-bold text-lg mb-4 uppercase">
               How to Import From Quizlet
             </h3>

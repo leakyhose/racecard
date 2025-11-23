@@ -89,7 +89,7 @@ export function Game() {
           {isLeader ? (
             <button
               onClick={() => socket.emit("continueGame")}
-              className="px-8 py-4 bg-terracotta text-vanilla text-xl font-bold hover:bg-coffee hover:text-vanilla transition-all uppercase tracking-wider border-4 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
+              className="px-8 py-4 bg-terracotta text-vanilla text-xl font-bold hover:bg-coffee hover:text-vanilla transition-all uppercase tracking-wider border-3 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer"
             >
               Continue
             </button>
@@ -127,7 +127,7 @@ export function Game() {
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               placeholder="TYPE YOUR ANSWER..."
-              className="w-full px-6 py-4 text-2xl bg-vanilla border-4 border-coffee text-coffee placeholder-coffee/30 focus:outline-none focus:bg-white/50 transition-colors text-center font-bold"
+              className="w-full px-6 py-4 text-2xl bg-vanilla border-3 border-coffee text-coffee placeholder-coffee/30 focus:outline-none focus:bg-white/50 transition-colors text-center font-bold"
               autoFocus
             />
           </form>
@@ -158,7 +158,7 @@ export function Game() {
               <h3 className="text-xl font-semibold mb-4 text-coffee uppercase tracking-wider">
                 Correct Answer
               </h3>
-              <div className="text-4xl font-bold text-coffee p-6 bg-vanilla border-4 border-coffee max-h-48 overflow-auto shadow-[4px_4px_0px_0px_#644536] uppercase">
+              <div className="text-4xl font-bold text-coffee p-6 bg-vanilla border-3 border-coffee max-h-48 overflow-auto shadow-[4px_4px_0px_0px_#644536] uppercase">
                 {results.Answer}
               </div>
             </div>

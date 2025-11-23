@@ -95,8 +95,8 @@ export default function Lobby() {
         lobby={lobby}
       />
 
-      <div className="flex flex-1 overflow-hidden border-t-4 border-coffee">
-        <div className="w-65 flex flex-col border-r-4 border-coffee bg-vanilla">
+      <div className="flex flex-1 overflow-hidden border-t-3 border-coffee">
+        <div className="w-65 flex flex-col border-r-3 border-coffee bg-vanilla">
           <Players
             players={lobby.players}
             gameStatus={lobby.status}
@@ -105,7 +105,7 @@ export default function Lobby() {
           />
 
           {isLeader && lobby.status === "waiting" && (
-            <div className="p-4 border-t-4 border-coffee flex flex-col gap-4 bg-vanilla">
+            <div className="p-4 border-t-3 border-coffee flex flex-col gap-4 bg-vanilla">
               <div className="flex flex-row justify-center gap-15">
                 <ChangeSettings
                   isLeader={isLeader}
@@ -172,7 +172,7 @@ export default function Lobby() {
           )}
         </div>
 
-        <div className="w-65 border-l-4 border-coffee bg-vanilla">
+        <div className="w-65 border-l-3 border-coffee bg-vanilla">
           <Chat />
         </div>
       </div>

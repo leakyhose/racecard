@@ -55,10 +55,10 @@ export function SettingsModal({
       onClick={handleClose}
     >
       <div
-        className="border-4 border-coffee bg-vanilla p-6 max-w-md w-full shadow-[8px_8px_0px_0px_#644536]"
+        className="border-3 border-coffee bg-vanilla p-6 max-w-md w-full shadow-[8px_8px_0px_0px_#644536]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6 border-b-4 border-coffee pb-2">
+        <div className="flex justify-between items-center mb-6 border-b-3 border-coffee pb-2">
           <h2 className="text-xl font-bold uppercase tracking-wide text-coffee">
             Game Settings
           </h2>

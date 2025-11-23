@@ -47,7 +47,7 @@ export function Chat() {
   return (
     <div className="flex flex-col h-full bg-vanilla">
       {/* Header */}
-      <div className="flex justify-center border-b-4 border-coffee p-4 bg-vanilla">
+      <div className="flex justify-center border-b-3 border-coffee p-4 bg-vanilla">
         <h2 className="font-bold text-xl text-coffee uppercase tracking-wide">
           Chat
         </h2>
@@ -86,7 +86,7 @@ export function Chat() {
       </div>
 
       {/* Input */}
-      <div className="border-t-4 border-coffee p-4 bg-vanilla">
+      <div className="border-t-3 border-coffee p-4 bg-vanilla">
         <form onSubmit={handleSubmit}>
           <input
             type="text"

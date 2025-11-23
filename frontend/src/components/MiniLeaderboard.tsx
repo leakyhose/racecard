@@ -11,7 +11,7 @@ export function MiniLeaderboard({
   playerList,
 }: FlashcardEndProps) {
   return (
-    <div className="border-4 border-coffee p-4 bg-vanilla w-80 min-h-80 shadow-[8px_8px_0px_0px_#644536]">
+    <div className="border-3 border-coffee p-4 bg-vanilla w-80 min-h-80 shadow-[8px_8px_0px_0px_#644536]">
       <h3 className="text-xl font-bold mb-3 text-coffee uppercase tracking-wide border-b-2 border-coffee pb-2">
         {leaderboardName}
       </h3>
