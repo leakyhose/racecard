@@ -25,6 +25,10 @@ export default function Lobby() {
   const [isLeader, setIsLeader] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
+  const [loadHovered, setLoadHovered] = useState(false);
+  const [saveHovered, setSaveHovered] = useState(false);
+  const [loadShake, setLoadShake] = useState(false);
+  const [saveShake, setSaveShake] = useState(false);
 
   useCodeValidation(code);
 
@@ -109,29 +113,48 @@ export default function Lobby() {
                 />
                 <UploadFlashcard isLeader={isLeader} />
               </div>
-              {user && (
+              <div className="flex flex-col gap-2">
                 <button
-                  onClick={() => setShowLoadModal(true)}
-                  className="w-full border-2 border-coffee bg-powder text-coffee px-2 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
+                  onClick={() => {
+                    if (user) {
+                      setShowLoadModal(true);
+                    } else {
+                      setLoadShake(true);
+                      setTimeout(() => setLoadShake(false), 500);
+                    }
+                  }}
+                  onMouseEnter={() => setLoadHovered(true)}
+                  onMouseLeave={() => setLoadHovered(false)}
+                  className={`w-full border-2 border-coffee px-2 py-3 uppercase font-bold transition-colors ${
+                    loadShake ? 'animate-shake bg-red-500 text-vanilla' : 
+                    'bg-powder text-coffee hover:bg-coffee hover:text-vanilla'
+                  }`}
                 >
-                  Load Saved Flashcards
+                  {!user && loadHovered ? 'Log In to Load' : 'Load Flashcards'}
                 </button>
-              )}
+                {lobby.flashcards.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (user) {
+                        setShowSaveModal(true);
+                      } else {
+                        setSaveShake(true);
+                        setTimeout(() => setSaveShake(false), 500);
+                      }
+                    }}
+                    onMouseEnter={() => setSaveHovered(true)}
+                    onMouseLeave={() => setSaveHovered(false)}
+                    className={`w-full border-2 border-coffee px-4 py-3 uppercase font-bold transition-colors ${
+                      saveShake ? 'animate-shake bg-red-500 text-vanilla' : 
+                      'bg-thistle text-coffee hover:bg-coffee hover:text-vanilla'
+                    }`}
+                  >
+                    {!user && saveHovered ? 'Log In to Save' : 'Save Flashcards'}
+                  </button>
+                )}
+              </div>
             </div>
           )}
-
-          {user &&
-            lobby.flashcards.length > 0 &&
-            lobby.status === "waiting" && (
-              <div className="p-4 border-t-4 border-coffee bg-vanilla">
-                <button
-                  onClick={() => setShowSaveModal(true)}
-                  className="w-full border-2 border-coffee bg-thistle text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
-                >
-                  Save Flashcards
-                </button>
-              </div>
-            )}
         </div>
 
         <div className="flex-1 p-0 overflow-y-auto overflow-x-hidden bg-light-vanilla relative">
