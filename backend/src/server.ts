@@ -311,6 +311,7 @@ io.on("connection", (socket) => {
     });
   });
 
+  // Signal to continue game
   socket.on("continueGame", () => {
     const lobby = getLobbyBySocket(socket.id);
     if (!lobby) {

@@ -112,9 +112,9 @@ export default function Lobby() {
               {user && (
                 <button
                   onClick={() => setShowLoadModal(true)}
-                  className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
+                  className="w-full border-2 border-coffee bg-powder text-coffee px-2 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
                 >
-                  📂 Load Saved Flashcards
+                  Load Saved Flashcards
                 </button>
               )}
             </div>
@@ -128,7 +128,7 @@ export default function Lobby() {
                   onClick={() => setShowSaveModal(true)}
                   className="w-full border-2 border-coffee bg-thistle text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors uppercase font-bold"
                 >
-                  💾 Save Flashcards
+                  Save Flashcards
                 </button>
               </div>
             )}

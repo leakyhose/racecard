@@ -1,6 +1,7 @@
 import type { Lobby } from "@shared/types";
 import { socket } from "../socket";
 import { useState } from "react";
+import { UserStatusHeader } from "./UserStatusHeader";
 
 interface LobbyHeaderProps {
   code: string;
@@ -11,7 +12,6 @@ interface LobbyHeaderProps {
 
 export function LobbyHeader({
   code,
-  nickname,
   isLeader,
   lobby,
 }: LobbyHeaderProps) {
@@ -32,18 +32,19 @@ export function LobbyHeader({
   };
 
   return (
-    <div className="flex relative p-3 items-center bg-vanilla text-coffee">
-      <div className="font-bold shrink-0 w-72 text-2xl tracking-widest uppercase relative group">
+    <div className="flex justify-between relative p-3 items-center bg-vanilla text-coffee">
+      <div className = "flex flex-col gap-0">
         <div
           onClick={handleCopyCode}
-          className="cursor-pointer inline-block relative"
+          className="font-bold shrink-0 w-72 text-2xl tracking-widest uppercase group cursor-pointer inline-block relative"
         >
           LOBBY: {code}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-coffee text-vanilla font-bold uppercase tracking-wider text-xs pointer-events-none">
+          <div className="leading-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-coffee text-vanilla font-bold uppercase tracking-wider text-xs pointer-events-none">
             {showCopyMessage ? "Copied!" : "Click to Copy"}
           </div>
         </div>
       </div>
+
       <div className="absolute left-1/2 -translate-x-1/2 text-coffee">
         {isLeader ? (
           lobby.flashcards.length == 0 ? (
@@ -82,9 +83,8 @@ export function LobbyHeader({
           </div>
         )}
       </div>
-      <div className="font-bold flex-1 shrink-0 w-80 text-right text-coffee uppercase">
-        <span className="text-coffee/70 mr-2">PLAYER:</span> {nickname}
-      </div>
+
+      <UserStatusHeader />
     </div>
   );
 }
