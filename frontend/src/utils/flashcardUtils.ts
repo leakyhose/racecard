@@ -59,6 +59,7 @@ export function parseFlashcards(
           id: crypto.randomUUID(),
           question,
           answer,
+          distractors: [],
         });
       }
     }
