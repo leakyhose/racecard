@@ -49,7 +49,7 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
             </div>
           ) : lobby.distractorStatus === "generating" ? (
             <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
-              Generating multiple choices...
+              Generating multiple choices (May take a minute for large sets)
             </div>
           ) : lobby.distractorStatus === "error" ? (
             <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
@@ -75,7 +75,7 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
           </div>
         ) : lobby.distractorStatus === "generating" ? (
           <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
-            Generating multiple choices...
+            Generating multiple choices (May take a minute for large sets)
           </div>
         ) : lobby.distractorStatus === "error" ? (
           <div className="font-bold text-lg uppercase tracking-wide text-terracotta">

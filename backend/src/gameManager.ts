@@ -187,6 +187,7 @@ export function validateAnswer(socketId: string, answerText: string) {
       gs.correctAnswers.push({ player: player.name, time: timeTaken });
       player.score += 1;
       player.miniStatus = timeTaken;
+      player.isCorrect = true;
     }
 
     if (!gs.submittedPlayers.find((a) => a === player.id)) {
@@ -196,12 +197,14 @@ export function validateAnswer(socketId: string, answerText: string) {
   } 
   
   else if (lobby.settings.multipleChoice) {
-    player.miniStatus = answerText;
+    player.miniStatus = timeTaken;
+    player.isCorrect = false;
     gs.wrongAnswers.push({ player: player.name, answer: [answerText] });
     gs.submittedPlayers.push(player.id);
 
   } else {
     player.miniStatus = answerText;
+    player.isCorrect = false;
     const existing = gs.wrongAnswers.find((w) => w.player === player.name);
     if (existing) {
       existing.answer.push(answerText);

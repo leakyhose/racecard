@@ -84,6 +84,7 @@ export function wipeMiniStatus(lobbyCode: string) {
 
   for (const player of lobby?.players || []) {
     player.miniStatus = null;
+    player.isCorrect = false;
   }
 
   return lobby;

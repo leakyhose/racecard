@@ -11,6 +11,7 @@ export interface Player {
   wins: number;
   score: number;
   miniStatus: number | string | null;
+  isCorrect?: boolean;
 }
 
 export interface Settings {

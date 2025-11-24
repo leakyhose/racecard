@@ -29,7 +29,7 @@ export function Players({
         {players.map((player) => {
           const hasMiniStatus = isOngoing && player.miniStatus !== null;
 
-          const hasCorrectAnswer = typeof player.miniStatus === "number";
+          const hasCorrectAnswer = player.isCorrect === true;
 
           return (
             <li
