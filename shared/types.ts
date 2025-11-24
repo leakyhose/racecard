@@ -2,6 +2,7 @@ export interface Flashcard {
   id: string;
   question: string;
   answer: string;
+  distractors: string[];
 }
 
 export interface Player {
@@ -16,6 +17,7 @@ export interface Settings {
   shuffle: boolean;
   fuzzyTolerance: boolean;
   answerByTerm: boolean;
+  multipleChoice: boolean;
 }
 
 export type GameStatus = "waiting" | "ongoing" | "finished" | "starting";
@@ -41,6 +43,7 @@ export interface Gamestate {
   roundStart: number;
   wrongAnswers: { player: string; answer: string[] }[];
   correctAnswers: { player: string; time: number }[];
+  submittedPlayers: string[];
 }
 
 export interface ServerToClientEvents {
@@ -50,8 +53,8 @@ export interface ServerToClientEvents {
   lobbyData: (lobby: Lobby | null) => void;
   startCountdown: (secondsRemaining: number | string) => void;
 
-  newFlashcard: (question: string) => void;
-  correctGuess: (answer: number) => void; // Time it took to answer correctly
+  newFlashcard: (question: string, choices: string[]|null) => void;
+  endGuess: (answer: number) => void; // Time it took took for guess
   endFlashcard: (flashcardEnd: FlashcardEnd) => void;
 }
 

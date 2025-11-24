@@ -31,6 +31,8 @@ import {
   advanceToNextFlashcard,
   endGame,
   allPlayersAnsweredCorrectly,
+  generateDistractors,
+  areDistractorsReady,
 } from "./gameManager.js";
 
 const app = express();
@@ -177,11 +179,22 @@ io.on("connection", (socket) => {
 
     // Shuffle cards asynchronously during countdown
     shuffleGameCards(lobby.code);
+    if (lobby.settings.multipleChoice){
+      generateDistractors(lobby.code);
+    }
 
     const countdownInterval = setInterval(() => {
-      if (countdown >= 1) {
+      if (countdown >= 2) {
         io.to(lobby.code).emit("startCountdown", countdown);
         countdown--;
+      } else if (countdown === 1) {
+        if (lobby.settings.multipleChoice && !areDistractorsReady(lobby.code)) {
+          // Wait at 1 until distractors are ready (Find more eloquent way to solve this at one point)
+          io.to(lobby.code).emit("startCountdown", countdown);
+        } else {
+          io.to(lobby.code).emit("startCountdown", countdown);
+          countdown--;
+        }
       } else {
         clearInterval(countdownInterval);
 
@@ -191,8 +204,8 @@ io.on("connection", (socket) => {
         io.to(lobby.code).emit("lobbyUpdated", lobby);
 
         const runGameplayLoop = (lobbyCode: string) => {
-          const currentQuestion = getCurrentQuestion(lobbyCode);
-          if (!currentQuestion) {
+          const questionData = getCurrentQuestion(lobbyCode);
+          if (!questionData) {
             const finalLobby = getLobbyByCode(lobbyCode);
             if (finalLobby) {
               finalLobby.status = "finished";
@@ -208,7 +221,7 @@ io.on("connection", (socket) => {
 
           // Set round start time when emitting question
           setRoundStart(lobbyCode);
-          io.to(lobbyCode).emit("newFlashcard", currentQuestion);
+          io.to(lobbyCode).emit("newFlashcard", questionData.question, questionData.choices);
 
           const roundStartTime = Date.now();
           const ROUND_DURATION = 10000;
@@ -230,9 +243,9 @@ io.on("connection", (socket) => {
 
             // Wait 5 seconds to show results
             setTimeout(() => {
-              const nextQuestion = advanceToNextFlashcard(lobbyCode);
+              const nextQuestionData = advanceToNextFlashcard(lobbyCode);
 
-              if (nextQuestion) {
+              if (nextQuestionData) {
                 // Continue to next round
                 runGameplayLoop(lobbyCode);
               } else {
@@ -269,8 +282,8 @@ io.on("connection", (socket) => {
     const result = validateAnswer(socket.id, text);
     if (!result) return;
 
-    if (result.isCorrect) {
-      socket.emit("correctGuess", result.timeTaken);
+    if (result.isCorrect || result.lobby.settings.multipleChoice) {
+      socket.emit("endGuess", result.timeTaken);
     }
     result.lobby.players = sortPlayersByMetric(result.lobby);
     io.to(result.lobby.code).emit("lobbyUpdated", result.lobby);

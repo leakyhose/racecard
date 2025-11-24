@@ -95,6 +95,7 @@ export function LoadFlashcardsModal({
         id: index.toString(),
         question: card.term,
         answer: card.definition,
+        distractors: [],
       }));
 
       socket.emit("updateFlashcard", flashcards);

@@ -24,6 +24,7 @@ export function ChangeSettings({
     shuffle: true,
     fuzzyTolerance: true,
     answerByTerm: false,
+    multipleChoice: false,
   };
 
   return (

@@ -23,18 +23,20 @@ export async function generateResponse(flashcards: Flashcard[]) {
     throw new Error("OpenAI API key not configured");
   }
   
+  const systemPrompt = process.env.SYSTEM_PROMPT!;
+
   const response = await apiClient.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: process.env.SYSTEM_PROMPT!,
+        content: systemPrompt,
       },
       {
         role: "user",
         content: flashcards.map((flashcard: Flashcard) => {
           return `Q: ${flashcard.question}\nA: ${flashcard.answer}`;
-        }).toString(),
+        }).join('\n\n'),
       },
     ],
     temperature: 0.9,
