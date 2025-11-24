@@ -7,7 +7,10 @@ import { shuffle, swap } from "./util.js";
 const codeToGamestate = new Map<string, Gamestate>();
 
 // Track distractor generation status
-const distractorStatus = new Map<string, { ready: boolean; generating: boolean }>();
+const distractorStatus = new Map<
+  string,
+  { ready: boolean; generating: boolean }
+>();
 
 // Generate distractors for flashcards using OpenAI
 export async function generateDistractors(lobbyCode: string) {
@@ -17,7 +20,9 @@ export async function generateDistractors(lobbyCode: string) {
   // Check if already generating for this lobby
   const status = distractorStatus.get(lobbyCode);
   if (status?.generating) {
-    console.log(`Distractor generation already in progress for lobby ${lobbyCode}, skipping...`);
+    console.log(
+      `Distractor generation already in progress for lobby ${lobbyCode}, skipping...`,
+    );
     return;
   }
 
@@ -29,7 +34,7 @@ export async function generateDistractors(lobbyCode: string) {
 
   try {
     const response = await generateResponse(flashcardsToGenerate);
-    
+
     if (!response) {
       console.error("Failed to generate distractors: empty response");
       distractorStatus.set(lobbyCode, { ready: false, generating: false });
@@ -39,7 +44,10 @@ export async function generateDistractors(lobbyCode: string) {
     const distractorsArray: string[][] = JSON.parse(response);
 
     // Validate the response, should never fire if AI prompting is correct
-    if (!Array.isArray(distractorsArray) || distractorsArray.length !== flashcardsToGenerate.length) {
+    if (
+      !Array.isArray(distractorsArray) ||
+      distractorsArray.length !== flashcardsToGenerate.length
+    ) {
       console.error("Invalid distractors format: array length mismatch");
       distractorStatus.set(lobbyCode, { ready: false, generating: false });
       throw new Error("Invalid distractors format");
@@ -124,10 +132,12 @@ export function setRoundStart(lobbyCode: string) {
 }
 
 // Get the current question for a lobby
-export function getCurrentQuestion(lobbyCode: string): { question: string; choices: string[] | null } | null {
+export function getCurrentQuestion(
+  lobbyCode: string,
+): { question: string; choices: string[] | null } | null {
   const gs = codeToGamestate.get(lobbyCode);
   if (!gs || !gs.flashcards || gs.flashcards.length === 0) return null;
-  
+
   const currentFlashcard = gs.flashcards[0];
   if (!currentFlashcard) return null;
 
@@ -135,9 +145,16 @@ export function getCurrentQuestion(lobbyCode: string): { question: string; choic
   const isMultipleChoice = lobby?.settings.multipleChoice ?? false;
 
   let choices: string[] | null = null;
-  if (isMultipleChoice && currentFlashcard.distractors && currentFlashcard.distractors.length === 3) {
+  if (
+    isMultipleChoice &&
+    currentFlashcard.distractors &&
+    currentFlashcard.distractors.length === 3
+  ) {
     // Create array with correct answer and 3 distractors, then shuffle
-    choices = shuffle([currentFlashcard.answer, ...currentFlashcard.distractors]);
+    choices = shuffle([
+      currentFlashcard.answer,
+      ...currentFlashcard.distractors,
+    ]);
   }
 
   return { question: currentFlashcard.question, choices };
@@ -173,14 +190,10 @@ export function validateAnswer(socketId: string, answerText: string) {
     if (!gs.submittedPlayers.find((a) => a === player.id)) {
       gs.submittedPlayers.push(player.id);
     }
-  
-  } 
-  
-  else if (lobby.settings.multipleChoice) {
+  } else if (lobby.settings.multipleChoice) {
     player.miniStatus = answerText;
     gs.wrongAnswers.push({ player: player.name, answer: [answerText] });
     gs.submittedPlayers.push(player.id);
-
   } else {
     player.miniStatus = answerText;
     const existing = gs.wrongAnswers.find((w) => w.player === player.name);
@@ -221,7 +234,9 @@ export function getRoundResults(lobbyCode: string) {
 }
 
 // Advance to next flashcard
-export function advanceToNextFlashcard(lobbyCode: string): { question: string; choices: string[] | null } | null {
+export function advanceToNextFlashcard(
+  lobbyCode: string,
+): { question: string; choices: string[] | null } | null {
   const gs = codeToGamestate.get(lobbyCode);
   if (!gs || !gs.flashcards || gs.flashcards.length === 0) return null;
 

@@ -9,7 +9,7 @@ export function Game() {
   const { code } = useParams();
   const lobby = useLobbyData(code);
   const [countdown, setCountdown] = useState<number | string | null>(
-    lobby?.status === "ongoing" ? "Waiting for current round to end..." : 3
+    lobby?.status === "ongoing" ? "Waiting for current round to end..." : 3,
   );
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const [currentChoices, setCurrentChoices] = useState<string[] | null>(null);
@@ -23,7 +23,11 @@ export function Game() {
 
   // Update countdown message when lobby status changes to ongoing (for hot joins)
   useEffect(() => {
-    if (lobby?.status === "ongoing" && currentQuestion === null && countdown === 3) {
+    if (
+      lobby?.status === "ongoing" &&
+      currentQuestion === null &&
+      countdown === 3
+    ) {
       setCountdown("Waiting for current round to end");
     }
   }, [lobby?.status, currentQuestion, countdown]);
@@ -33,7 +37,7 @@ export function Game() {
       setCountdown(seconds);
     };
 
-    const handleNewFlashcard = (question: string, choices: string[]| null) => {
+    const handleNewFlashcard = (question: string, choices: string[] | null) => {
       setCountdown(null); // Clear countdown when question arrives
       setCurrentQuestion(question);
       setAnswer("");
@@ -180,10 +184,11 @@ export function Game() {
           {hasAnswered && (
             <div className="shrink-0 p-8 flex items-center justify-center">
               <div className="text-center">
-                
                 {isCorrect == true ? (
                   <div>
-                    <div className="text-6xl mb-4 text-coffee drop-shadow-[0_4px_16px_rgba(184,230,184,1)]">✓</div>
+                    <div className="text-6xl mb-4 text-coffee drop-shadow-[0_4px_16px_rgba(184,230,184,1)]">
+                      ✓
+                    </div>
                     <div className="text-2xl font-bold text-coffee uppercase tracking-widest drop-shadow-[0_4px_16px_rgba(184,230,184,1)]">
                       Correct
                     </div>
@@ -197,7 +202,6 @@ export function Game() {
                   </div>
                 )}
 
-                
                 {answerTime !== null && (
                   <div className="text-xl text-coffee mt-2 font-bold">
                     {(answerTime / 1000).toFixed(3)}s

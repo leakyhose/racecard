@@ -38,7 +38,9 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     }
 
     if (flashcards.length > 100) {
-      alert("Maximum 100 flashcards allowed. Please reduce the number of flashcards.");
+      alert(
+        "Maximum 100 flashcards allowed. Please reduce the number of flashcards.",
+      );
       return;
     }
 
@@ -62,7 +64,9 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
             <h2 className="text-2xl font-bold uppercase tracking-wide text-coffee">
               Import Flashcards
             </h2>
-            <p className="text-sm text-coffee/70 font-bold mt-1">Maximum 150 flashcards</p>
+            <p className="text-sm text-coffee/70 font-bold mt-1">
+              Maximum 150 flashcards
+            </p>
           </div>
           <button
             onClick={onClose}

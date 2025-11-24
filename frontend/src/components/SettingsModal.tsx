@@ -18,23 +18,23 @@ interface SettingDefinition {
 const SETTINGS_DEFINITIONS: SettingDefinition[] = [
   { key: "shuffle", label: "Shuffle Flashcards", type: "boolean" },
   { key: "fuzzyTolerance", label: "Fuzzy Tolerance", type: "boolean" },
-  { 
-    key: "answerByTerm", 
-    label: "Answer By:", 
+  {
+    key: "answerByTerm",
+    label: "Answer By:",
     type: "choice",
     choices: [
       { value: false, label: "Definition" },
-      { value: true, label: "Term" }
-    ]
+      { value: true, label: "Term" },
+    ],
   },
-  { 
-    key: "multipleChoice", 
-    label: "Answer Format:", 
+  {
+    key: "multipleChoice",
+    label: "Answer Format:",
     type: "choice",
     choices: [
       { value: true, label: "Multiple Choice" },
-      { value: false, label: "Written" }
-    ]
+      { value: false, label: "Written" },
+    ],
   },
 ];
 
@@ -104,10 +104,11 @@ export function SettingsModal({
                 <div className="flex gap-2">
                   {def.choices.map((choice) => {
                     const currentValue = settings[def.key];
-                    const isSelected = currentValue !== undefined 
-                      ? currentValue === choice.value
-                      : choice.value === false; // Default to false (Written/Definition)
-                    
+                    const isSelected =
+                      currentValue !== undefined
+                        ? currentValue === choice.value
+                        : choice.value === false; // Default to false (Written/Definition)
+
                     return (
                       <button
                         key={String(choice.value)}

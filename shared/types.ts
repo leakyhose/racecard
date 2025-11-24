@@ -55,7 +55,7 @@ export interface ServerToClientEvents {
   lobbyData: (lobby: Lobby | null) => void;
   startCountdown: (secondsRemaining: number | string) => void;
 
-  newFlashcard: (question: string, choices: string[]|null) => void;
+  newFlashcard: (question: string, choices: string[] | null) => void;
   endGuess: (answer: number, isCorrect: boolean) => void; // Time it took took for guess
   endFlashcard: (flashcardEnd: FlashcardEnd) => void;
 }

@@ -94,7 +94,11 @@ io.on("connection", (socket) => {
     if (lobby.status === "ongoing") {
       const questionData = getCurrentQuestion(code);
       if (questionData) {
-        socket.emit("newFlashcard", questionData.question, questionData.choices);
+        socket.emit(
+          "newFlashcard",
+          questionData.question,
+          questionData.choices,
+        );
       } else {
         // If there's no current question (between rounds), show waiting message
         socket.emit("startCountdown", "Waiting for current round to end");
@@ -109,19 +113,21 @@ io.on("connection", (socket) => {
       console.log(`Failed to update flashcards`);
       return;
     }
-    
+
     // If multiple choice is enabled and flashcards were uploaded, generate distractors
     if (lobby.settings.multipleChoice && cards.length > 0) {
       // Check if already generating
       if (areDistractorsGenerating(lobby.code)) {
-        console.log(`Distractors already generating for ${lobby.code}, skipping...`);
+        console.log(
+          `Distractors already generating for ${lobby.code}, skipping...`,
+        );
         io.to(lobby.code).emit("lobbyUpdated", lobby);
         return;
       }
-      
+
       lobby.distractorStatus = "generating";
       io.to(lobby.code).emit("lobbyUpdated", lobby);
-      
+
       try {
         await generateDistractors(lobby.code);
         lobby.distractorStatus = "ready";
@@ -132,7 +138,7 @@ io.on("connection", (socket) => {
     } else {
       lobby.distractorStatus = "idle";
     }
-    
+
     io.to(lobby.code).emit("lobbyUpdated", lobby);
   });
 
@@ -143,24 +149,29 @@ io.on("connection", (socket) => {
       console.log(`Failed to update settings`);
       return;
     }
-    
+
     // If multiple choice was enabled and flashcards exist, generate distractors
     if (settings.multipleChoice && lobby.flashcards.length > 0) {
       // Check if already generating
       if (areDistractorsGenerating(lobby.code)) {
-        console.log(`Distractors already generating for ${lobby.code}, skipping...`);
+        console.log(
+          `Distractors already generating for ${lobby.code}, skipping...`,
+        );
         io.to(lobby.code).emit("lobbyUpdated", lobby);
         return;
       }
-      
+
       // Check if distractors are already ready (have been generated for current flashcards)
-      const alreadyReady = areDistractorsReady(lobby.code) && 
-                           lobby.flashcards.every(card => card.distractors && card.distractors.length === 3);
-      
+      const alreadyReady =
+        areDistractorsReady(lobby.code) &&
+        lobby.flashcards.every(
+          (card) => card.distractors && card.distractors.length === 3,
+        );
+
       if (!alreadyReady) {
         lobby.distractorStatus = "generating";
         io.to(lobby.code).emit("lobbyUpdated", lobby);
-        
+
         try {
           await generateDistractors(lobby.code);
           lobby.distractorStatus = "ready";
@@ -174,7 +185,7 @@ io.on("connection", (socket) => {
     } else if (!settings.multipleChoice) {
       lobby.distractorStatus = "idle";
     }
-    
+
     io.to(lobby.code).emit("lobbyUpdated", lobby);
   });
 
@@ -241,7 +252,7 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("lobbyUpdated", lobby);
 
     shuffleGameCards(lobby.code);
-    
+
     // Start countdown
     let countdown = 3;
     io.to(lobby.code).emit("startCountdown", countdown);
@@ -277,7 +288,11 @@ io.on("connection", (socket) => {
 
           // Set round start time when emitting question
           setRoundStart(lobbyCode);
-          io.to(lobbyCode).emit("newFlashcard", questionData.question, questionData.choices);
+          io.to(lobbyCode).emit(
+            "newFlashcard",
+            questionData.question,
+            questionData.choices,
+          );
 
           const roundStartTime = Date.now();
           const ROUND_DURATION = 10000;

@@ -38,7 +38,9 @@ export function UploadFlashcard({ isLeader, lobby }: UploadFlashcardProps) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             className={`border-3 border-coffee p-2 transition-colors shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer flex items-center justify-center ${
-              shake ? 'animate-shake bg-terracotta' : 'bg-terracotta hover:bg-coffee'
+              shake
+                ? "animate-shake bg-terracotta"
+                : "bg-terracotta hover:bg-coffee"
             }`}
             title="Upload Flashcards"
           >

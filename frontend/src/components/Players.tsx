@@ -35,10 +35,10 @@ export function Players({
             <li
               key={player.id}
               className={`border-b-3 border-coffee flex w-full group relative h-14 hover:bg-terracotta/20 transition-colors ${
-                hasCorrectAnswer 
-                  ? "bg-mint/50" 
-                  : hasMiniStatus 
-                    ? "bg-terracotta/30" 
+                hasCorrectAnswer
+                  ? "bg-mint/50"
+                  : hasMiniStatus
+                    ? "bg-terracotta/30"
                     : "bg-vanilla"
               }`}
             >
