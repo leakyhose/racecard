@@ -4,7 +4,6 @@ import type { Flashcard } from "@shared/types.js";
 
 // Load environment variables
 config();
-console.log(process.env.OPENAI_API_KEY);
 
 let client: OpenAI | null = null;
 
@@ -25,6 +24,11 @@ export async function generateResponse(flashcards: Flashcard[]) {
   
   const systemPrompt = process.env.SYSTEM_PROMPT!;
 
+  const userContent = flashcards.map((flashcard: Flashcard) => {
+    return `■Q ${flashcard.question}\n■A ${flashcard.answer}`;
+  }).join('\n\n');
+
+
   const response = await apiClient.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
@@ -34,14 +38,11 @@ export async function generateResponse(flashcards: Flashcard[]) {
       },
       {
         role: "user",
-        content: flashcards.map((flashcard: Flashcard) => {
-          return `Q: ${flashcard.question}\nA: ${flashcard.answer}`;
-        }).join('\n\n'),
+        content: userContent,
       },
     ],
     temperature: 0.9,
   });
-
   return response.choices[0]!.message?.content;
 }
 
