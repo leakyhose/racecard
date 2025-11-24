@@ -47,6 +47,14 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
             <div className="font-bold text-lg uppercase tracking-wide">
               Upload or create Flashcards to start
             </div>
+          ) : lobby.distractorStatus === "generating" ? (
+            <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
+              Generating multiple choices...
+            </div>
+          ) : lobby.distractorStatus === "error" ? (
+            <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
+              Error occurred while generating choices
+            </div>
           ) : lobby.status === "waiting" ? (
             <button
               onClick={handleStartGame}
@@ -64,6 +72,14 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
         ) : lobby.flashcards.length == 0 ? (
           <div className="font-bold text-lg uppercase">
             Waiting for leader to upload...
+          </div>
+        ) : lobby.distractorStatus === "generating" ? (
+          <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
+            Generating multiple choices...
+          </div>
+        ) : lobby.distractorStatus === "error" ? (
+          <div className="font-bold text-lg uppercase tracking-wide text-terracotta">
+            Error occurred while generating choices
           </div>
         ) : lobby.status === "ongoing" ? (
           <div className="text-terracotta font-bold uppercase">

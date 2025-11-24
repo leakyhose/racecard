@@ -143,7 +143,7 @@ export function Game() {
       {!showResults && (
         <>
           <div className="flex-1 flex items-center justify-center p-8 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-coffee/10 [&::-webkit-scrollbar-thumb]:bg-coffee [&::-webkit-scrollbar-thumb]:rounded-none">
-            <div className="text-6xl font-bold text-center max-w-4xl text-coffee leading-tight drop-shadow-sm uppercase wrap-break-word">
+            <div className="text-6xl font-bold text-center max-w-4xl text-coffee leading-tight drop-shadow-sm wrap-break-word">
               {currentQuestion}
             </div>
           </div>
@@ -156,7 +156,7 @@ export function Game() {
                     <button
                       key={index}
                       onClick={() => handleChoiceClick(choice)}
-                      className="px-6 py-4 text-xl bg-vanilla border-3 border-coffee text-coffee hover:bg-coffee hover:text-vanilla transition-all text-center font-bold uppercase shadow-[4px_4px_0px_0px_#644536] hover:shadow-[2px_2px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                      className="px-6 py-4 text-xl bg-vanilla border-3 border-coffee text-coffee hover:bg-coffee hover:text-vanilla transition-all text-center font-bold shadow-[4px_4px_0px_0px_#644536] hover:shadow-[2px_2px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                     >
                       {choice}
                     </button>
@@ -217,7 +217,7 @@ export function Game() {
           <div className="flex flex-col gap-8 max-w-6xl mx-auto">
             {/* Question */}
             <div className="text-center">
-              <div className="text-5xl font-bold text-coffee leading-tight uppercase wrap-break-word mb-8">
+              <div className="text-5xl font-bold text-coffee leading-tight wrap-break-word mb-8">
                 {currentQuestion}
               </div>
             </div>
@@ -227,7 +227,7 @@ export function Game() {
               <h3 className="text-xl font-semibold mb-4 text-coffee uppercase tracking-wider">
                 Correct Answer
               </h3>
-              <div className="text-3xl font-bold text-coffee p-4 bg-vanilla border-3 border-coffee shadow-[4px_4px_0px_0px_#644536] uppercase wrap-break-word max-w-3xl mx-auto">
+              <div className="text-3xl font-bold text-coffee p-4 bg-vanilla border-3 border-coffee shadow-[4px_4px_0px_0px_#644536] wrap-break-word max-w-3xl mx-auto">
                 {results.Answer}
               </div>
             </div>

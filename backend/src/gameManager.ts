@@ -7,38 +7,46 @@ import { shuffle, swap } from "./util.js";
 const codeToGamestate = new Map<string, Gamestate>();
 
 // Track distractor generation status
-const distractorStatus = new Map<string, { ready: boolean }>();
+const distractorStatus = new Map<string, { ready: boolean; generating: boolean }>();
 
 // Generate distractors for flashcards using OpenAI
 export async function generateDistractors(lobbyCode: string) {
   const lobby = getLobbyByCode(lobbyCode);
   if (!lobby) return;
 
-  const gs = codeToGamestate.get(lobbyCode);
-  if (!gs) return;
+  // Check if already generating for this lobby
+  const status = distractorStatus.get(lobbyCode);
+  if (status?.generating) {
+    console.log(`Distractor generation already in progress for lobby ${lobbyCode}, skipping...`);
+    return;
+  }
 
-  distractorStatus.set(lobbyCode, { ready: false });
+  // Work with lobby flashcards directly, not gamestate (gamestate may not exist yet)
+  const flashcardsToGenerate = lobby.flashcards;
+  if (!flashcardsToGenerate || flashcardsToGenerate.length === 0) return;
+
+  distractorStatus.set(lobbyCode, { ready: false, generating: true });
 
   try {
-    const response = await generateResponse(gs.flashcards);
+    const response = await generateResponse(flashcardsToGenerate);
     
     if (!response) {
       console.error("Failed to generate distractors: empty response");
-      distractorStatus.set(lobbyCode, { ready: true });
-      return;
+      distractorStatus.set(lobbyCode, { ready: false, generating: false });
+      throw new Error("Failed to generate distractors");
     }
 
     const distractorsArray: string[][] = JSON.parse(response);
 
     // Validate the response, should never fire if AI prompting is correct
-    if (!Array.isArray(distractorsArray) || distractorsArray.length !== gs.flashcards.length) {
+    if (!Array.isArray(distractorsArray) || distractorsArray.length !== flashcardsToGenerate.length) {
       console.error("Invalid distractors format: array length mismatch");
-      distractorStatus.set(lobbyCode, { ready: true });
-      return;
+      distractorStatus.set(lobbyCode, { ready: false, generating: false });
+      throw new Error("Invalid distractors format");
     }
 
-    // Assign distractors to each flashcard
-    gs.flashcards.forEach((flashcard, index) => {
+    // Assign distractors to each flashcard in the lobby
+    flashcardsToGenerate.forEach((flashcard, index) => {
       const distractors = distractorsArray[index];
       if (Array.isArray(distractors) && distractors.length === 3) {
         flashcard.distractors = distractors;
@@ -49,10 +57,11 @@ export async function generateDistractors(lobbyCode: string) {
     });
 
     console.log(`Distractors generated successfully for lobby ${lobbyCode}`);
-    distractorStatus.set(lobbyCode, { ready: true });
+    distractorStatus.set(lobbyCode, { ready: true, generating: false });
   } catch (error) {
     console.error("Error generating distractors:", error);
-    distractorStatus.set(lobbyCode, { ready: true });
+    distractorStatus.set(lobbyCode, { ready: false, generating: false });
+    throw error;
   }
 }
 
@@ -60,6 +69,12 @@ export async function generateDistractors(lobbyCode: string) {
 export function areDistractorsReady(lobbyCode: string): boolean {
   const status = distractorStatus.get(lobbyCode);
   return status?.ready ?? true; // Default to true if not tracked
+}
+
+// Check if distractors are currently generating
+export function areDistractorsGenerating(lobbyCode: string): boolean {
+  const status = distractorStatus.get(lobbyCode);
+  return status?.generating ?? false;
 }
 
 // Clean up distractor status
@@ -121,8 +136,27 @@ export function getCurrentQuestion(lobbyCode: string): { question: string; choic
 
   let choices: string[] | null = null;
   if (isMultipleChoice && currentFlashcard.distractors && currentFlashcard.distractors.length === 3) {
-    // Create array with correct answer and 3 distractors, then shuffle
-    choices = shuffle([currentFlashcard.answer, ...currentFlashcard.distractors]);
+    console.log(`Question: "${currentFlashcard.question}"`);
+    console.log(`Correct Answer: "${currentFlashcard.answer}"`);
+    console.log(`Distractors from flashcard:`, currentFlashcard.distractors);
+    
+    // Filter out any distractors that match the correct answer (case-insensitive)
+    const validDistractors = currentFlashcard.distractors.filter(
+      distractor => distractor.toLowerCase().trim() !== currentFlashcard.answer.toLowerCase().trim()
+    );
+    
+    console.log(`Valid Distractors after filtering:`, validDistractors);
+    
+    // If we don't have 3 valid distractors, log a warning
+    if (validDistractors.length < 3) {
+      console.warn(`Warning: Flashcard "${currentFlashcard.question}" has duplicate/invalid distractors. Using ${validDistractors.length} distractors.`);
+    }
+    
+    // Create array with correct answer and valid distractors, then shuffle
+    const choicesBeforeShuffle = [currentFlashcard.answer, ...validDistractors];
+    console.log(`Choices before shuffle:`, choicesBeforeShuffle);
+    choices = shuffle(choicesBeforeShuffle);
+    console.log(`Choices after shuffle:`, choices);
   }
 
   return { question: currentFlashcard.question, choices };

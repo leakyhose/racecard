@@ -30,6 +30,7 @@ export interface Lobby {
   status: GameStatus;
   settings: Settings;
   leader: string; // ID of leader
+  distractorStatus?: "idle" | "generating" | "ready" | "error";
 }
 
 export interface FlashcardEnd {

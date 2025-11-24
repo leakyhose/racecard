@@ -111,7 +111,7 @@ export default function Lobby() {
                   isLeader={isLeader}
                   currentSettings={lobby.settings}
                 />
-                <UploadFlashcard isLeader={isLeader} />
+                <UploadFlashcard isLeader={isLeader} lobby={lobby} />
               </div>
               <div className="flex flex-col gap-2">
                 <button

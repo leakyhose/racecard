@@ -33,6 +33,7 @@ import {
   allPlayersAnsweredCorrectly,
   generateDistractors,
   areDistractorsReady,
+  areDistractorsGenerating,
 } from "./gameManager.js";
 
 const app = express();
@@ -102,22 +103,78 @@ io.on("connection", (socket) => {
   });
 
   // Loads flashcards
-  socket.on("updateFlashcard", (cards) => {
+  socket.on("updateFlashcard", async (cards) => {
     const lobby = updateFlashcard(socket.id, cards);
     if (!lobby) {
       console.log(`Failed to update flashcards`);
       return;
     }
+    
+    // If multiple choice is enabled and flashcards were uploaded, generate distractors
+    if (lobby.settings.multipleChoice && cards.length > 0) {
+      // Check if already generating
+      if (areDistractorsGenerating(lobby.code)) {
+        console.log(`Distractors already generating for ${lobby.code}, skipping...`);
+        io.to(lobby.code).emit("lobbyUpdated", lobby);
+        return;
+      }
+      
+      lobby.distractorStatus = "generating";
+      io.to(lobby.code).emit("lobbyUpdated", lobby);
+      
+      try {
+        await generateDistractors(lobby.code);
+        lobby.distractorStatus = "ready";
+      } catch (error) {
+        console.error("Error generating distractors:", error);
+        lobby.distractorStatus = "error";
+      }
+    } else {
+      lobby.distractorStatus = "idle";
+    }
+    
     io.to(lobby.code).emit("lobbyUpdated", lobby);
   });
 
   // Updates settings
-  socket.on("updateSettings", (settings) => {
+  socket.on("updateSettings", async (settings) => {
     const lobby = updateSettings(socket.id, settings);
     if (!lobby) {
       console.log(`Failed to update settings`);
       return;
     }
+    
+    // If multiple choice was enabled and flashcards exist, generate distractors
+    if (settings.multipleChoice && lobby.flashcards.length > 0) {
+      // Check if already generating
+      if (areDistractorsGenerating(lobby.code)) {
+        console.log(`Distractors already generating for ${lobby.code}, skipping...`);
+        io.to(lobby.code).emit("lobbyUpdated", lobby);
+        return;
+      }
+      
+      // Check if distractors are already ready (have been generated for current flashcards)
+      const alreadyReady = areDistractorsReady(lobby.code) && 
+                           lobby.flashcards.every(card => card.distractors && card.distractors.length === 3);
+      
+      if (!alreadyReady) {
+        lobby.distractorStatus = "generating";
+        io.to(lobby.code).emit("lobbyUpdated", lobby);
+        
+        try {
+          await generateDistractors(lobby.code);
+          lobby.distractorStatus = "ready";
+        } catch (error) {
+          console.error("Error generating distractors:", error);
+          lobby.distractorStatus = "error";
+        }
+      } else {
+        lobby.distractorStatus = "ready";
+      }
+    } else if (!settings.multipleChoice) {
+      lobby.distractorStatus = "idle";
+    }
+    
     io.to(lobby.code).emit("lobbyUpdated", lobby);
   });
 
@@ -184,29 +241,16 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("lobbyUpdated", lobby);
 
     shuffleGameCards(lobby.code);
-    if (lobby.settings.multipleChoice){
-      generateDistractors(lobby.code);
-    }
+    
     // Start countdown
     let countdown = 3;
     io.to(lobby.code).emit("startCountdown", countdown);
     countdown--;
 
-    // Shuffle cards asynchronously during countdown
-
-
     const countdownInterval = setInterval(() => {
-      if (countdown >= 2) {
+      if (countdown > 0) {
         io.to(lobby.code).emit("startCountdown", countdown);
         countdown--;
-      } else if (countdown === 1) {
-        if (lobby.settings.multipleChoice && !areDistractorsReady(lobby.code)) {
-          // Wait at 1 until distractors are ready (Find more eloquent way to solve this at one point)
-          io.to(lobby.code).emit("startCountdown", countdown);
-        } else {
-          io.to(lobby.code).emit("startCountdown", countdown);
-          countdown--;
-        }
       } else {
         clearInterval(countdownInterval);
 

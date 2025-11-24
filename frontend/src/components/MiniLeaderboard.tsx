@@ -36,7 +36,7 @@ export function MiniLeaderboard({
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-coffee/70 font-bold wrap-break-word">
+              <div className="space-y-1 text-sm text-coffee/70 font-bold wrap-break-word">
                 {player.value}
               </div>
             )}
