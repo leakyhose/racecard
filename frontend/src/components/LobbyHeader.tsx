@@ -19,7 +19,7 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(`RaceCard.io/${code}`);
       setShowCopyMessage(true);
       setTimeout(() => setShowCopyMessage(false), 2000);
     } catch (err) {
