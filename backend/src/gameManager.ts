@@ -182,8 +182,20 @@ export function validateAnswer(socketId: string, answerText: string) {
 
   if (isCorrect) {
     if (!gs.correctAnswers.find((a) => a.player === player.name)) {
+      let points = 1;
+      if (gs.correctAnswers.length === 0) {
+        points = 5;
+      } else {
+        const firstTime = gs.correctAnswers[0]?.time ?? 0;
+        const diff = (timeTaken - firstTime) / 1000;
+        if (diff < 1.5) points = 4;
+        else if (diff < 3) points = 3;
+        else if (diff < 5) points = 2;
+        else points = 1;
+      }
+
       gs.correctAnswers.push({ player: player.name, time: timeTaken });
-      player.score += 1;
+      player.score += points;
       player.miniStatus = timeTaken;
       player.isCorrect = true;
     }
