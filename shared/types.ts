@@ -5,6 +5,7 @@ export interface Flashcard {
   trickTerms?: string[]; // 3 fake questions
   trickDefinitions?: string[]; // 3 fake answers
   isGenerated?: boolean; // Whether MC options have been generated
+  distractors?: string[]; // 3 incorrect alternatives for answer
 }
 
 export interface Player {
