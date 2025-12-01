@@ -16,8 +16,6 @@ if (!process.env.DISTRACTOR_PROMPT) {
 }
 
 const distractorPrompt: string = process.env.DISTRACTOR_PROMPT;
-console.log(distractorPrompt)
-
 let client: OpenAI | null = null;
 
 function getClient() {
@@ -62,7 +60,6 @@ async function generateDistractors(
       try {
         const response = await apiClient.chat.completions.parse({
           model: MODEL_NAME,
-          reasoning: { effort: "none" },
 
           messages: [
             {
@@ -168,12 +165,6 @@ export async function generateResponse(
     completionTokens: termResult.usage.completionTokens + definitionResult.usage.completionTokens,
     totalTokens: termResult.usage.totalTokens + definitionResult.usage.totalTokens,
   };
-
-  console.log('\n=== Token Usage ===');
-  console.log(`Prompt tokens: ${totalUsage.promptTokens.toLocaleString()}`);
-  console.log(`Completion tokens: ${totalUsage.completionTokens.toLocaleString()}`);
-  console.log(`Total tokens: ${totalUsage.totalTokens.toLocaleString()}`);
-  console.log('===================\n');
 
   return JSON.stringify({
     termDistractors: termResult.distractors,
