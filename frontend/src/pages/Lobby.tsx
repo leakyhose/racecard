@@ -263,25 +263,29 @@ export default function Lobby() {
               {(currentSection === "all" || isTransitioning) && (
                 <div 
                   ref={allCardsRef}
-                  className="min-h-screen p-4 bg-light-vanilla"
+                  className="min-h-screen bg-light-vanilla"
                 >
-                  <button
-                    onClick={scrollToStudy}
-                    disabled={isTransitioning}
-                    className="mb-6 px-6 py-3 border-2 border-coffee bg-vanilla hover:bg-coffee hover:text-vanilla transition-colors font-bold block mx-auto disabled:opacity-50"
-                  >
-                    ↑ Back to Study Mode
-                  </button>
-                  <div className="border-t-2 border-coffee pt-8 mb-4">
-                    <h2 className="text-2xl font-bold text-coffee mb-6 text-center">
-                      All Flashcards
-                    </h2>
+                  <div className="sticky top-0 bg-light-vanilla z-10 px-4 pt-4">
+                    <button
+                      onClick={scrollToStudy}
+                      disabled={isTransitioning}
+                      className="mb-4 px-6 py-3 border-2 border-coffee bg-vanilla hover:bg-coffee hover:text-vanilla transition-colors font-bold block mx-auto disabled:opacity-50"
+                    >
+                      ↑ Back to Study Mode
+                    </button>
+                    <div className="border-b-2 border-coffee pb-4 bg-light-vanilla">
+                      <h2 className="text-2xl font-bold text-coffee text-center">
+                        All Flashcards
+                      </h2>
+                    </div>
                   </div>
-                  <FlashcardPreview
-                    flashcards={lobby.flashcards}
-                    answerByTerm={lobby.settings.answerByTerm}
-                    multipleChoice={lobby.settings.multipleChoice}
-                  />
+                  <div className="p-4">
+                    <FlashcardPreview
+                      flashcards={lobby.flashcards}
+                      answerByTerm={lobby.settings.answerByTerm}
+                      multipleChoice={lobby.settings.multipleChoice}
+                    />
+                  </div>
                 </div>
               )}
             </>
