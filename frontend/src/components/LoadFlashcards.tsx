@@ -167,7 +167,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                                             <h3 className="truncate font-bold text-sm transition-colors text-coffee group-hover:text-terracotta">
                                                 {set.name}
                                             </h3>
-                                            <p className="text-xs font-medium mt-0.5 text-coffee/50">
+                                            <p className="text-xs font-medium mt-0.3 text-coffee/50">
                                                 {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
                                             </p>
                                         </div>
