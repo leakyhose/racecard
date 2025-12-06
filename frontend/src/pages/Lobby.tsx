@@ -15,6 +15,7 @@ import { FlashcardStudy } from "../components/FlashcardStudy";
 import { Game } from "../components/Game";
 import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
+import { LoadFlashcards } from "../components/LoadFlashcards";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -169,9 +170,13 @@ export default function Lobby() {
       />
       {/* */}
       <div className="flex flex-1 overflow-hidden border-coffee">
-        <div className="w-65 flex flex-col p-4 bg-light-vanilla">
-          <div className="flex-1" />
-          <Chat />
+        <div className="w-65 flex flex-col p-4 bg-light-vanilla h-full">
+          <div className="h-9/16 flex flex-col min-h-0 mb-4">
+            <LoadFlashcards />
+          </div>
+          <div className="h-7/16 flex flex-col min-h-0">
+            <Chat />
+          </div>
         </div>
 
         <div
