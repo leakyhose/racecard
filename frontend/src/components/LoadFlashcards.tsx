@@ -12,11 +12,16 @@ interface FlashcardSet {
   has_generated: boolean;
 }
 
-export function LoadFlashcards() {
+interface LoadFlashcardsProps {
+  isLeader: boolean;
+}
+
+export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "community">("personal");
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
+  const [shakingSetId, setShakingSetId] = useState<string | null>(null);
   //const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -70,6 +75,11 @@ export function LoadFlashcards() {
   }, [activeTab, user]);
 
   const handleLoadSet = async (setId: string) => {
+    if (!isLeader) {
+      setShakingSetId(setId);
+      setTimeout(() => setShakingSetId(null), 500);
+      return;
+    }
     //setLoadingSetId(setId);
 
     try {
@@ -141,18 +151,28 @@ export function LoadFlashcards() {
                             <div
                                 key={set.id}
                                 onClick={() => handleLoadSet(set.id)}
-                                className="bg-vanilla/50 p-2 rounded-sm border-2 border-coffee cursor-pointer hover:bg-white hover:border-coffee/30 transition-all group"
+                                className={`p-2 rounded-sm border-2 border-coffee cursor-pointer transition-all group min-h-[3.5rem] flex flex-col justify-center ${
+                                  shakingSetId === set.id
+                                    ? "animate-shake bg-red-500 text-vanilla"
+                                    : "bg-vanilla/50 hover:bg-white hover:border-coffee/30"
+                                }`}
                             >
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="font-bold text-coffee text-sm group-hover:text-terracotta transition-colors">
-                                            {set.name}
-                                        </h3>
-                                        <p className="text-xs text-coffee/50 font-medium mt-0.5">
-                                            {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
-                                        </p>
+                                {shakingSetId === set.id ? (
+                                    <div className="text-center font-bold text-sm">
+                                        Must be leader
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="flex justify-between items-start w-full">
+                                        <div className="w-full">
+                                            <h3 className="truncate font-bold text-sm transition-colors text-coffee group-hover:text-terracotta">
+                                                {set.name}
+                                            </h3>
+                                            <p className="text-xs font-medium mt-0.5 text-coffee/50">
+                                                {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))
                     )}

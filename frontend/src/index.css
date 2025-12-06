@@ -120,3 +120,57 @@
     border-radius: 0;
   }
 }
+
+/* Arrow Button Styles */
+.swallow-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.25rem;
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  display: inline-block;
+}
+
+.swallow-icon span {
+  width: 1.5rem;
+  height: 0.563rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.swallow-icon span:before,
+.swallow-icon span:after {
+  content: "";
+  width: 0.75rem;
+  height: 0.125rem;
+  background-color: currentColor;
+  position: absolute;
+  bottom: 0;
+  transition: transform 0.3s ease;
+}
+
+.swallow-icon span:before {
+  right: 50%;
+  border-radius: 2px 0 0 2px;
+  transform-origin: 100% 100%;
+  transform: rotate(40deg);
+}
+
+.swallow-icon span:after {
+  left: 50%;
+  border-radius: 0 2px 2px 0;
+  transform-origin: 0 100%;
+  transform: rotate(-40deg);
+}
+
+.swallow-icon:hover span:before {
+  transform: rotate(50deg);
+}
+
+.swallow-icon:hover span:after {
+  transform: rotate(-50deg);
+}

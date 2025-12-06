@@ -16,6 +16,7 @@ import { Game } from "../components/Game";
 import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
 import { LoadFlashcards } from "../components/LoadFlashcards";
+import { ArrowButton } from "../components/ArrowButton";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -172,7 +173,7 @@ export default function Lobby() {
       <div className="flex flex-1 overflow-hidden border-coffee">
         <div className="w-65 flex flex-col p-4 bg-light-vanilla h-full">
           <div className="h-9/16 flex flex-col min-h-0 mb-4">
-            <LoadFlashcards />
+            <LoadFlashcards isLeader={isLeader} />
           </div>
           <div className="h-7/16 flex flex-col min-h-0">
             <Chat />
@@ -200,13 +201,13 @@ export default function Lobby() {
                     answerByTerm={lobby.settings.answerByTerm}
                     multipleChoice={lobby.settings.multipleChoice}
                   />
-                  <button
-                    onClick={scrollToAllCards}
-                    disabled={isTransitioning}
-                    className="mt-8 px-6 py-3 border-2 border-coffee bg-vanilla hover:bg-coffee hover:text-vanilla transition-colors font-bold disabled:opacity-50"
-                  >
-                    View All Flashcards ↓
-                  </button>
+                  <div className="mt-8">
+                    <ArrowButton
+                      onClick={scrollToAllCards}
+                      disabled={isTransitioning}
+                      direction="down"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -217,16 +218,16 @@ export default function Lobby() {
                   className="min-h-screen bg-light-vanilla"
                 >
                   <div className="sticky top-0 bg-light-vanilla z-10 px-4 pt-4">
-                    <button
-                      onClick={scrollToStudy}
-                      disabled={isTransitioning}
-                      className="mb-4 px-6 py-3 border-2 border-coffee bg-vanilla hover:bg-coffee hover:text-vanilla transition-colors font-bold block mx-auto disabled:opacity-50"
-                    >
-                      ↑ Back to Study Mode
-                    </button>
+                    <div className="flex justify-center mb-4">
+                      <ArrowButton
+                        onClick={scrollToStudy}
+                        disabled={isTransitioning}
+                        direction="up"
+                      />
+                    </div>
                     <div className="border-b-2 border-coffee pb-4 bg-light-vanilla">
                       <h2 className="text-2xl font-bold text-coffee text-center">
-                        All Flashcards
+                        Flashcards
                       </h2>
                     </div>
                   </div>

@@ -16,6 +16,7 @@ export function FlashcardStudy({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 
+  
   if (!flashcards.length) {
     return (
       <div className="flex items-center h-full justify-center text-sm italic text-center">
@@ -24,7 +25,9 @@ export function FlashcardStudy({
     );
   }
 
-  const currentCard = flashcards[currentIndex];
+  // Ensure currentIndex is within bounds
+  const safeIndex = Math.min(currentIndex, flashcards.length - 1);
+  const currentCard = flashcards[safeIndex];
   const showMC = multipleChoice && currentCard?.isGenerated;
 
   const handlePrevious = () => {
@@ -82,7 +85,7 @@ export function FlashcardStudy({
                 <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_1px_var(--color-powder)] flex flex-col items-center justify-center gap-4">
                   <div className="text-center">
                     <div className="text-sm text-coffee/60 mb-4 font-bold">
-                      {currentIndex + 1} of {flashcards.length}
+                      {safeIndex + 1} of {flashcards.length}
                     </div>
                     <div className="text-2xl font-bold text-coffee whitespace-pre-wrap wrap-break-word">
                       {question}
@@ -152,7 +155,7 @@ export function FlashcardStudy({
             type="range"
             min="0"
             max={flashcards.length - 1}
-            value={currentIndex}
+            value={safeIndex}
             onChange={handleSliderChange}
             className="flex-1 h-2 bg-vanilla border-2 border-coffee appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-coffee [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
           />
