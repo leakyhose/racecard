@@ -87,6 +87,7 @@ io.on("connection", (socket) => {
     // Send join notification to chat
     io.to(code).emit("chatMessage", {
       player: "System",
+      id: "system",
       text: `${nickname} joined the lobby`,
     });
 
@@ -221,6 +222,7 @@ io.on("connection", (socket) => {
     if (playerName) {
       io.to(lobby.code).emit("chatMessage", {
         player: "System",
+        id: "system",
         text: `${playerName} left the lobby`,
       });
     }
@@ -380,6 +382,7 @@ io.on("connection", (socket) => {
     }
     io.to(lobby.code).emit("chatMessage", {
       player: player.name,
+      id: player.id,
       text: msg,
     });
   });

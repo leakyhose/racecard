@@ -55,7 +55,7 @@ export interface Gamestate {
 export interface ServerToClientEvents {
   lobbyUpdated: (lobby: Lobby) => void;
   scoreUpdate: (players: Player[]) => void;
-  chatMessage: (msg: { player: string; text: string }) => void;
+  chatMessage: (msg: { player: string; id: string; text: string }) => void;
   lobbyData: (lobby: Lobby | null) => void;
   startCountdown: (secondsRemaining: number | string) => void;
   generationProgress: (progress: string) => void;

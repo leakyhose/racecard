@@ -160,7 +160,7 @@ export default function Lobby() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-vanilla text-coffee font-executive overflow-hidden">
+    <div className="flex flex-col h-screen bg-light-vanilla text-coffee font-executive overflow-hidden">
       <LobbyHeader
         code={code!}
         nickname={nickname}

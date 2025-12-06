@@ -3,6 +3,7 @@ import { socket } from "../socket";
 
 interface ChatMessage {
   player: string;
+  id: string;
   text: string;
   timestamp: number;
 }
@@ -22,9 +23,10 @@ export function Chat() {
   }, [messages]);
 
   useEffect(() => {
-    const handleChatMessage = (msg: { player: string; text: string }) => {
+    const handleChatMessage = (msg: { player: string; id: string, text: string, }) => {
       setMessages(prev => prev.concat({
           player: msg.player,
+          id: msg.id,
           text: msg.text,
           timestamp: Date.now()
         }));
@@ -47,15 +49,17 @@ export function Chat() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full">
-        <div className="flex-1 overflow-x-hidden p-2 [overflow-y:overlay] mask-[linear-gradient(to_bottom,transparent,black_1.5rem)] [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 mask-[linear-gradient(to_bottom,transparent,black_1.5rem)] [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar]:left-0">
         <div className="flex flex-col space-y-1 [direction:ltr] min-h-full">
           <div className="grow" />
           {messages.length === 0 ? (
-            <div className="text-coffee/40 text-sm font-bold text-center italic py-4">
-              Start the conversation...
+            <div className="text-coffee/40 text-sm font-bold text-center italic py-2">
+              no messages yet
             </div>
           ) : (
-            messages.map((msg, index) => (
+            messages.map((msg, index) => {
+              const showPlayerName = index === 0 || messages[index - 1].id !== msg.id;
+              return (
               <div
                 key={index}
                 className={`${
@@ -67,17 +71,19 @@ export function Chat() {
                     {msg.text}
                   </span>
                 ) : (
-                  <div className="flex flex-col items-start mt-2 px-1">
-                    <div className="text-xs font-bold text-coffee/70 mb-0.5">
+                  <div className="flex flex-col items-start px-1">
+                    {showPlayerName && (
+                    <div className="text-xs font-bold text-terracotta">
                       {msg.player}
-                    </div>
-                    <div className="text-sm font-medium text-coffee wrap-break-word leading-snug">
+                    </div>)}
+                    <div className="text-xs font-medium text-coffee wrap-break-word leading-snug">
                       {msg.text}
                     </div>
                   </div>
                 )}
               </div>
-            ))
+            );})
+            
           )}
           <div ref={messagesEndRef} />
         </div>
