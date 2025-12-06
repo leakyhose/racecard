@@ -298,7 +298,8 @@ export default function Lobby() {
           )}
         </div>
 
-        <div className="w-65 flex flex-col gap-4 p-4 bg-light-vanilla">
+        <div className="w-65 flex flex-col p-4 bg-light-vanilla">
+          <div className="flex-1" />
           <Chat />
         </div>
       </div>
