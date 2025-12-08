@@ -110,14 +110,14 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full mb-10">
       {/* Tabs */}
-      <div className="flex space-x-4 mb-2 border-b-2 border-coffee/10 pb-1 px-2">
+      <div className="justify-center flex space-x-4 mb-2 border-b-2 border-coffee/10 pb-1 px-2">
         <button
           onClick={() => setActiveTab("personal")}
           className={`text-sm font-bold transition-colors ${
             activeTab === "personal" ? "text-coffee" : "text-coffee/40 hover:text-coffee/70"
           }`}
         >
-          Personal
+          My Cards
         </button>
         <button
           onClick={() => setActiveTab("community")}
@@ -125,7 +125,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
             activeTab === "community" ? "text-coffee" : "text-coffee/40 hover:text-coffee/70"
           }`}
         >
-          Community
+          Public Cards
         </button>
       </div>
 
@@ -153,18 +153,18 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                                 onClick={() => handleLoadSet(set.id)}
                                 className={`p-2 rounded-sm border-2 border-coffee cursor-pointer transition-all group min-h-14 flex flex-col justify-center ${
                                   shakingSetId === set.id
-                                    ? "animate-shake bg-red-500 text-vanilla"
-                                    : "bg-vanilla/50 hover:bg-white hover:border-coffee/30"
+                                    ? "bg-terracotta text-vanilla translate-x-2 animate-shake"
+                                    : " bg-vanilla/50 hover:translate-x-2"
                                 }`}
                             >
                                 {shakingSetId === set.id ? (
                                     <div className="text-center font-bold text-sm">
-                                        Must be leader
+                                        Must be lobby leader
                                     </div>
                                 ) : (
                                     <div className="flex justify-between items-start w-full">
                                         <div className="w-full">
-                                            <h3 className="truncate font-bold text-sm transition-colors text-coffee group-hover:text-terracotta">
+                                            <h3 className="truncate font-bold text-sm transition-colors text-coffee">
                                                 {set.name}
                                             </h3>
                                             <p className="text-xs font-medium mt-0.3 text-coffee/50">
