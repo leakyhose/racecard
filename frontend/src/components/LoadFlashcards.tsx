@@ -148,32 +148,38 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                         </div>
                     ) : (
                         sets.map((set) => (
-                            <div
+                            <button
                                 key={set.id}
                                 onClick={() => handleLoadSet(set.id)}
-                                className={`p-2 rounded-sm border-2 border-coffee cursor-pointer transition-all group min-h-14 flex flex-col justify-center ${
-                                  shakingSetId === set.id
-                                    ? "bg-terracotta text-vanilla translate-x-2 animate-shake"
-                                    : " bg-vanilla/50 hover:translate-x-2"
+                                className={`group relative w-full rounded-xl bg-coffee border-none p-0 cursor-pointer outline-none ${
+                                  shakingSetId === set.id ? "animate-shake" : ""
                                 }`}
                             >
-                                {shakingSetId === set.id ? (
-                                    <div className="text-center font-bold text-sm">
-                                        Must be lobby leader
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-between items-start w-full">
-                                        <div className="w-full">
-                                            <h3 className="truncate font-bold text-sm transition-colors text-coffee">
-                                                {set.name}
-                                            </h3>
-                                            <p className="text-xs font-medium mt-0.3 text-coffee/50">
-                                                {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
-                                            </p>
+                                <span className={`w-full h-full rounded-xl border-2 border-coffee p-2 text-left -translate-y-0 transition-transform duration-100 ease-out group-hover:-translate-y-0.5 group-active:translate-y-0 flex flex-col justify-center min-h-14 ${
+                                  shakingSetId === set.id 
+                                    ? "bg-red-500 text-vanilla" 
+                                    : "bg-vanilla text-coffee"
+                                }`}>
+                                    {shakingSetId === set.id ? (
+                                        <div className="text-center font-bold text-sm">
+                                            Must be leader
                                         </div>
-                                    </div>
-                                )}
-                            </div>
+                                    ) : (
+                                        <div className="flex justify-between items-start w-full">
+                                            <div className="w-full">
+                                                <h3 className="truncate font-bold text-sm transition-colors">
+                                                    {set.name}
+                                                </h3>
+                                                <p className={`text-xs font-medium mt-0.5 ${
+                                                  shakingSetId === set.id ? "text-vanilla/80" : "text-coffee/50"
+                                                }`}>
+                                                    {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </span>
+                            </button>
                         ))
                     )}
                 </>
