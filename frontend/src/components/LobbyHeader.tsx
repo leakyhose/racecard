@@ -44,7 +44,7 @@ export function LobbyHeader({ code, isLeader, lobby }: LobbyHeaderProps) {
   };
 
   return (
-    <div className="flex justify-between relative p-3 items-center bg-light-vanilla text-coffee z-10">
+    <div className="flex justify-between relative p-3 items-center bg-light-vanilla text-coffee">
       <div className="flex flex-col gap-0">
         <div
           onClick={handleCopyCode}

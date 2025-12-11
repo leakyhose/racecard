@@ -60,14 +60,14 @@ export function FlashcardStudy({
   const answer = answerByTerm ? currentCard.question : currentCard.answer;
 
   return (
-    <div className="flex items-center justify-center w-full p-8 relative z-30">
+    <div className="flex items-center justify-center w-full p-8">
       <div className="flex flex-col items-center justify-center w-full max-w-3xl gap-6">
         {/* Flashcard */}
-        <div className="group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
+        <div className="group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px]">
           <div
             onClick={handleFlip}
             className={`
-              grid grid-cols-1 w-full flex-1 transition-transform transform-3d cursor-pointer z-40
+              grid grid-cols-1 w-full flex-1 transition-transform transform-3d cursor-pointer
               ${isSwitching ? "duration-0" : "duration-1000"}
               ${isFlipped ? "transform-[rotateY(180deg)]" : ""}
             `}

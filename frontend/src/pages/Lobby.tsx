@@ -170,7 +170,7 @@ export default function Lobby() {
         lobby={lobby}
       />
       {/* */}
-      <div className="flex flex-1 min-h-0 border-coffee">
+      <div className="flex flex-1 overflow-hidden border-coffee">
         <div className="w-65 flex flex-col p-4 bg-light-vanilla h-full">
           <div className="h-9/16 flex flex-col min-h-0 mb-4">
             <LoadFlashcards isLeader={isLeader} />
@@ -182,7 +182,7 @@ export default function Lobby() {
 
         <div
           ref={scrollContainerRef}
-          className={`flex-1 bg-light-vanilla relative ${currentSection === "all" && !isTransitioning ? "overflow-y-auto [&::-webkit-scrollbar]:hidden" : "overflow-visible"}`}
+          className={`flex-1 bg-light-vanilla relative ${currentSection === "all" && !isTransitioning ? "overflow-y-auto [&::-webkit-scrollbar]:hidden" : "overflow-hidden"}`}
         >
           {lobby.status === "starting" ||
           lobby.status === "ongoing" ||
