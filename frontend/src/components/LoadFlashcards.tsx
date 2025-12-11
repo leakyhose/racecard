@@ -114,7 +114,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
         <button
           onClick={() => setActiveTab("personal")}
           className={`text-sm font-bold transition-colors ${
-            activeTab === "personal" ? "text-coffee" : "text-coffee/40 hover:text-coffee/70"
+            activeTab === "personal" ? "text-terracotta" : "text-coffee/40 hover:text-coffee/70"
           }`}
         >
           My Cards
@@ -122,7 +122,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
         <button
           onClick={() => setActiveTab("community")}
           className={`text-sm font-bold transition-colors ${
-            activeTab === "community" ? "text-coffee" : "text-coffee/40 hover:text-coffee/70"
+            activeTab === "community" ? "text-terracotta" : "text-coffee/40 hover:text-coffee/70"
           }`}
         >
           Public Cards
