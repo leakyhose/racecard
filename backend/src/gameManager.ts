@@ -200,7 +200,7 @@ export function validateAnswer(socketId: string, answerText: string) {
   const player = lobby.players.find((p) => p.id === socketId);
   if (!player) return null;
 
-  const timeTaken = Date.now() - gs.roundStart;
+  const timeTaken = Math.max(307, Date.now() - gs.roundStart) - 300; // Buffer for animation of the card fliping into position.
 
   // Determine correct answer based on mode
   const answerByTerm = lobby.settings.answerByTerm ?? false;

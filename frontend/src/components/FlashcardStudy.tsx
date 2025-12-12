@@ -83,7 +83,7 @@ export function FlashcardStudy({
 
               {/* Top Card (Front) */}
               <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
-                <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_1px_var(--color-powder)] flex flex-col items-center justify-center gap-4">
+                <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4">
                   <div className="text-center">
                     <div className="text-sm text-coffee/60 mb-4 font-bold">
                       {safeIndex + 1} of {flashcards.length}
@@ -99,7 +99,7 @@ export function FlashcardStudy({
             {/* Back Face */}
             <div className="col-start-1 row-start-1 backface-hidden transform-[rotateY(180deg)] relative w-full h-full">
               {/* Under Card (Back) */}
-              <div className="shadow-[0_0_10px_rgba(0,0,0,0.212)] border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
+              <div className="border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
                 <div className="text-center text-coffee/80 text-[0.69rem] font-bold tracking-[0.2em]">
                   click for question
                 </div>
@@ -107,7 +107,7 @@ export function FlashcardStudy({
 
               {/* Top Card (Back) */}
               <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
-                <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_1px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4">
+                <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-4">
                   <div className="w-full">
                     <div className="text-sm text-coffee/60 mb-4 font-bold text-center">
                       Answer
