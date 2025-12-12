@@ -22,6 +22,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
   const [shakingSetId, setShakingSetId] = useState<string | null>(null);
+  const [currentlyLoaded, setCurrentlyLoaded] = useState<string | null>(null);
   //const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -100,6 +101,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
             }));
 
       socket.emit("updateFlashcard", flashcards);
+      setCurrentlyLoaded(setId);
     } catch {
       console.error("Failed to load set");
     } finally {
@@ -108,7 +110,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full mb-5">
+    <div className="flex flex-col flex-1 min-h-0 w-full">
       {/* Toggle Switch */}
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
         <label className="relative inline-flex items-center cursor-pointer select-none">
@@ -136,7 +138,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 mask-[linear-gradient(to_top,transparent,black_1.5rem)] [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar]:left-0">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar]:left-0">
         <div className="flex flex-col space-y-2 [direction:ltr] min-h-full mb-3">
             {activeTab === "personal" ? (
                 <>
@@ -164,7 +166,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                                 <span className={`w-full h-full rounded-xl border-2 border-coffee p-2 text-left -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 flex flex-col justify-center min-h-14 ${
                                   shakingSetId === set.id 
                                     ? "bg-red-500 text-vanilla" 
-                                    : "bg-vanilla text-coffee"
+                                    : `${set.id == currentlyLoaded ? "shadow-[inset_0_0_0_2px_var(--color-powder)]" : ""} bg-vanilla text-coffee`
                                 }`}>
                                     {shakingSetId === set.id ? (
                                         <div className="text-center font-bold text-sm">

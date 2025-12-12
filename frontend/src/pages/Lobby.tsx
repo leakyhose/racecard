@@ -42,6 +42,50 @@ export default function Lobby() {
   const studyRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
+  // Resizable sidebar logic
+  const [splitRatio, setSplitRatio] = useState(0.55); // DEFAULT RATIO (Change this to set default position)
+  const [isDragging, setIsDragging] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !sidebarRef.current) return;
+      
+      const sidebarRect = sidebarRef.current.getBoundingClientRect();
+      const relativeY = e.clientY - sidebarRect.top;
+      // MIN/MAX RATIOS (Change 0.2 and 0.8 to set min/max limits)
+      const newRatio = Math.min(Math.max(relativeY / sidebarRect.height, 0.2), 0.8);
+      
+      setSplitRatio(newRatio);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isDragging]);
+
   useCodeValidation(code);
 
   const lobby = useLobbyData(code);
@@ -189,12 +233,32 @@ export default function Lobby() {
         />
       </div>
       {/* */}
-      <div className="flex flex-1 min-h-0 border-coffee">
-        <div className="w-65 flex flex-col p-4 bg-light-vanilla h-full">
-          <div className="h-9/16 flex flex-col min-h-0 mb-4">
+            <div className="flex flex-1 min-h-0 border-coffee">
+        <div ref={sidebarRef} className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative">
+          <div style={{ height: `${splitRatio * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]">
             <LoadFlashcards isLeader={isLeader} />
           </div>
-          <div className="h-7/16 flex flex-col min-h-0">
+          
+          {/* Resizable Divider */}
+          <div 
+            className={`absolute h-5 flex items-center justify-center cursor-ns-resize z-50 w-full group transition-colors duration-200`}
+            style={{ top: `calc(${splitRatio * 100}% - 10px)` }}
+            onMouseDown={handleMouseDown}
+          >
+             <div className="w-full flex items-center justify-center pointer-events-none px-4">
+                <div className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}></div>
+                <div className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}>
+                    {/* Minimalistic Drag Handle Icon */}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 15l-6 6-6-6"/>
+                        <path d="M18 9l-6-6-6 6"/>
+                    </svg>
+                </div>
+                <div className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}></div>
+             </div>
+          </div>
+
+          <div style={{ height: `${(1 - splitRatio) * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]">
             <Chat />
           </div>
         </div>

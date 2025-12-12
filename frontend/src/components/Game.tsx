@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { socket } from "../socket";
 import type { FlashcardEnd } from "@shared/types";
 import { MiniLeaderboard } from "./MiniLeaderboard";
@@ -22,6 +22,24 @@ export function Game() {
   const [lastAnswer, setLastAnswer] = useState("");
   const [lastResults, setLastResults] = useState<FlashcardEnd | null>(null);
   const isLeader = lobby?.leader === socket.id;
+  const gameInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus management
+  useEffect(() => {
+    if (hasAnswered || showResults) {
+      document.getElementById("chat-input")?.focus();
+    } else if (!currentChoices) {
+      setTimeout(() => {
+        gameInputRef.current?.focus();
+      }, 50);
+    }
+  }, [hasAnswered, showResults, currentChoices]);
+
+  useEffect(() => {
+    return () => {
+      document.getElementById("chat-input")?.focus();
+    };
+  }, []);
 
   // Update countdown message when lobby status changes to ongoing (for hot joins)
   useEffect(() => {
@@ -62,6 +80,7 @@ export function Game() {
       setLastAnswer(flashcardEnd.Answer);
       setLastResults(flashcardEnd);
       setShowResults(true);
+      setAnswer("");
     };
 
     socket.on("startCountdown", handleCountdown);
@@ -198,12 +217,14 @@ return (
                     ) : (
                         <form onSubmit={handleSubmitAnswer} className="mt-8 relative group rounded-xl bg-coffee">
                           <input
+                            ref={gameInputRef}
                             type="text"
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
                             placeholder="TYPE YOUR ANSWER..."
                             className="w-full px-6 py-4 text-2xl bg-vanilla border-2 border-coffee rounded-xl text-coffee placeholder:text-coffee/30 -translate-y-1 transition-transform duration-100 ease-out hover:-translate-y-2 focus:-translate-y-2 font-bold outline-none focus:shadow-[inset_0_0_0_1px_var(--color-terracotta)] text-center"
                             autoFocus
+                            disabled={showResults}
                           />
                         </form>
                     )
