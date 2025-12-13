@@ -17,7 +17,7 @@ export function UploadFlashcard({ isLeader, lobby }: UploadFlashcardProps) {
   const isGenerating = lobby?.distractorStatus === "generating";
 
   const handleImport = (flashcards: Flashcard[]) => {
-    socket.emit("updateFlashcard", flashcards);
+    socket.emit("updateFlashcard", flashcards, " ", " ");
   };
 
   const handleClick = () => {

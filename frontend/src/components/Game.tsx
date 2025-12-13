@@ -69,11 +69,6 @@ export function Game() {
       setIsCorrect(null);
     };
 
-    const handleEndGuess = (time: number, isCorrect: boolean) => {
-      setHasAnswered(true);
-      setAnswerTime(time);
-      setIsCorrect(isCorrect);
-    };
 
     const handleEndFlashcard = (flashcardEnd: FlashcardEnd) => {
       setResults(flashcardEnd);
@@ -85,13 +80,11 @@ export function Game() {
 
     socket.on("startCountdown", handleCountdown);
     socket.on("newFlashcard", handleNewFlashcard);
-    socket.on("endGuess", handleEndGuess);
     socket.on("endFlashcard", handleEndFlashcard);
 
     return () => {
       socket.off("startCountdown", handleCountdown);
       socket.off("newFlashcard", handleNewFlashcard);
-      socket.off("endGuess", handleEndGuess);
       socket.off("endFlashcard", handleEndFlashcard);
     };
   }, []);

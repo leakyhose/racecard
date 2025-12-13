@@ -14,16 +14,18 @@ interface FlashcardSet {
 
 interface LoadFlashcardsProps {
   isLeader: boolean;
+  refreshTrigger?: number;
+  autoSelectedSetId?: string | null;
 }
 
-export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
+export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId }: LoadFlashcardsProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "community">("personal");
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
   const [shakingSetId, setShakingSetId] = useState<string | null>(null);
   const [currentlyLoaded, setCurrentlyLoaded] = useState<string | null>(null);
-  //const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
+  const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSets = async () => {
@@ -73,7 +75,11 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
     if (activeTab === "personal" && user) {
       fetchSets();
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, refreshTrigger]);
+
+  useEffect(() => {
+    setCurrentlyLoaded(autoSelectedSetId || null);
+  }, [autoSelectedSetId]);
 
   const handleLoadSet = async (setId: string) => {
     if (!isLeader) {
@@ -81,7 +87,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
       setTimeout(() => setShakingSetId(null), 500);
       return;
     }
-    //setLoadingSetId(setId);
+    setLoadingSetId(setId);
 
     try {
       const { data, error: fetchError } = await supabase
@@ -100,12 +106,15 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
               isGenerated: card.is_generated || false,
             }));
 
-      socket.emit("updateFlashcard", flashcards);
+      const set = sets.find((s) => s.id === setId);
+      const setName = set ? set.name : "Unnamed Set";
+
+      socket.emit("updateFlashcard", flashcards, setName, setId);
       setCurrentlyLoaded(setId);
     } catch {
       console.error("Failed to load set");
     } finally {
-      //setLoadingSetId(null);
+      setLoadingSetId(null);
     }
   };
 
@@ -144,7 +153,7 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                 <>
                     {!user ? (
                         <div className="text-coffee/40 text-sm font-bold text-center italic py-2">
-                            Log in to see your flashcards
+                            Log in to save flashcards!
                         </div>
                     ) : loading && sets.length === 0 ? (
                         <div className="text-coffee/40 text-sm font-bold text-center italic py-2">
@@ -163,9 +172,9 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                                   shakingSetId === set.id ? "animate-shake" : ""
                                 }`}
                             >
-                                <span className={`w-full h-full rounded-xl border-2 border-coffee p-2 text-left -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 flex flex-col justify-center min-h-14 ${
+                                <span className={`w-full h-full rounded-xl border-2 border-coffee p-2 text-left -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 flex flex-col justify-center min-h-15 ${
                                   shakingSetId === set.id 
-                                    ? "bg-red-500 text-vanilla" 
+                                    ? "bg-coffee/80 text-vanilla" 
                                     : `${set.id == currentlyLoaded ? "shadow-[inset_0_0_0_2px_var(--color-powder)]" : ""} bg-vanilla text-coffee`
                                 }`}>
                                     {shakingSetId === set.id ? (
@@ -173,16 +182,23 @@ export function LoadFlashcards({ isLeader }: LoadFlashcardsProps) {
                                             Must be leader
                                         </div>
                                     ) : (
-                                        <div className="flex justify-between items-start w-full">
+                                        <div className="flex flex-col w-full">
                                             <div className="w-full">
                                                 <h3 className="truncate font-bold text-sm transition-colors">
                                                     {set.name}
                                                 </h3>
-                                                <p className={`text-xs font-medium mt-0.5 ${
+                                            </div>
+                                            <div className="flex justify-between items-center w-full mt-0.5">
+                                                <p className={`text-xs font-medium ${
                                                   shakingSetId === set.id ? "text-vanilla/80" : "text-coffee/50"
                                                 }`}>
                                                     {set.flashcard_count} cards • {new Date(set.created_at).toLocaleDateString()}
                                                 </p>
+                                                {loadingSetId === set.id && (
+                                                    <div className="ml-2 shrink-0">
+                                                        <div className="w-4 h-4 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )}

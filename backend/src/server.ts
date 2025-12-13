@@ -5,7 +5,6 @@ import { Server } from "socket.io";
 import type {
   ServerToClientEvents,
   ClientToServerEvents,
-  Lobby,
 } from "@shared/types.js";
 
 import {
@@ -108,8 +107,8 @@ io.on("connection", (socket) => {
   });
 
   // Loads flashcards
-  socket.on("updateFlashcard", async (cards) => {
-    const lobby = updateFlashcard(socket.id, cards);
+  socket.on("updateFlashcard", async (cards, setName, setID) => {
+    const lobby = updateFlashcard(socket.id, cards, setName, setID);
     if (!lobby) {
       console.log(`Failed to update flashcards`);
       return;

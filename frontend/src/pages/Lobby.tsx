@@ -17,6 +17,7 @@ import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
 import { LoadFlashcards } from "../components/LoadFlashcards";
 import { ArrowButton } from "../components/ArrowButton";
+import { supabase } from "../supabaseClient";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -29,10 +30,13 @@ export default function Lobby() {
   const [isLeader, setIsLeader] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [trackedSetId, setTrackedSetId] = useState<string | null>(null);
   const [loadHovered, setLoadHovered] = useState(false);
-  const [saveHovered, setSaveHovered] = useState(false);
   const [loadShake, setLoadShake] = useState(false);
   const [saveShake, setSaveShake] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [canQuickSave, setCanQuickSave] = useState(false);
   const [currentSection, setCurrentSection] = useState<"study" | "all">(
     "study",
   );
@@ -89,6 +93,65 @@ export default function Lobby() {
   useCodeValidation(code);
 
   const lobby = useLobbyData(code);
+
+  // Sync trackedSetId with lobby.flashcardID
+  useEffect(() => {
+    if (lobby?.flashcardID) {
+      setTrackedSetId(lobby.flashcardID);
+    }
+  }, [lobby?.flashcardID]);
+
+  // Check if current flashcard set is saved and if it needs update
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (!user || !trackedSetId || trackedSetId === "UNNAMED") {
+        setIsSaved(false);
+        setCanQuickSave(false);
+        return;
+      }
+
+      try {
+        const { data: setData, error } = await supabase
+          .from("flashcard_sets")
+          .select("id")
+          .eq("id", trackedSetId)
+          .eq("user_id", user.id)
+          .single();
+
+        if (error || !setData) {
+          setIsSaved(false);
+          setCanQuickSave(false);
+        } else {
+          // Check if DB has generated cards
+          const { data: generatedCards } = await supabase
+            .from("flashcards")
+            .select("is_generated")
+            .eq("set_id", trackedSetId)
+            .eq("is_generated", true)
+            .limit(1);
+
+          const dbHasGenerated = generatedCards && generatedCards.length > 0;
+          const lobbyHasGenerated = lobby?.flashcards.some(
+            (f) => f.isGenerated,
+          );
+
+          if (lobbyHasGenerated && !dbHasGenerated) {
+            // Mismatch: Lobby has generated content, DB does not
+            setIsSaved(false);
+            setCanQuickSave(true);
+          } else {
+            setIsSaved(true);
+            setCanQuickSave(false);
+          }
+        }
+      } catch {
+        setIsSaved(false);
+        setCanQuickSave(false);
+      }
+    };
+
+    checkSavedStatus();
+  }, [trackedSetId, lobby?.flashcards, user, refreshTrigger]);
 
   // Update page title with lobby code
   useEffect(() => {
@@ -185,6 +248,43 @@ export default function Lobby() {
     }
   };
 
+  const handleQuickSave = async () => {
+    if (!user || !trackedSetId) return;
+
+    try {
+      // Delete old flashcards
+      const { error: deleteError } = await supabase
+        .from("flashcards")
+        .delete()
+        .eq("set_id", trackedSetId);
+
+      if (deleteError) throw deleteError;
+
+      // Insert new flashcards
+      const flashcardsToInsert = lobby!.flashcards.map((card) => ({
+        set_id: trackedSetId,
+        term: card.question,
+        definition: card.answer,
+        trick_terms: card.trickTerms || [],
+        trick_definitions: card.trickDefinitions || [],
+        is_generated: card.isGenerated || false,
+      }));
+
+      const { error: insertError } = await supabase
+        .from("flashcards")
+        .insert(flashcardsToInsert);
+
+      if (insertError) throw insertError;
+
+      // Update local state
+      setIsSaved(true);
+      setCanQuickSave(false);
+      setRefreshTrigger((prev) => prev + 1);
+    } catch (err) {
+      console.error("Failed to quick save:", err);
+    }
+  };
+
   const handleJoinLobby = () => {
     if (!nicknameInput.trim()) return;
     setNickname(nicknameInput);
@@ -232,14 +332,12 @@ export default function Lobby() {
           lobby={lobby}
         />
       </div>
-      {/* */}
             <div className="flex flex-1 min-h-0 border-coffee">
         <div ref={sidebarRef} className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative">
           <div style={{ height: `${splitRatio * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]">
-            <LoadFlashcards isLeader={isLeader} />
+            <LoadFlashcards isLeader={isLeader} refreshTrigger={refreshTrigger} autoSelectedSetId={trackedSetId} />
           </div>
           
-          {/* Resizable Divider */}
           <div 
             className={`absolute h-5 flex items-center justify-center cursor-ns-resize z-50 w-full group transition-colors duration-200`}
             style={{ top: `calc(${splitRatio * 100}% - 10px)` }}
@@ -285,11 +383,26 @@ export default function Lobby() {
                 <div
                   ref={studyRef}
                   className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full"
-                >
+                > 
                   <FlashcardStudy
                     flashcards={lobby.flashcards}
+                    flashcardName={lobby.flashcardName}
                     answerByTerm={lobby.settings.answerByTerm}
                     multipleChoice={lobby.settings.multipleChoice}
+                    isSaved={isSaved}
+                    onSave={() => {
+                      if (user) {
+                        if (canQuickSave) {
+                          handleQuickSave();
+                        } else {
+                          setShowSaveModal(true);
+                        }
+                      } else {
+                        setSaveShake(true);
+                        setTimeout(() => setSaveShake(false), 500);
+                      }
+                    }}
+                    saveShake={saveShake}
                   />
                   {lobby.flashcards.length > 0 && (
                     <div className="mt-8 relative z-30">
@@ -370,27 +483,9 @@ export default function Lobby() {
                   {!user && loadHovered ? "Log In to Load" : "Load Flashcards"}
                 </button>
                 {lobby.flashcards.length > 0 && (
-                  <button
-                    onClick={() => {
-                      if (user) {
-                        setShowSaveModal(true);
-                      } else {
-                        setSaveShake(true);
-                        setTimeout(() => setSaveShake(false), 500);
-                      }
-                    }}
-                    onMouseEnter={() => setSaveHovered(true)}
-                    onMouseLeave={() => setSaveHovered(false)}
-                    className={`w-full border-2 border-coffee px-4 py-3 font-bold transition-colors ${
-                      saveShake
-                        ? "animate-shake bg-red-500 text-vanilla"
-                        : "bg-thistle text-coffee hover:bg-coffee hover:text-vanilla"
-                    }`}
-                  >
-                    {!user && saveHovered
-                      ? "Log In to Save"
-                      : "Save Flashcards"}
-                  </button>
+                  <div className="flex justify-center">
+                    {/* Save button moved to FlashcardStudy */}
+                  </div>
                 )}
               </div>
             </div>
@@ -402,11 +497,20 @@ export default function Lobby() {
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         flashcards={lobby.flashcards}
+        isLeader={isLeader}
+        currentName={lobby.flashcardName}
+        onSaveSuccess={(newSetId) => {
+          setRefreshTrigger((prev) => prev + 1);
+          if (newSetId) {
+            setTrackedSetId(newSetId);
+          }
+        }}
       />
 
       <LoadFlashcardsModal
         isOpen={showLoadModal}
         onClose={() => setShowLoadModal(false)}
+        refreshTrigger={refreshTrigger}
       />
     </div>
   );

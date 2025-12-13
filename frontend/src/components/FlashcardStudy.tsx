@@ -1,17 +1,26 @@
 import { useState } from "react";
 import type { Flashcard } from "@shared/types";
 import { ArrowButton } from "./ArrowButton";
+import { SaveButton } from "./SaveButton";
 
 interface FlashcardStudyProps {
   flashcards: Flashcard[];
+  flashcardName?: string;
   answerByTerm?: boolean;
   multipleChoice?: boolean;
+  isSaved?: boolean;
+  onSave?: () => void;
+  saveShake?: boolean;
 }
 
 export function FlashcardStudy({
   flashcards,
+  flashcardName = "Unnamed Set",
   answerByTerm,
   multipleChoice,
+  isSaved = false,
+  onSave,
+  saveShake,
 }: FlashcardStudyProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -62,8 +71,9 @@ export function FlashcardStudy({
   return (
     <div className="flex items-center justify-center w-full p-8 relative">
       <div className="flex flex-col items-center justify-center w-full max-w-3xl gap-6">
+        <div className="flex flex-col-reverse items-center justify-center w-full gap-6">
         {/* Flashcard */}
-        <div className="group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
+        <div className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
           <div
             onClick={handleFlip}
             className={`
@@ -141,6 +151,17 @@ export function FlashcardStudy({
               </div>
             </div>
           </div>
+        </div>
+        <div className="transition-transform duration-400 peer-hover:-translate-y-[23px] flex items-center gap-3">
+          <div className="font-bold text-xl">{flashcardName}</div>
+          {onSave && (
+            <SaveButton
+              isSaved={isSaved}
+              onClick={onSave}
+              className={saveShake ? "animate-shake" : ""}
+            />
+          )}
+        </div>
         </div>
 
         <div className="flex items-center gap-4 w-full relative z-40">

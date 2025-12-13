@@ -7,6 +7,7 @@ import type { Flashcard } from "@shared/types";
 interface LoadFlashcardsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  refreshTrigger?: number;
 }
 
 interface FlashcardSet {
@@ -20,6 +21,7 @@ interface FlashcardSet {
 export function LoadFlashcardsModal({
   isOpen,
   onClose,
+  refreshTrigger = 0,
 }: LoadFlashcardsModalProps) {
   const { user } = useAuth();
   const [sets, setSets] = useState<FlashcardSet[]>([]);
@@ -81,9 +83,9 @@ export function LoadFlashcardsModal({
       fetchSets();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, user]);
+  }, [isOpen, user, refreshTrigger]);
 
-  const handleLoadSet = async (setId: string) => {
+  const handleLoadSet = async (setId: string, setName: string) => {
     setLoadingSetId(setId);
     setError("");
 
@@ -113,7 +115,7 @@ export function LoadFlashcardsModal({
         isGenerated: card.is_generated || false,
       }));
 
-      socket.emit("updateFlashcard", flashcards);
+      socket.emit("updateFlashcard", flashcards, setName, setId);
       onClose();
     } catch {
       setError("Failed to load flashcards");
@@ -210,7 +212,7 @@ export function LoadFlashcardsModal({
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => handleLoadSet(set.id)}
+                      onClick={() => handleLoadSet(set.id, set.name)}
                       disabled={loadingSetId !== null}
                       className="border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >

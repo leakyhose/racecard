@@ -1,24 +1,43 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
+import { socket } from "../socket";
 import type { Flashcard } from "@shared/types";
 
 interface SaveFlashcardsModalProps {
   isOpen: boolean;
   onClose: () => void;
   flashcards: Flashcard[];
+  isLeader: boolean;
+  onSaveSuccess?: (newSetId: string) => void;
+  currentName?: string;
 }
 
 export function SaveFlashcardsModal({
   isOpen,
   onClose,
   flashcards,
+  isLeader,
+  onSaveSuccess,
+  currentName,
 }: SaveFlashcardsModalProps) {
   const { user } = useAuth();
   const [setName, setSetName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (currentName && currentName !== "UNNAMED") {
+        setSetName(currentName);
+      } else {
+        setSetName("");
+      }
+      setError("");
+      setSuccess(false);
+    }
+  }, [isOpen, currentName]);
 
   if (!isOpen) return null;
 
@@ -70,6 +89,11 @@ export function SaveFlashcardsModal({
 
       if (cardsError) throw cardsError;
 
+      if (isLeader) {
+        socket.emit("updateFlashcard", flashcards, setName.trim(), setData.id);
+      }
+
+      onSaveSuccess?.(setData.id);
       setSuccess(true);
       setTimeout(() => {
         onClose();
@@ -121,7 +145,7 @@ export function SaveFlashcardsModal({
                 value={setName}
                 onChange={(e) => setSetName(e.target.value)}
                 placeholder="My Flashcard Set"
-                maxLength={100}
+                maxLength={50}
                 className="w-full border-2 border-coffee bg-transparent p-3 placeholder-coffee/50 focus:outline-none focus:bg-white/20"
                 autoFocus
                 disabled={saving}

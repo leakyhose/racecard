@@ -27,6 +27,8 @@ export function createLobby(hostID: string, hostName: string): Lobby {
       { id: hostID, name: hostName, score: 0, wins: 0, miniStatus: null },
     ],
     flashcards: [],
+    flashcardID: "",
+    flashcardName: "",
     status: "waiting",
     settings: {
       shuffle: true,
@@ -44,12 +46,14 @@ export function createLobby(hostID: string, hostName: string): Lobby {
 
 // Updates flashcards in a lobby
 // @returns updated lobby
-export function updateFlashcard(socketId: string, flashcards: Flashcard[]) {
+export function updateFlashcard(socketId: string, flashcards: Flashcard[], setName:string, setID:string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) {
     return false;
   }
   lobby.flashcards = flashcards;
+  lobby.flashcardName = setName == " " ?  "Unnamed Set" : setName;
+  lobby.flashcardID = setID == " " ?  "UNNAMED" : setID;
   return lobby;
 }
 
