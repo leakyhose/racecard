@@ -369,7 +369,12 @@ export default function Lobby() {
             <div className="flex flex-1 min-h-0 border-coffee">
         <div ref={sidebarRef} className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative">
           <div style={{ height: `${splitRatio * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]">
-            <LoadFlashcards isLeader={isLeader} refreshTrigger={refreshTrigger} autoSelectedSetId={trackedSetId} />
+            <LoadFlashcards 
+              isLeader={isLeader} 
+              refreshTrigger={refreshTrigger} 
+              autoSelectedSetId={trackedSetId}
+              onOpenModal={() => setShowLoadModal(true)}
+            />
           </div>
           
           <div 

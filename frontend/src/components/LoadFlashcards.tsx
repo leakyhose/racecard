@@ -16,9 +16,10 @@ interface LoadFlashcardsProps {
   isLeader: boolean;
   refreshTrigger?: number;
   autoSelectedSetId?: string | null;
+  onOpenModal?: () => void;
 }
 
-export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId }: LoadFlashcardsProps) {
+export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId, onOpenModal }: LoadFlashcardsProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "community">("personal");
   const [sets, setSets] = useState<FlashcardSet[]>([]);
@@ -38,7 +39,8 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
           .from("flashcard_sets")
           .select("id, name, created_at")
           .eq("user_id", user.id)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: false })
+          .limit(10);
 
         if (fetchError) throw fetchError;
 
@@ -148,7 +150,7 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar]:left-0">
-        <div className="flex flex-col space-y-2 [direction:ltr] min-h-full mb-3">
+        <div className="flex flex-col space-y-2 [direction:ltr] min-h-full mb-1">
             {activeTab === "personal" ? (
                 <>
                     {!user ? (
@@ -161,10 +163,11 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
                         </div>
                     ) : sets.length === 0 ? (
                         <div className="text-coffee/40 text-sm font-bold text-center italic py-2">
-                            No flashcard sets found
+                            No flashcard sets.
                         </div>
                     ) : (
-                        sets.map((set) => (
+                      <>
+                        {sets.map((set) => (
                             <button
                                 key={set.id}
                                 onClick={() => handleLoadSet(set.id)}
@@ -204,8 +207,17 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
                                     )}
                                 </span>
                             </button>
-                        ))
-                    )}
+                       ))}
+                        <button 
+                          className="text-center text-coffee font-bold underline decoration-2 underline-offset-2 hover:text-terracotta transition-colors cursor-pointer"
+                          onClick={() => onOpenModal?.()}
+                        >
+                          See More
+                        </button>
+                      </>
+                      )
+                    }
+                    
                 </>
             ) : (
                 <div className="text-coffee/40 text-sm font-bold text-center italic py-2">

@@ -49,7 +49,7 @@ export function Players({
                 <div className="flex-1 flex flex-col justify-center overflow-visible px-3 py-1 relative">
                   {hasMiniStatus ? (
                     <>
-                      <div className="truncate leading-tight text-coffee">
+                      <div className="font-bold truncate leading-tight text-coffee">
                         {player.name}
                         {player.id === leader && (
                           <span className="text-[10px] align-middle"> 👑</span>
@@ -63,7 +63,7 @@ export function Players({
                       </div>
                     </>
                   ) : (
-                    <div className="truncate leading-tight text-coffee">
+                    <div className="font-semibold truncate leading-tight text-coffee">
                       {player.name}
                       {player.id === leader && (
                         <span className="text-[10px] align-middle"> 👑</span>
