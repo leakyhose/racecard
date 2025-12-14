@@ -220,6 +220,7 @@ return (
                           <input
                             ref={gameInputRef}
                             type="text"
+                            autoComplete="off"
                             value={answer}
                             onChange={(e) => setAnswer(e.target.value)}
                             placeholder="TYPE YOUR ANSWER..."

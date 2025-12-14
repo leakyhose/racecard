@@ -25,6 +25,7 @@ export function SaveButton({
     >
       <input
         type="checkbox"
+        autoComplete="off"
         checked={isSaved}
         readOnly
         className="absolute opacity-0 h-0 w-0"

@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
+
 @theme {
+  --color-vanilla: #f0e9ce;
+  --color-coffee: #644536;
+  --color-terracotta: #b2675e;
+  --color-powder: #b4cded;
+  --color-thistle: #e7c8dd;
+  --color-light-vanilla: #eee1b3;
+  --color-mint: #b8e6b8;
+
+  --font: "RobotoSlab", serif;
+
+} 
+
+/* @theme {
   --color-vanilla: #f3eaca;
   --color-coffee: #644536;
   --color-terracotta: #b2675e;
@@ -11,7 +25,7 @@
 
   --font: "RobotoSlab", serif;
 
-}
+} */
 
 @font-face {
   font-family: "RobotoSlab";

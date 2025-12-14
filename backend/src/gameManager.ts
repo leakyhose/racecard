@@ -267,13 +267,19 @@ export function allPlayersAnsweredCorrectly(lobbyCode: string): boolean {
 // Get results for current round
 export function getRoundResults(lobbyCode: string) {
   const gs = codeToGamestate.get(lobbyCode);
-  if (!gs) return null;
+  const lobby = getLobbyByCode(lobbyCode);
+  if (!gs || !lobby) return null;
 
   const currentFlashcard = gs.flashcards?.[0];
   if (!currentFlashcard) return null;
 
+  const answerByTerm = lobby.settings.answerByTerm ?? false;
+  const correctAnswer = answerByTerm
+    ? currentFlashcard.question
+    : currentFlashcard.answer;
+
   return {
-    Answer: currentFlashcard.answer,
+    Answer: correctAnswer,
     fastestPlayers: [...gs.correctAnswers].sort((a, b) => a.time - b.time),
     wrongAnswers: gs.wrongAnswers,
   };

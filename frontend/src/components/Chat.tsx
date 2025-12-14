@@ -94,6 +94,7 @@ export function Chat() {
           <input
             id="chat-input"
             type="text"
+            autoComplete="off"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Send a message..."
