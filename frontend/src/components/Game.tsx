@@ -78,14 +78,22 @@ export function Game() {
       setAnswer("");
     };
 
+    const handleEndGuess = (timeTaken: number, correct: boolean) => {
+      setHasAnswered(true);
+      setAnswerTime(timeTaken);
+      setIsCorrect(correct);
+    };
+
     socket.on("startCountdown", handleCountdown);
     socket.on("newFlashcard", handleNewFlashcard);
     socket.on("endFlashcard", handleEndFlashcard);
+    socket.on("endGuess", handleEndGuess);
 
     return () => {
       socket.off("startCountdown", handleCountdown);
       socket.off("newFlashcard", handleNewFlashcard);
       socket.off("endFlashcard", handleEndFlashcard);
+      socket.off("endGuess", handleEndGuess);
     };
   }, []);
 

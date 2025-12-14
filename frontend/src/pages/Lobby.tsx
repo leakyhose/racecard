@@ -94,43 +94,43 @@ export default function Lobby() {
   const lobby = useLobbyData(code);
   const prevDistractorStatus = useRef(lobby?.distractorStatus);
 
-  const handleAutoUpdate = async () => {
-    if (!user || !trackedSetId) return;
-
-    try {
-      // Delete old flashcards
-      const { error: deleteError } = await supabase
-        .from("flashcards")
-        .delete()
-        .eq("set_id", trackedSetId);
-
-      if (deleteError) throw deleteError;
-
-      // Insert new flashcards
-      const flashcardsToInsert = lobby!.flashcards.map((card) => ({
-        set_id: trackedSetId,
-        term: card.question,
-        definition: card.answer,
-        trick_terms: card.trickTerms || [],
-        trick_definitions: card.trickDefinitions || [],
-        is_generated: card.isGenerated || false,
-      }));
-
-      const { error: insertError } = await supabase
-        .from("flashcards")
-        .insert(flashcardsToInsert);
-
-      if (insertError) throw insertError;
-
-      // Update local state
-      setIsSaved(true);
-      setRefreshTrigger((prev) => prev + 1);
-    } catch (err) {
-      console.error("Failed to auto update:", err);
-    }
-  };
-
   useEffect(() => {
+    const handleAutoUpdate = async () => {
+      if (!user || !trackedSetId) return;
+
+      try {
+        // Delete old flashcards
+        const { error: deleteError } = await supabase
+          .from("flashcards")
+          .delete()
+          .eq("set_id", trackedSetId);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new flashcards
+        const flashcardsToInsert = lobby!.flashcards.map((card) => ({
+          set_id: trackedSetId,
+          term: card.question,
+          definition: card.answer,
+          trick_terms: card.trickTerms || [],
+          trick_definitions: card.trickDefinitions || [],
+          is_generated: card.isGenerated || false,
+        }));
+
+        const { error: insertError } = await supabase
+          .from("flashcards")
+          .insert(flashcardsToInsert);
+
+        if (insertError) throw insertError;
+
+        // Update local state
+        setIsSaved(true);
+        setRefreshTrigger((prev) => prev + 1);
+      } catch (err) {
+        console.error("Failed to auto update:", err);
+      }
+    };
+
     if (
       prevDistractorStatus.current === "generating" &&
       lobby?.distractorStatus === "ready"
@@ -138,7 +138,7 @@ export default function Lobby() {
       handleAutoUpdate();
     }
     prevDistractorStatus.current = lobby?.distractorStatus;
-  }, [lobby?.distractorStatus]);
+  }, [lobby?.distractorStatus, user, trackedSetId, lobby]);
 
   // Sync trackedSetId with lobby.flashcardID
   useEffect(() => {
@@ -146,6 +146,8 @@ export default function Lobby() {
       setTrackedSetId(lobby.flashcardID);
     }
   }, [lobby?.flashcardID]);
+
+  const prevLobbyIdRef = useRef(lobby?.flashcardID);
 
   // Check if current flashcard set is saved and if it needs update
   useEffect(() => {
@@ -160,6 +162,16 @@ export default function Lobby() {
         return;
       }
 
+      // Prevent flickering during set transition
+      // Only return if lobby ID changed but trackedSetId hasn't synced yet
+      if (
+        lobby?.flashcardID &&
+        lobby.flashcardID !== prevLobbyIdRef.current &&
+        trackedSetId !== lobby.flashcardID
+      ) {
+        return;
+      }
+
       try {
         const { data: setData, error } = await supabase
           .from("flashcard_sets")
@@ -170,32 +182,28 @@ export default function Lobby() {
 
         if (error || !setData) {
           setIsSaved(false);
-        } else {
-          const lobbyHasGenerated = lobby?.flashcards.some(
-            (f) => f.isGenerated,
-          );
-
-          if (!lobbyHasGenerated) {
-            setIsSaved(true);
-          } else {
-            // Lobby has generated content, check if it matches DB
-            const { data: generatedCards } = await supabase
-              .from("flashcards")
-              .select("is_generated")
-              .eq("set_id", trackedSetId)
-              .eq("is_generated", true)
-              .limit(1);
-
-            const dbHasGenerated = generatedCards && generatedCards.length > 0;
-
-            if (lobbyHasGenerated && !dbHasGenerated) {
-              // Mismatch: Lobby has generated content, DB does not
-              setIsSaved(false);
-            } else {
-              setIsSaved(true);
-            }
-          }
+          return;
         }
+
+        const lobbyHasGenerated = lobby?.flashcards.some(
+          (f) => f.isGenerated,
+        );
+
+        if (!lobbyHasGenerated) {
+          setIsSaved(true);
+          return;
+        }
+
+        // Lobby has generated content, check if it matches DB
+        const { data: generatedCards } = await supabase
+          .from("flashcards")
+          .select("is_generated")
+          .eq("set_id", trackedSetId)
+          .eq("is_generated", true)
+          .limit(1);
+
+        const dbHasGenerated = generatedCards && generatedCards.length > 0;
+        setIsSaved(!!dbHasGenerated);
       } catch {
         setIsSaved(false);
       }
@@ -208,7 +216,13 @@ export default function Lobby() {
     user,
     refreshTrigger,
     lobby?.distractorStatus,
+    lobby?.flashcardID,
   ]);
+
+  // Update prevLobbyIdRef after checkSavedStatus
+  useEffect(() => {
+    prevLobbyIdRef.current = lobby?.flashcardID;
+  }, [lobby?.flashcardID]);
 
   // Update page title with lobby code
   useEffect(() => {
