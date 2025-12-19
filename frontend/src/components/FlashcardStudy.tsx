@@ -94,11 +94,11 @@ export function FlashcardStudy({
               {/* Top Card (Front) */}
               <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
                 <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4">
-                  <div className="text-center">
+                  <div className="text-center w-full">
                     <div className="text-sm text-coffee/60 mb-4 font-bold">
                       {safeIndex + 1} of {flashcards.length}
                     </div>
-                    <div className="text-2xl font-bold text-coffee whitespace-pre-wrap wrap-break-word">
+                    <div className="text-2xl font-bold text-coffee whitespace-pre-wrap break-words break-all w-full max-w-full overflow-hidden">
                       {question}
                     </div>
                   </div>
@@ -142,7 +142,7 @@ export function FlashcardStudy({
                       </div>
                     ) : (
                       // Simple answer view
-                      <div className="text-xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-word">
+                      <div className="text-xl font-bold text-coffee text-center whitespace-pre-wrap break-words break-all w-full max-w-full overflow-hidden">
                         {answer}
                       </div>
                     )}
