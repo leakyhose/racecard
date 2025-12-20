@@ -173,13 +173,12 @@ export function Game() {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden w-full">
-      <div className="w-full max-w-3xl mx-auto flex flex-col h-full p-4 pb-4">
+    <div className="absolute inset-0 flex flex-col overflow-y-auto w-full">
+      <div className="w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 pb-4">
         
-        <div className={`shrink-0 transition-all duration-800 ease-in-out ${showResults ? 'h-0' : 'h-6 md:h-12'}`} />
-
-        <div className={`
-            relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
+        <div className="my-auto w-full flex flex-col">
+            <div className={`
+                relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
             ${showResults ? 'h-[200px]' : 'h-[200px] sm:h-[300px] md:h-[450px]'}
         `}>
             <div className={`
@@ -197,12 +196,12 @@ export function Game() {
             </div>
         </div>
 
-        <div className="relative flex-1 w-full min-h-0 mt-8 overflow-hidden">
-             <div className={`
-                absolute inset-0 w-full h-full transition-all duration-500 ease-in-out flex flex-col
+            <div className="grid grid-cols-1 grid-rows-1 w-full mt-8">
+                <div className={`
+                    col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out flex flex-col
                 ${showResults ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0 z-10'}
             `}>
-                <div className={`w-full max-w-2xl mx-auto max-h-full p-2 ${!showResults ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                <div className="w-full max-w-2xl mx-auto p-2">
                     {!hasAnswered ? (
                         currentChoices ? (
                             <div className="grid grid-cols-2 gap-6">
@@ -257,11 +256,11 @@ export function Game() {
                 </div>
              </div>
 
-             <div className={`
-                absolute inset-0 w-full h-full transition-all duration-500 ease-in-out
-                ${showResults ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 translate-y-10 pointer-events-none'}
-            `}>
-                 <div className={`w-full h-full p-2 ${showResults ? 'overflow-y-auto' : 'overflow-hidden'}`}>
+                <div className={`
+                    col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out
+                    ${showResults ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 translate-y-10 pointer-events-none'}
+                `}>
+                    <div className="w-full p-2">
                      {(results || lastResults) && (
                         <div className="flex gap-6 justify-center flex-wrap w-full">
                           {(results || lastResults)?.fastestPlayers && (results || lastResults)!.fastestPlayers.length > 0 ? (
@@ -306,6 +305,7 @@ export function Game() {
              </div>
         </div>
 
+        </div>
       </div>
     </div>
   );
