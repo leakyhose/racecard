@@ -50,6 +50,11 @@ export default function Lobby() {
   const [isDragging, setIsDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
+  // Global tooltip state
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
+  const [tooltipText, setTooltipText] = useState<string | null>(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     e.preventDefault();
@@ -357,7 +362,19 @@ export default function Lobby() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-light-vanilla text-coffee font-executive overflow-hidden">
+    <div className="flex flex-col h-screen bg-light-vanilla text-coffee font-executive overflow-hidden relative">
+      {/* Global Tooltip */}
+      {showTooltip && tooltipText && (
+        <div 
+          className="fixed z-100 pointer-events-none px-2 py-1 bg-coffee text-vanilla text-xs font-bold rounded shadow-lg whitespace-nowrap"
+          style={{
+            left: `${tooltipPos.x + 10}px`,
+            top: `${tooltipPos.y + 10}px`,
+          }}
+        >
+          {tooltipText}
+        </div>
+      )}
       <div className="relative z-20">
         <LobbyHeader
           code={code!}
@@ -374,6 +391,16 @@ export default function Lobby() {
               refreshTrigger={refreshTrigger} 
               autoSelectedSetId={trackedSetId}
               onOpenModal={() => setShowLoadModal(true)}
+              isGenerating={lobby?.distractorStatus === "generating"}
+              onTooltipChange={(show: boolean, text?: string, x?: number, y?: number) => {
+                setShowTooltip(show);
+                if (show && text) {
+                  setTooltipText(text);
+                } else if (!show) {
+                  setTooltipText(null);
+                }
+                if (x !== undefined && y !== undefined) setTooltipPos({ x, y });
+              }}
             />
           </div>
           

@@ -17,9 +17,11 @@ interface LoadFlashcardsProps {
   refreshTrigger?: number;
   autoSelectedSetId?: string | null;
   onOpenModal?: () => void;
+  isGenerating?: boolean;
+  onTooltipChange?: (show: boolean, text?: string, x?: number, y?: number) => void;
 }
 
-export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId, onOpenModal }: LoadFlashcardsProps) {
+export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId, onOpenModal, isGenerating = false, onTooltipChange }: LoadFlashcardsProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "community">("personal");
   const [sets, setSets] = useState<FlashcardSet[]>([]);
@@ -83,7 +85,16 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
     setCurrentlyLoaded(autoSelectedSetId || null);
   }, [autoSelectedSetId]);
 
+  useEffect(() => {
+    if (!isGenerating) {
+      onTooltipChange?.(false);
+    }
+  }, [isGenerating, onTooltipChange]);
+
   const handleLoadSet = async (setId: string) => {
+    if (isGenerating) {
+      return;
+    }
     if (!isLeader) {
       setShakingSetId(setId);
       setTimeout(() => setShakingSetId(null), 500);
@@ -121,7 +132,17 @@ export function LoadFlashcards({ isLeader, refreshTrigger = 0, autoSelectedSetId
   };
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 w-full">
+    <div className="flex flex-col flex-1 min-h-0 w-full relative">
+      {isGenerating && (
+        <div 
+          className="-translate-y-1 absolute inset-0 bg-light-vanilla/60 z-50 cursor-not-allowed pointer-events-auto"
+          onMouseMove={(e) => {
+            onTooltipChange?.(true, "Please wait for distractors to finish", e.clientX, e.clientY);
+          }}
+          onMouseEnter={() => onTooltipChange?.(true, "Please wait for distractors to finish", 0, 0)}
+          onMouseLeave={() => onTooltipChange?.(false)}
+        ></div>
+      )}
       {/* Toggle Switch */}
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
         <label className="relative inline-flex items-center cursor-pointer select-none">
