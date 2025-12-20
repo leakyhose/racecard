@@ -70,7 +70,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   createLobby: (nickname: string) => void;
   joinLobby: (code: string, nickname: string) => void;
-  updateFlashcard: (cards: Flashcard[], name:string, id:string) => void;
+  updateFlashcard: (cards: Flashcard[], name: string, id: string) => void;
   updateSettings: (settings: Settings) => void;
   updateLeader: (nextLeaderId: string) => void;
   startGame: () => void;

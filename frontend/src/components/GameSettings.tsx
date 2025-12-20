@@ -10,8 +10,19 @@ interface GameSettingsProps {
   lobby: Lobby | null;
 }
 
-const CustomCheckbox = ({ checked, onChange, disabled }: { checked: boolean; onChange?: (checked: boolean) => void; disabled: boolean }) => (
-  <label className={`relative inline-block w-4 h-4 border-2 border-coffee rounded ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`} onClick={(e) => e.stopPropagation()}>
+const CustomCheckbox = ({
+  checked,
+  onChange,
+  disabled,
+}: {
+  checked: boolean;
+  onChange?: (checked: boolean) => void;
+  disabled: boolean;
+}) => (
+  <label
+    className={`relative inline-block w-4 h-4 border-2 border-coffee rounded ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+    onClick={(e) => e.stopPropagation()}
+  >
     <input
       type="checkbox"
       className="peer sr-only"
@@ -58,13 +69,19 @@ export function GameSettings({
   };
 
   return (
-    <div className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canEdit ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}>
-      <div 
+    <div
+      className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canEdit ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+    >
+      <div
         className={`flex items-center justify-between ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
-        onClick={() => canEdit && handleChange("shuffle", !currentSettings.shuffle)}
+        onClick={() =>
+          canEdit && handleChange("shuffle", !currentSettings.shuffle)
+        }
       >
-        <label className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-            Shuffle Flashcards
+        <label
+          className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+        >
+          Shuffle Flashcards
         </label>
         <CustomCheckbox
           checked={!!currentSettings.shuffle}
@@ -73,12 +90,17 @@ export function GameSettings({
         />
       </div>
 
-      <div 
+      <div
         className={`flex items-center justify-between ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
-        onClick={() => canEdit && handleChange("fuzzyTolerance", !currentSettings.fuzzyTolerance)}
+        onClick={() =>
+          canEdit &&
+          handleChange("fuzzyTolerance", !currentSettings.fuzzyTolerance)
+        }
       >
-        <label className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-            Fuzzy Tolerance
+        <label
+          className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+        >
+          Fuzzy Tolerance
         </label>
         <CustomCheckbox
           checked={!!currentSettings.fuzzyTolerance}
@@ -88,59 +110,103 @@ export function GameSettings({
       </div>
 
       <div className="flex justify-between items-center py-1">
-         <div className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`} onClick={() => canEdit && handleChange("answerByTerm", !currentSettings.answerByTerm)}>
-            <label className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                Use Definition
-            </label>
-            <CustomCheckbox
-                checked={!currentSettings.answerByTerm}
-                disabled={!canEdit}
-                onChange={() => canEdit && handleChange("answerByTerm", !currentSettings.answerByTerm)}
-            />
-         </div>
+        <div
+          className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
+          onClick={() =>
+            canEdit &&
+            handleChange("answerByTerm", !currentSettings.answerByTerm)
+          }
+        >
+          <label
+            className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+          >
+            Use Definition
+          </label>
+          <CustomCheckbox
+            checked={!currentSettings.answerByTerm}
+            disabled={!canEdit}
+            onChange={() =>
+              canEdit &&
+              handleChange("answerByTerm", !currentSettings.answerByTerm)
+            }
+          />
+        </div>
 
-         <div className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`} onClick={() => canEdit && handleChange("answerByTerm", !currentSettings.answerByTerm)}>
-            <label className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                Use Term
-            </label>
-            <CustomCheckbox
-                checked={!!currentSettings.answerByTerm}
-                disabled={!canEdit}
-                onChange={() => canEdit && handleChange("answerByTerm", !currentSettings.answerByTerm)}
-            />
-         </div>
+        <div
+          className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
+          onClick={() =>
+            canEdit &&
+            handleChange("answerByTerm", !currentSettings.answerByTerm)
+          }
+        >
+          <label
+            className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+          >
+            Use Term
+          </label>
+          <CustomCheckbox
+            checked={!!currentSettings.answerByTerm}
+            disabled={!canEdit}
+            onChange={() =>
+              canEdit &&
+              handleChange("answerByTerm", !currentSettings.answerByTerm)
+            }
+          />
+        </div>
       </div>
 
       <div className="flex justify-between items-center py-1">
-         <div className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`} onClick={() => canEdit && handleChange("multipleChoice", !currentSettings.multipleChoice)}>
-            <label className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                Written
-            </label>
-            <CustomCheckbox
-                checked={!currentSettings.multipleChoice}
-                disabled={!canEdit}
-                onChange={() => canEdit && handleChange("multipleChoice", !currentSettings.multipleChoice)}
-            />
-         </div>
+        <div
+          className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
+          onClick={() =>
+            canEdit &&
+            handleChange("multipleChoice", !currentSettings.multipleChoice)
+          }
+        >
+          <label
+            className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+          >
+            Written
+          </label>
+          <CustomCheckbox
+            checked={!currentSettings.multipleChoice}
+            disabled={!canEdit}
+            onChange={() =>
+              canEdit &&
+              handleChange("multipleChoice", !currentSettings.multipleChoice)
+            }
+          />
+        </div>
 
-         <div className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`} onClick={() => canEdit && handleChange("multipleChoice", !currentSettings.multipleChoice)}>
-            <label className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                Multiple Choice
-            </label>
-            <CustomCheckbox
-                checked={!!currentSettings.multipleChoice}
-                disabled={!canEdit}
-                onChange={() => canEdit && handleChange("multipleChoice", !currentSettings.multipleChoice)}
-            />
-         </div>
+        <div
+          className={`flex items-center gap-2 ${canEdit ? "cursor-pointer" : "pointer-events-none"}`}
+          onClick={() =>
+            canEdit &&
+            handleChange("multipleChoice", !currentSettings.multipleChoice)
+          }
+        >
+          <label
+            className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit ? "cursor-pointer" : "cursor-not-allowed"}`}
+          >
+            Multiple Choice
+          </label>
+          <CustomCheckbox
+            checked={!!currentSettings.multipleChoice}
+            disabled={!canEdit}
+            onChange={() =>
+              canEdit &&
+              handleChange("multipleChoice", !currentSettings.multipleChoice)
+            }
+          />
+        </div>
       </div>
 
       <div className="flex flex-col gap-0.5">
         <div className="flex justify-between items-center">
-            <label className="font-bold text-xs text-coffee">Round Time</label>
-            <span className="font-bold text-coffee text-xs">
-                {Number(currentSettings.roundTime) || 10}s
-            </span>
+          <label className="font-bold text-xs text-coffee">Round Time</label>
+          <span className="font-bold text-coffee text-xs">
+            {Number(currentSettings.roundTime) || 10}s
+          </span>
         </div>
         <input
           type="range"

@@ -60,12 +60,15 @@ export default function Lobby() {
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || !sidebarRef.current) return;
-      
+
       const sidebarRect = sidebarRef.current.getBoundingClientRect();
       const relativeY = e.clientY - sidebarRect.top;
       // MIN/MAX RATIOS (Change 0.2 and 0.8 to set min/max limits)
-      const newRatio = Math.min(Math.max(relativeY / sidebarRect.height, 0.2), 0.8);
-      
+      const newRatio = Math.min(
+        Math.max(relativeY / sidebarRect.height, 0.2),
+        0.8,
+      );
+
       setSplitRatio(newRatio);
     };
 
@@ -74,20 +77,20 @@ export default function Lobby() {
     };
 
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'ns-resize';
-      document.body.style.userSelect = 'none';
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "ns-resize";
+      document.body.style.userSelect = "none";
     } else {
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
     };
   }, [isDragging]);
 
@@ -187,9 +190,7 @@ export default function Lobby() {
           return;
         }
 
-        const lobbyHasGenerated = lobby?.flashcards.some(
-          (f) => f.isGenerated,
-        );
+        const lobbyHasGenerated = lobby?.flashcards.some((f) => f.isGenerated);
 
         if (!lobbyHasGenerated) {
           setIsSaved(true);
@@ -300,7 +301,11 @@ export default function Lobby() {
       setIsTransitioning(true);
     });
 
-    if (studyRef.current && contentWrapperRef.current && scrollContainerRef.current) {
+    if (
+      studyRef.current &&
+      contentWrapperRef.current &&
+      scrollContainerRef.current
+    ) {
       // Lock height to viewport height
       const containerHeight = scrollContainerRef.current.clientHeight;
       studyRef.current.style.height = `${containerHeight}px`;
@@ -362,7 +367,7 @@ export default function Lobby() {
     <div className="flex flex-col h-screen bg-light-vanilla text-coffee font-executive overflow-hidden relative">
       {/* Global Tooltip */}
       {showTooltip && tooltipText && (
-        <div 
+        <div
           className="fixed z-100 pointer-events-none px-2 py-1 bg-coffee text-vanilla text-xs font-bold rounded shadow-lg whitespace-nowrap"
           style={{
             left: `${tooltipPos.x + 10}px`,
@@ -380,16 +385,27 @@ export default function Lobby() {
           lobby={lobby}
         />
       </div>
-            <div className="flex flex-1 min-h-0 border-coffee">
-        <div ref={sidebarRef} className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative">
-          <div style={{ height: `${splitRatio * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]">
-            <LoadFlashcards 
-              isLeader={isLeader} 
-              refreshTrigger={refreshTrigger} 
+      <div className="flex flex-1 min-h-0 border-coffee">
+        <div
+          ref={sidebarRef}
+          className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative"
+        >
+          <div
+            style={{ height: `${splitRatio * 100}%` }}
+            className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
+          >
+            <LoadFlashcards
+              isLeader={isLeader}
+              refreshTrigger={refreshTrigger}
               autoSelectedSetId={trackedSetId}
               onOpenModal={() => setShowLoadModal(true)}
               isGenerating={lobby?.distractorStatus === "generating"}
-              onTooltipChange={(show: boolean, text?: string, x?: number, y?: number) => {
+              onTooltipChange={(
+                show: boolean,
+                text?: string,
+                x?: number,
+                y?: number,
+              ) => {
                 setShowTooltip(show);
                 if (show && text) {
                   setTooltipText(text);
@@ -400,26 +416,44 @@ export default function Lobby() {
               }}
             />
           </div>
-          
-          <div 
+
+          <div
             className={`absolute h-5 flex items-center justify-center cursor-ns-resize z-50 w-full group transition-colors duration-200`}
             style={{ top: `calc(${splitRatio * 100}% - 10px)` }}
             onMouseDown={handleMouseDown}
           >
-             <div className="w-full flex items-center justify-center pointer-events-none px-4">
-                <div className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}></div>
-                <div className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}>
-                    {/* Minimalistic Drag Handle Icon */}
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 15l-6 6-6-6"/>
-                        <path d="M18 9l-6-6-6 6"/>
-                    </svg>
-                </div>
-                <div className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}></div>
-             </div>
+            <div className="w-full flex items-center justify-center pointer-events-none px-4">
+              <div
+                className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
+              ></div>
+              <div
+                className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}
+              >
+                {/* Minimalistic Drag Handle Icon */}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 15l-6 6-6-6" />
+                  <path d="M18 9l-6-6-6 6" />
+                </svg>
+              </div>
+              <div
+                className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
+              ></div>
+            </div>
           </div>
 
-          <div style={{ height: `${(1 - splitRatio) * 100}%` }} className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]">
+          <div
+            style={{ height: `${(1 - splitRatio) * 100}%` }}
+            className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]"
+          >
             <Chat />
           </div>
         </div>
@@ -446,7 +480,7 @@ export default function Lobby() {
                 <div
                   ref={studyRef}
                   className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full"
-                > 
+                >
                   <FlashcardStudy
                     flashcards={lobby.flashcards}
                     flashcardName={lobby.flashcardName}
@@ -477,7 +511,10 @@ export default function Lobby() {
 
               {/* All flashcards section - render when in all mode or transitioning */}
               {(currentSection === "all" || isTransitioning) && (
-                <div ref={allCardsRef} className="bg-light-vanilla w-full pb-20">
+                <div
+                  ref={allCardsRef}
+                  className="bg-light-vanilla w-full pb-20"
+                >
                   <div className="bg-light-vanilla px-4 pt-4">
                     <div className="flex justify-center mb-4">
                       <ArrowButton

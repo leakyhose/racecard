@@ -7,7 +7,12 @@ interface ArrowButtonProps {
   className?: string;
 }
 
-export function ArrowButton({ onClick, direction = "down", disabled, className = "" }: ArrowButtonProps) {
+export function ArrowButton({
+  onClick,
+  direction = "down",
+  disabled,
+  className = "",
+}: ArrowButtonProps) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const handleClick = () => {

@@ -51,7 +51,12 @@ async function generateDistractors(
   let totalTokens = 0;
 
   // Split into batches and process in parallel
-  const batches: { id: string; originalIndex: number; question: string; answer: string }[][] = [];
+  const batches: {
+    id: string;
+    originalIndex: number;
+    question: string;
+    answer: string;
+  }[][] = [];
 
   // Initialize batches
   for (let i = 0; i < Math.ceil(pairs.length / BATCH_SIZE); i++) {
@@ -64,7 +69,7 @@ async function generateDistractors(
     const pair = pairs[i]!;
     batches[batchIndex]!.push({
       id: `c${idInBatch}`,
-      originalIndex: i,  // Store original index
+      originalIndex: i, // Store original index
       question: pair.question,
       answer: pair.answer,
     });
@@ -77,7 +82,10 @@ async function generateDistractors(
   const batchPromises = batches.map(async (initialBatch, batchIndex) => {
     const MAX_RETRIES = 3;
     let currentBatch = initialBatch;
-    const batchResults = new Map<string, { distractors: string[]; originalIndex: number }>();
+    const batchResults = new Map<
+      string,
+      { distractors: string[]; originalIndex: number }
+    >();
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
@@ -122,17 +130,22 @@ async function generateDistractors(
         }
 
         // Match IDs from LLM response to requested IDs
-        const nextBatch: { id: string; originalIndex: number; question: string; answer: string }[] = [];
+        const nextBatch: {
+          id: string;
+          originalIndex: number;
+          question: string;
+          answer: string;
+        }[] = [];
 
         // Process each item in current batch
         for (const item of currentBatch) {
           const llmDistractors = parsed.distractors[item.id];
-          
+
           if (llmDistractors) {
             // LLM provided distractors for this ID - store with original index
-            batchResults.set(item.id, { 
+            batchResults.set(item.id, {
               distractors: llmDistractors,
-              originalIndex: item.originalIndex
+              originalIndex: item.originalIndex,
             });
           } else {
             // LLM didn't provide distractors, add to next batch
@@ -144,13 +157,13 @@ async function generateDistractors(
         if (nextBatch.length === 0) {
           completedBatches++;
           onProgress?.(completedBatches, totalBatches);
-          
+
           // Store results in the global map by original index
           for (const item of initialBatch) {
             const result = batchResults.get(item.id)!;
             resultsByIndex.set(result.originalIndex, result.distractors);
           }
-          
+
           return {
             usage: {
               promptTokens: totalPromptTokens,
@@ -187,7 +200,7 @@ async function generateDistractors(
   });
 
   const results = await Promise.all(batchPromises);
-  
+
   // Accumulate token usage
   results.forEach((result) => {
     totalPromptTokens += result.usage.promptTokens;

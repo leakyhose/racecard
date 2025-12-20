@@ -8,7 +8,7 @@
   --color-thistle: #e7c8dd;
   --color-light-vanilla: #eee1b3;
   --color-mint: #b8e6b8;
-} 
+}
 
 /* @theme {
   --color-vanilla: #f3eaca;
@@ -194,7 +194,8 @@
 }
 
 @keyframes arrow-click-before {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(50deg);
   }
   50% {
@@ -203,7 +204,8 @@
 }
 
 @keyframes arrow-click-after {
-  0%, 100% {
+  0%,
+  100% {
     transform: rotate(-50deg);
   }
   50% {

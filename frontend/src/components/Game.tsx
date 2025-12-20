@@ -75,7 +75,6 @@ export function Game() {
       setIsCorrect(null);
     };
 
-
     const handleEndFlashcard = (flashcardEnd: FlashcardEnd) => {
       setResults(flashcardEnd);
       setLastAnswer(flashcardEnd.Answer);
@@ -175,136 +174,168 @@ export function Game() {
   return (
     <div className="absolute inset-0 flex flex-col overflow-y-auto overflow-x-hidden w-full">
       <div className="w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 pb-4">
-        
         <div className="my-auto w-full flex flex-col">
-            <div className={`
+          <div
+            className={`
                 relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
-            ${showResults ? 'h-[200px]' : 'h-[200px] sm:h-[300px] md:h-[450px]'}
-        `}>
-            <div className={`
+            ${showResults ? "h-[200px]" : "h-[200px] sm:h-[300px] md:h-[450px]"}
+        `}
+          >
+            <div
+              className={`
                 relative w-full h-full transition-transform duration-800 transform-3d rounded-[20px]
-                ${showResults ? 'transform-[rotateY(180deg)]' : 'transform-[rotateY(0deg)]'}
-            `}>
-                <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)]">
-                    <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">{currentQuestion}</div>
+                ${showResults ? "transform-[rotateY(180deg)]" : "transform-[rotateY(0deg)]"}
+            `}
+            >
+              <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)]">
+                <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
+                  {currentQuestion}
                 </div>
+              </div>
 
-                <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)]">
-                     <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">Correct Answer</div>
-                     <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">{results?.Answer || lastAnswer}</div>
+              <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)]">
+                <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">
+                  Correct Answer
                 </div>
+                <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
+                  {results?.Answer || lastAnswer}
+                </div>
+              </div>
             </div>
-        </div>
+          </div>
 
-            <div className="grid grid-cols-1 grid-rows-1 w-full pt-8 overflow-hidden">
-                <div className={`
+          <div className="grid grid-cols-1 grid-rows-1 w-full pt-8 overflow-hidden">
+            <div
+              className={`
                     col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out flex flex-col
-                ${showResults ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0 z-10'}
-            `}>
-                <div className="w-full max-w-2xl mx-auto p-2">
-                    {!hasAnswered ? (
-                        currentChoices ? (
-                            <div className="grid grid-cols-2 gap-6">
-                              {currentChoices.map((choice, index) => (
-                                <button
-                                  key={index}
-                                  onClick={() => handleChoiceClick(choice)}
-                                  className="group relative w-full rounded-xl bg-coffee border-none p-0 cursor-pointer outline-none"
-                                >
-                                  <span className="w-full h-full rounded-xl border-[0.2rem] border-coffee p-4 text-center -translate-y-0.5 transition-transform duration-100 ease-out group-hover:-translate-y-1 group-active:translate-y-0 flex flex-col justify-center min-h-20 bg-vanilla text-coffee font-bold">
-                                    <span className={`w-full line-clamp-2 wrap-break-word ${getChoiceFontSize(choice)}`}>
-                                      {choice}
-                                    </span>
-                                  </span>
-                                </button>
-                              ))}
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubmitAnswer} className="relative group rounded-xl bg-coffee">
-                              <input
-                                ref={gameInputRef}
-                                type="text"
-                                autoComplete="off"
-                                value={answer}
-                                onChange={(e) => setAnswer(e.target.value)}
-                                placeholder="TYPE YOUR ANSWER..."
-                                className="w-full px-6 py-4 text-2xl bg-vanilla border-2 border-coffee rounded-xl text-coffee placeholder:text-coffee/30 -translate-y-1 transition-transform duration-100 ease-out hover:-translate-y-2 focus:-translate-y-2 font-bold outline-none focus:shadow-[inset_0_0_0_1px_var(--color-terracotta)] text-center"
-                                autoFocus
-                                disabled={showResults}
-                              />
-                            </form>
-                        )
+                ${showResults ? "opacity-0 translate-y-10 pointer-events-none" : "opacity-100 translate-y-0 z-10"}
+            `}
+            >
+              <div className="w-full max-w-2xl mx-auto p-2">
+                {!hasAnswered ? (
+                  currentChoices ? (
+                    <div className="grid grid-cols-2 gap-6">
+                      {currentChoices.map((choice, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleChoiceClick(choice)}
+                          className="group relative w-full rounded-xl bg-coffee border-none p-0 cursor-pointer outline-none"
+                        >
+                          <span className="w-full h-full rounded-xl border-[0.2rem] border-coffee p-4 text-center -translate-y-0.5 transition-transform duration-100 ease-out group-hover:-translate-y-1 group-active:translate-y-0 flex flex-col justify-center min-h-20 bg-vanilla text-coffee font-bold">
+                            <span
+                              className={`w-full line-clamp-2 wrap-break-word ${getChoiceFontSize(choice)}`}
+                            >
+                              {choice}
+                            </span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={handleSubmitAnswer}
+                      className="relative group rounded-xl bg-coffee"
+                    >
+                      <input
+                        ref={gameInputRef}
+                        type="text"
+                        autoComplete="off"
+                        value={answer}
+                        onChange={(e) => setAnswer(e.target.value)}
+                        placeholder="TYPE YOUR ANSWER..."
+                        className="w-full px-6 py-4 text-2xl bg-vanilla border-2 border-coffee rounded-xl text-coffee placeholder:text-coffee/30 -translate-y-1 transition-transform duration-100 ease-out hover:-translate-y-2 focus:-translate-y-2 font-bold outline-none focus:shadow-[inset_0_0_0_1px_var(--color-terracotta)] text-center"
+                        autoFocus
+                        disabled={showResults}
+                      />
+                    </form>
+                  )
+                ) : (
+                  <div className="text-center p-6">
+                    {isCorrect === true ? (
+                      <div>
+                        <div className="text-4xl mb-2 text-coffee">✓</div>
+                        <div className="text-xl font-bold text-coffee tracking-widest">
+                          Correct
+                        </div>
+                      </div>
                     ) : (
-                        <div className="text-center p-6">
-                            {isCorrect === true ? (
-                              <div>
-                                <div className="text-4xl mb-2 text-coffee">✓</div>
-                                <div className="text-xl font-bold text-coffee tracking-widest">Correct</div>
-                              </div>
-                            ) : (
-                              <div>
-                                <div className="text-4xl mb-2 text-terracotta">✗</div>
-                                <div className="text-xl font-bold text-terracotta tracking-widest">Incorrect</div>
-                              </div>
-                            )}
-                            {answerTime !== null && (
-                              <div className="text-lg text-coffee mt-2 font-bold">{(answerTime / 1000).toFixed(3)}s</div>
-                            )}
-                            <div className="text-coffee/50 mt-2 font-bold text-sm">Please wait for current flashcard to end...</div>
+                      <div>
+                        <div className="text-4xl mb-2 text-terracotta">✗</div>
+                        <div className="text-xl font-bold text-terracotta tracking-widest">
+                          Incorrect
                         </div>
+                      </div>
                     )}
-                </div>
-             </div>
+                    {answerTime !== null && (
+                      <div className="text-lg text-coffee mt-2 font-bold">
+                        {(answerTime / 1000).toFixed(3)}s
+                      </div>
+                    )}
+                    <div className="text-coffee/50 mt-2 font-bold text-sm">
+                      Please wait for current flashcard to end...
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-                <div className={`
+            <div
+              className={`
                     col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out
-                    ${showResults ? 'opacity-100 translate-y-0 z-10' : 'opacity-0 translate-y-10 pointer-events-none'}
-                `}>
-                    <div className="w-full p-2">
-                     {(results || lastResults) && (
-                        <div className="flex gap-6 justify-center flex-wrap w-full">
-                          {(results || lastResults)?.fastestPlayers && (results || lastResults)!.fastestPlayers.length > 0 ? (
-                            <>
-                              <MiniLeaderboard
-                                leaderboardName="Fastest Answers"
-                                playerList={(results || lastResults)!.fastestPlayers.map((player) => ({
-                                  player: player.player,
-                                  value: `${(Number(player.time) / 1000).toFixed(3)}s`,
-                                }))}
-                              />
-                              {(results || lastResults)!.wrongAnswers.length > 0 && (
-                                <MiniLeaderboard
-                                  leaderboardName="Wrong Answers"
-                                  playerList={(results || lastResults)!.wrongAnswers.map((player) => ({
-                                    player: player.player,
-                                    value: player.answer,
-                                  }))}
-                                />
-                              )}
-                            </>
-                          ) : (
-                            <div className="flex flex-col items-center w-full gap-6">
-                                <div className="text-center p-6">
-                                    <div className="text-4xl text-coffee/50 mb-2">✗</div>
-                                    <div className="text-xl font-bold text-coffee tracking-widest">No Correct Answers</div>
-                                </div>
-                                {(results || lastResults)?.wrongAnswers && (results || lastResults)!.wrongAnswers.length > 0 && (
-                                    <MiniLeaderboard
-                                        leaderboardName="Wrong Answers"
-                                        playerList={(results || lastResults)!.wrongAnswers.map((player) => ({
-                                        player: player.player,
-                                        value: player.answer,
-                                        }))}
-                                    />
-                                )}
-                            </div>
-                          )}
+                    ${showResults ? "opacity-100 translate-y-0 z-10" : "opacity-0 translate-y-10 pointer-events-none"}
+                `}
+            >
+              <div className="w-full p-2">
+                {(results || lastResults) && (
+                  <div className="flex gap-6 justify-center flex-wrap w-full">
+                    {(results || lastResults)?.fastestPlayers &&
+                    (results || lastResults)!.fastestPlayers.length > 0 ? (
+                      <>
+                        <MiniLeaderboard
+                          leaderboardName="Fastest Answers"
+                          playerList={(results ||
+                            lastResults)!.fastestPlayers.map((player) => ({
+                            player: player.player,
+                            value: `${(Number(player.time) / 1000).toFixed(3)}s`,
+                          }))}
+                        />
+                        {(results || lastResults)!.wrongAnswers.length > 0 && (
+                          <MiniLeaderboard
+                            leaderboardName="Wrong Answers"
+                            playerList={(results ||
+                              lastResults)!.wrongAnswers.map((player) => ({
+                              player: player.player,
+                              value: player.answer,
+                            }))}
+                          />
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center w-full gap-6">
+                        <div className="text-center p-6">
+                          <div className="text-4xl text-coffee/50 mb-2">✗</div>
+                          <div className="text-xl font-bold text-coffee tracking-widest">
+                            No Correct Answers
+                          </div>
                         </div>
-                     )}
-                </div>
-             </div>
-        </div>
-
+                        {(results || lastResults)?.wrongAnswers &&
+                          (results || lastResults)!.wrongAnswers.length > 0 && (
+                            <MiniLeaderboard
+                              leaderboardName="Wrong Answers"
+                              playerList={(results ||
+                                lastResults)!.wrongAnswers.map((player) => ({
+                                player: player.player,
+                                value: player.answer,
+                              }))}
+                            />
+                          )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
