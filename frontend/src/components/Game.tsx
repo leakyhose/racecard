@@ -29,6 +29,25 @@ export function Game() {
   const [lastResults, setLastResults] = useState<FlashcardEnd | null>(null);
   const isLeader = lobby?.leader === socket.id;
   const gameInputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isResultsVisible, setIsResultsVisible] = useState(false);
+
+  // Handle delayed visibility for results to prevent scrolling issues
+  useEffect(() => {
+    if (showResults) {
+      setIsResultsVisible(true);
+    } else {
+      const timer = setTimeout(() => setIsResultsVisible(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showResults]);
+
+  // Reset scroll position when new question arrives
+  useEffect(() => {
+    if (currentQuestion && scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [currentQuestion]);
 
   // Focus management
   useEffect(() => {
@@ -144,6 +163,7 @@ export function Game() {
         <MiniLeaderboard
           leaderboardName="Final Scores"
           playerList={leaderboardData}
+          maxHeight="max-h-[50vh]"
         />
         <div>
           {isLeader ? (
@@ -172,9 +192,13 @@ export function Game() {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-y-auto overflow-x-hidden w-full">
-      <div className="w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 pb-4">
-        <div className="my-auto w-full flex flex-col">
+    <div ref={scrollRef} className="absolute inset-0 flex flex-col overflow-hidden w-full">
+      <div
+        className={`w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 justify-center ${currentChoices ? "pb-4" : "pb-20"}`}
+      >
+        <div
+          className={`my-auto w-full flex flex-col ${currentChoices ? "gap-6" : "gap-14"}`}
+        >
           <div
             className={`
                 relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
@@ -204,14 +228,14 @@ export function Game() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 grid-rows-1 w-full pt-8 overflow-hidden">
+          <div className="relative grid grid-cols-1 grid-rows-1 w-full">
             <div
               className={`
                     col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out flex flex-col
-                ${showResults ? "opacity-0 translate-y-10 pointer-events-none" : "opacity-100 translate-y-0 z-10"}
+                ${showResults ? "opacity-0 pointer-events-none" : "opacity-100 z-10"}
             `}
             >
-              <div className="w-full max-w-2xl mx-auto p-2">
+              <div className="w-full max-w-2xl mx-auto p-6">
                 {!hasAnswered ? (
                   currentChoices ? (
                     <div className="grid grid-cols-2 gap-6">
@@ -242,8 +266,8 @@ export function Game() {
                         autoComplete="off"
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="TYPE YOUR ANSWER..."
-                        className="w-full px-6 py-4 text-2xl bg-vanilla border-2 border-coffee rounded-xl text-coffee placeholder:text-coffee/30 -translate-y-1 transition-transform duration-100 ease-out hover:-translate-y-2 focus:-translate-y-2 font-bold outline-none focus:shadow-[inset_0_0_0_1px_var(--color-terracotta)] text-center"
+                        placeholder="Answer here..."
+                        className="w-full px-6 py-4 text-2xl bg-vanilla border-2 border-coffee rounded-xl text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out hover:-translate-y-1 focus:-translate-y-1 font-bold outline-none focus:shadow-[inset_0_0_0_1px_var(--color-terracotta)] text-center"
                         autoFocus
                         disabled={showResults}
                       />
@@ -281,11 +305,12 @@ export function Game() {
 
             <div
               className={`
-                    col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out
-                    ${showResults ? "opacity-100 translate-y-0 z-10" : "opacity-0 translate-y-10 pointer-events-none"}
+                    col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out absolute top-0 left-0
+                    ${showResults ? "opacity-100 z-20" : "opacity-0 pointer-events-none"}
+                    ${isResultsVisible ? "" : "hidden"}
                 `}
             >
-              <div className="w-full p-2">
+              <div className="w-full p-6">
                 {(results || lastResults) && (
                   <div className="flex gap-6 justify-center flex-wrap w-full">
                     {(results || lastResults)?.fastestPlayers &&
@@ -312,23 +337,24 @@ export function Game() {
                       </>
                     ) : (
                       <div className="flex flex-col items-center w-full gap-6">
-                        <div className="text-center p-6">
-                          <div className="text-4xl text-coffee/50 mb-2">✗</div>
-                          <div className="text-xl font-bold text-coffee tracking-widest">
-                            No Correct Answers
-                          </div>
-                        </div>
                         {(results || lastResults)?.wrongAnswers &&
-                          (results || lastResults)!.wrongAnswers.length > 0 && (
-                            <MiniLeaderboard
-                              leaderboardName="Wrong Answers"
-                              playerList={(results ||
-                                lastResults)!.wrongAnswers.map((player) => ({
-                                player: player.player,
-                                value: player.answer,
-                              }))}
-                            />
-                          )}
+                        (results || lastResults)!.wrongAnswers.length > 0 ? (
+                          <MiniLeaderboard
+                            leaderboardName="Wrong Answers"
+                            playerList={(results ||
+                              lastResults)!.wrongAnswers.map((player) => ({
+                              player: player.player,
+                              value: player.answer,
+                            }))}
+                          />
+                        ) : (
+                          <div className="text-center p-6">
+                            <div className="text-4xl text-coffee/50 mb-2">✗</div>
+                            <div className="text-xl font-bold text-coffee tracking-widest">
+                              No Correct Answers
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
