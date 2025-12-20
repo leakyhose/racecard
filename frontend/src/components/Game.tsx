@@ -173,7 +173,7 @@ export function Game() {
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-y-auto w-full">
+    <div className="absolute inset-0 flex flex-col overflow-y-auto overflow-x-hidden w-full">
       <div className="w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 pb-4">
         
         <div className="my-auto w-full flex flex-col">
@@ -196,7 +196,7 @@ export function Game() {
             </div>
         </div>
 
-            <div className="grid grid-cols-1 grid-rows-1 w-full mt-8">
+            <div className="grid grid-cols-1 grid-rows-1 w-full pt-8 overflow-hidden">
                 <div className={`
                     col-start-1 row-start-1 w-full transition-all duration-500 ease-in-out flex flex-col
                 ${showResults ? 'opacity-0 translate-y-10 pointer-events-none' : 'opacity-100 translate-y-0 z-10'}
