@@ -176,6 +176,8 @@ export function Game() {
     <div className="absolute inset-0 flex flex-col overflow-hidden w-full">
       <div className="w-full max-w-3xl mx-auto flex flex-col h-full p-4 pb-4">
         
+        <div className={`shrink-0 transition-all duration-800 ease-in-out ${showResults ? 'h-0' : 'h-6 md:h-12'}`} />
+
         <div className={`
             relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
             ${showResults ? 'h-[200px]' : 'h-[200px] sm:h-[300px] md:h-[450px]'}
