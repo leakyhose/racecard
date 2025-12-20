@@ -185,12 +185,12 @@ return (
                 ${showResults ? 'transform-[rotateY(180deg)]' : 'transform-[rotateY(0deg)]'}
             `}>
                 <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)]">
-                    <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap break-words break-all w-full max-w-full overflow-hidden">{currentQuestion}</div>
+                    <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-word break-all w-full max-w-full overflow-hidden">{currentQuestion}</div>
                 </div>
 
                 <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)]">
                      <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">Correct Answer</div>
-                     <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap break-words break-all w-full max-w-full overflow-hidden">{results?.Answer || lastAnswer}</div>
+                     <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-word break-all w-full max-w-full overflow-hidden">{results?.Answer || lastAnswer}</div>
                 </div>
             </div>
         </div>
