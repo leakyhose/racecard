@@ -173,32 +173,32 @@ export function Game() {
   }
 
 return (
-    <div className="flex flex-col h-full items-center justify-start pt-15 relative overflow-hidden w-full">
-      <div className="relative w-full max-w-3xl flex flex-col items-center justify-center">
+    <div className="flex flex-col h-full items-center justify-start pt-4 md:pt-15 relative overflow-y-auto overflow-x-hidden w-full">
+      <div className="relative w-full max-w-3xl flex flex-col items-center justify-center min-h-fit pb-8">
         
         <div className={`
             relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px]
-            ${showResults ? 'h-[200px]' : 'h-[300px] md:h-[450px] translate-y-0'}
+            ${showResults ? 'h-[200px]' : 'h-[200px] sm:h-[300px] md:h-[450px] translate-y-0'}
         `}>
             <div className={`
                 relative w-full h-full transition-transform duration-800 transform-3d rounded-[20px]
                 ${showResults ? 'transform-[rotateY(180deg)]' : 'transform-[rotateY(0deg)]'}
             `}>
                 <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)]">
-                    <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-word break-all w-full max-w-full overflow-hidden">{currentQuestion}</div>
+                    <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">{currentQuestion}</div>
                 </div>
 
                 <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)]">
                      <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">Correct Answer</div>
-                     <div className="text-3xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-word break-all w-full max-w-full overflow-hidden">{results?.Answer || lastAnswer}</div>
+                     <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">{results?.Answer || lastAnswer}</div>
                 </div>
             </div>
         </div>
 
         <div className={`
-            absolute top-0 w-full flex justify-center z-10 transition-all duration-600
+            relative w-full flex justify-center z-10 transition-all duration-400
             ${showResults ? 'ease-in' : 'ease-out'}
-            ${!showResults ? 'translate-y-[330px] md:translate-y-[480px] opacity-100' : 'translate-y-[1000px] opacity-0'}
+            ${showResults ? '-mt-[250px] opacity-0 pointer-events-none' : 'mt-0 opacity-100'}
         `}>
              <div className="w-full max-w-2xl">
                 {!hasAnswered ? (

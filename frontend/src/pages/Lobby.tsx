@@ -7,8 +7,7 @@ import { useLobbyData } from "../hooks/useLobbyData";
 import { useAuth } from "../hooks/useAuth";
 import { Players } from "../components/Players";
 import { Chat } from "../components/Chat";
-import { UploadFlashcard } from "../components/UploadFlashcard";
-import { ChangeSettings } from "../components/ChangeSettings";
+import { GameSettings } from "../components/GameSettings";
 import { LobbyHeader } from "../components/LobbyHeader";
 import { FlashcardPreview } from "../components/FlashcardPreview";
 import { FlashcardStudy } from "../components/FlashcardStudy";
@@ -32,8 +31,6 @@ export default function Lobby() {
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [trackedSetId, setTrackedSetId] = useState<string | null>(null);
-  const [loadHovered, setLoadHovered] = useState(false);
-  const [loadShake, setLoadShake] = useState(false);
   const [saveShake, setSaveShake] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [currentSection, setCurrentSection] = useState<"study" | "all">(
@@ -515,43 +512,14 @@ export default function Lobby() {
             leader={lobby.leader}
           />
 
-          {isLeader && lobby.status === "waiting" && (
-            <div className="p-4 border-2 border-coffee flex flex-col gap-4 bg-vanilla">
-              <div className="flex flex-row justify-center gap-15">
-                <ChangeSettings
-                  isLeader={isLeader}
-                  currentSettings={lobby.settings}
-                />
-                <UploadFlashcard isLeader={isLeader} lobby={lobby} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => {
-                    if (user) {
-                      setShowLoadModal(true);
-                    } else {
-                      setLoadShake(true);
-                      setTimeout(() => setLoadShake(false), 500);
-                    }
-                  }}
-                  onMouseEnter={() => setLoadHovered(true)}
-                  onMouseLeave={() => setLoadHovered(false)}
-                  className={`w-full border-2 border-coffee px-2 py-3 font-bold transition-colors ${
-                    loadShake
-                      ? "animate-shake bg-red-500 text-vanilla"
-                      : "bg-powder text-coffee hover:bg-coffee hover:text-vanilla"
-                  }`}
-                >
-                  {!user && loadHovered ? "Log In to Load" : "Load Flashcards"}
-                </button>
-                {lobby.flashcards.length > 0 && (
-                  <div className="flex justify-center">
-                    {/* Save button moved to FlashcardStudy */}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          <div className="p-4 flex flex-col gap-4">
+            <GameSettings
+              isLeader={isLeader}
+              currentSettings={lobby.settings}
+              onUpdate={(settings) => socket.emit("updateSettings", settings)}
+              lobby={lobby}
+            />
+          </div>
         </div>
       </div>
 

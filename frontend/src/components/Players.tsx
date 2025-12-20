@@ -25,7 +25,12 @@ export function Players({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-light-vanilla">
-      <ul className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar-track]:bg-vanilla [&::-webkit-scrollbar-thumb]:bg-coffee [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-vanilla">
+      <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
+        <div className="h-4 flex items-center">
+          <span className="text-sm font-bold text-coffee">Players</span>
+        </div>
+      </div>
+      <ul className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 p-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40">
         {players.map((player) => {
           const hasMiniStatus = isOngoing && player.miniStatus !== null;
 
