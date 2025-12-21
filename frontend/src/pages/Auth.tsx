@@ -6,6 +6,7 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,9 +33,15 @@ export default function Auth() {
     setSuccess("");
     setLoading(true);
 
+    if (!isLogin && !username.trim()) {
+      setError("Username is required");
+      setLoading(false);
+      return;
+    }
+
     const { error } = isLogin
       ? await signIn(email, password)
-      : await signUp(email, password);
+      : await signUp(email, password, username);
 
     setLoading(false);
 
@@ -64,6 +71,23 @@ export default function Auth() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {!isLogin && (
+            <div>
+              <label className="block text-coffee font-bold mb-2 text-sm">
+                Username
+              </label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                maxLength={15}
+                className="w-full px-4 py-3 border-2 border-coffee bg-white/50 text-coffee focus:outline-none focus:bg-white font-bold"
+                placeholder="Username"
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-coffee font-bold mb-2 text-sm">
               Email

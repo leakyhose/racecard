@@ -8,6 +8,7 @@ interface LoadFlashcardsModalProps {
   isOpen: boolean;
   onClose: () => void;
   refreshTrigger?: number;
+  onDeleteSuccess?: () => void;
 }
 
 interface FlashcardSet {
@@ -15,13 +16,14 @@ interface FlashcardSet {
   name: string;
   created_at: string;
   flashcard_count: number;
-  has_generated: boolean; // Whether at least one card has MC options
+  has_generated: boolean;
 }
 
 export function LoadFlashcardsModal({
   isOpen,
   onClose,
   refreshTrigger = 0,
+  onDeleteSuccess,
 }: LoadFlashcardsModalProps) {
   const { user } = useAuth();
   const [sets, setSets] = useState<FlashcardSet[]>([]);
@@ -148,6 +150,7 @@ export function LoadFlashcardsModal({
 
       // Refresh the list
       fetchSets();
+      onDeleteSuccess?.();
     } catch {
       setError("Failed to delete flashcard set");
     }

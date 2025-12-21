@@ -28,6 +28,13 @@ export default function Lobby() {
   );
   const [nicknameInput, setNicknameInput] = useState("");
   const [isLeader, setIsLeader] = useState(false);
+
+  useEffect(() => {
+    if (user?.user_metadata?.username && !nickname) {
+      setNicknameInput(user.user_metadata.username);
+    }
+  }, [user, nickname]);
+
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -601,6 +608,7 @@ export default function Lobby() {
         isOpen={showLoadModal}
         onClose={() => setShowLoadModal(false)}
         refreshTrigger={refreshTrigger}
+        onDeleteSuccess={() => setRefreshTrigger((prev) => prev + 1)}
       />
     </div>
   );

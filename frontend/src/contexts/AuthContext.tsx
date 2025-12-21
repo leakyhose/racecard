@@ -10,12 +10,14 @@ export interface AuthContextType {
   signUp: (
     email: string,
     password: string,
+    username: string,
   ) => Promise<{ error: AuthError | null }>;
   signIn: (
     email: string,
     password: string,
   ) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
+  updateProfile: (data: { username?: string }) => Promise<{ error: AuthError | null }>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -50,11 +52,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, username: string) => {
+    // Check if username exists
+    const { data: existingUser } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("username", username)
+      .maybeSingle();
+
+    if (existingUser) {
+      return {
+        error: {
+          message: "Username already taken",
+          name: "AuthError",
+          status: 400,
+        } as AuthError,
+      };
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: "https://www.racecard.io/confirm" },
+      options: {
+        emailRedirectTo: "https://www.racecard.io/confirm",
+        data: { username },
+      },
     });
     return { error };
   };
@@ -71,9 +93,59 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await supabase.auth.signOut();
   };
 
+  const updateProfile = async (data: { username?: string }) => {
+    if (data.username) {
+      // Check if username exists
+      const { data: existingUser } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("username", data.username)
+        .maybeSingle();
+
+      if (existingUser) {
+        return {
+          error: {
+            message: "Username already taken",
+            name: "AuthError",
+            status: 400,
+          } as AuthError,
+        };
+      }
+
+      // Update profiles table
+      if (user) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({ id: user.id, username: data.username });
+
+        if (profileError) {
+          return {
+            error: {
+              message: profileError.message,
+              name: "PostgrestError",
+              status: 500,
+            } as AuthError,
+          };
+        }
+      }
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      data: data,
+    });
+    // Manually update local state if successful to reflect changes immediately
+    if (!error && user) {
+      const {
+        data: { user: updatedUser },
+      } = await supabase.auth.getUser();
+      setUser(updatedUser);
+    }
+    return { error };
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signUp, signIn, signOut }}
+      value={{ user, session, loading, signUp, signIn, signOut, updateProfile }}
     >
       {children}
     </AuthContext.Provider>

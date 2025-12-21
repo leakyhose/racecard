@@ -11,7 +11,9 @@ export function UserStatusHeader() {
     <div>
       {user ? (
         <div className="flex gap-4 items-center">
-          <div className="text-xs">Logged in on {user.email}</div>
+          <div className="text-xs">
+            Logged in on {user.user_metadata.username || user.email}
+          </div>
           <button
             onClick={signOut}
             className="border-2 border-coffee bg-terracotta text-vanilla px-3 py-1 hover:bg-coffee transition-colors text-xs font-bold"
