@@ -401,7 +401,6 @@ io.on("connection", (socket) => {
     io.to(result.lobby.code).emit("lobbyUpdated", result.lobby);
 
     // Check if all players have answered correctly
-    const roundInfo = activeRounds.get(result.lobby.code);
     if (
       roundInfo &&
       !roundInfo.roundEnded &&
