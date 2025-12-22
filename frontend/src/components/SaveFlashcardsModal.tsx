@@ -129,7 +129,11 @@ export function SaveFlashcardsModal({
           Save Flashcard Set
         </h2>
 
-        {success ? (
+        {saving ? (
+          <div className="flex-1 flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : success ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">✓</div>
             <div className="text-xl text-coffee">Flashcards Saved!</div>

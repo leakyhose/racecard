@@ -84,155 +84,206 @@ export function GameSettings({
     <div
       className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canEdit ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
     >
-      <div
-        className={`flex items-center justify-between ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60 blur-[0.5px]" : ""}`}
-        onClick={() =>
-          canEdit && !isLocked("shuffle") && handleChange("shuffle", !currentSettings.shuffle)
-        }
-      >
-        <label
-          className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"}`}
-        >
-          Shuffle Flashcards
-        </label>
-        <CustomCheckbox
-          checked={!!currentSettings.shuffle}
-          onChange={(checked) => handleChange("shuffle", checked)}
-          disabled={!canEdit || isLocked("shuffle")}
-        />
-      </div>
-
-      {!isMCLockedOn && (
-        <div
-          className={`flex items-center justify-between ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60 blur-[0.5px]" : ""}`}
-          onClick={() =>
-            canEdit && !isLocked("fuzzyTolerance") &&
-            handleChange("fuzzyTolerance", !currentSettings.fuzzyTolerance)
-          }
-        >
-          <label
-            className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"}`}
+      {lobby && lobby.flashcards.length > 0 && (
+        <>
+          <div
+            className={`flex items-center justify-between ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60 blur-[0.5px]" : ""}`}
+            onClick={() =>
+              canEdit &&
+              !isLocked("shuffle") &&
+              handleChange("shuffle", !currentSettings.shuffle)
+            }
           >
-            Fuzzy Tolerance
-          </label>
-          <CustomCheckbox
-            checked={!!currentSettings.fuzzyTolerance}
-            onChange={(checked) => handleChange("fuzzyTolerance", checked)}
-            disabled={!canEdit || isLocked("fuzzyTolerance")}
-          />
-        </div>
+            <label
+              className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"}`}
+            >
+              Shuffle Flashcards
+            </label>
+            <CustomCheckbox
+              checked={!!currentSettings.shuffle}
+              onChange={(checked) => handleChange("shuffle", checked)}
+              disabled={!canEdit || isLocked("shuffle")}
+            />
+          </div>
+
+          {!isMCLockedOn && (
+            <div
+              className={`flex items-center justify-between ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60 blur-[0.5px]" : ""}`}
+              onClick={() =>
+                canEdit &&
+                !isLocked("fuzzyTolerance") &&
+                handleChange("fuzzyTolerance", !currentSettings.fuzzyTolerance)
+              }
+            >
+              <label
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              >
+                Fuzzy Tolerance
+              </label>
+              <CustomCheckbox
+                checked={!!currentSettings.fuzzyTolerance}
+                onChange={(checked) => handleChange("fuzzyTolerance", checked)}
+                disabled={!canEdit || isLocked("fuzzyTolerance")}
+              />
+            </div>
+          )}
+
+          <div
+            className={`flex justify-between items-center py-1 ${isLocked("answerByTerm") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+          >
+            <div
+              className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
+              onClick={() =>
+                canEdit &&
+                !isLocked("answerByTerm") &&
+                handleChange("answerByTerm", !currentSettings.answerByTerm)
+              }
+            >
+              <label
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              >
+                Use Definition
+              </label>
+              <CustomCheckbox
+                checked={!currentSettings.answerByTerm}
+                disabled={!canEdit || isLocked("answerByTerm")}
+                onChange={() =>
+                  canEdit &&
+                  !isLocked("answerByTerm") &&
+                  handleChange("answerByTerm", !currentSettings.answerByTerm)
+                }
+              />
+            </div>
+
+            <div
+              className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
+              onClick={() =>
+                canEdit &&
+                !isLocked("answerByTerm") &&
+                handleChange("answerByTerm", !currentSettings.answerByTerm)
+              }
+            >
+              <label
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              >
+                Use Term
+              </label>
+              <CustomCheckbox
+                checked={!!currentSettings.answerByTerm}
+                disabled={!canEdit || isLocked("answerByTerm")}
+                onChange={() =>
+                  canEdit &&
+                  !isLocked("answerByTerm") &&
+                  handleChange("answerByTerm", !currentSettings.answerByTerm)
+                }
+              />
+            </div>
+          </div>
+
+          <div
+            className={`flex justify-between items-center py-1 ${isLocked("multipleChoice") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+          >
+            <div
+              className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
+              onClick={() =>
+                canEdit &&
+                !isLocked("multipleChoice") &&
+                handleChange("multipleChoice", !currentSettings.multipleChoice)
+              }
+            >
+              <label
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              >
+                Written
+              </label>
+              <CustomCheckbox
+                checked={!currentSettings.multipleChoice}
+                disabled={!canEdit || isLocked("multipleChoice")}
+                onChange={() =>
+                  canEdit &&
+                  !isLocked("multipleChoice") &&
+                  handleChange("multipleChoice", !currentSettings.multipleChoice)
+                }
+              />
+            </div>
+
+            <div
+              className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
+              onClick={() =>
+                canEdit &&
+                !isLocked("multipleChoice") &&
+                handleChange("multipleChoice", !currentSettings.multipleChoice)
+              }
+            >
+              <label
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              >
+                Multiple Choice
+              </label>
+              <CustomCheckbox
+                checked={!!currentSettings.multipleChoice}
+                disabled={!canEdit || isLocked("multipleChoice")}
+                onChange={() =>
+                  canEdit &&
+                  !isLocked("multipleChoice") &&
+                  handleChange("multipleChoice", !currentSettings.multipleChoice)
+                }
+              />
+            </div>
+          </div>
+
+          <div
+            className={`flex flex-col gap-0.5 ${isLocked("roundTime") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+          >
+            <div className="flex justify-between items-center">
+              <label className="font-bold text-xs text-coffee">
+                Round Time
+              </label>
+              <span className="font-bold text-coffee text-xs">
+                {Number(currentSettings.roundTime) || 10}s
+              </span>
+            </div>
+            <input
+              type="range"
+              min={3}
+              max={20}
+              step={1}
+              value={Number(currentSettings.roundTime) || 10}
+              onChange={(e) =>
+                handleChange("roundTime", Number(e.target.value))
+              }
+              disabled={!canEdit || isLocked("roundTime")}
+              className="w-full h-1.5 bg-coffee/20 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-coffee [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+
+          <div className="flex flex-col gap-0.5">
+            <div className="flex justify-between items-center">
+              <label className="font-bold text-xs text-coffee">
+                Points to Win
+              </label>
+              <span className="font-bold text-coffee text-xs">
+                {currentSettings.pointsToWin ===
+                Math.max(10, (lobby?.flashcards.length || 0) * 5)
+                  ? "Play all flashcards"
+                  : currentSettings.pointsToWin || 100}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={10}
+              max={Math.max(10, (lobby?.flashcards.length || 0) * 5)}
+              step={10}
+              value={currentSettings.pointsToWin || 100}
+              onChange={(e) =>
+                handleChange("pointsToWin", Number(e.target.value))
+              }
+              disabled={!canEdit}
+              className="w-full h-1.5 bg-coffee/20 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-coffee [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+          </div>
+        </>
       )}
-
-      <div className={`flex justify-between items-center py-1 ${isLocked("answerByTerm") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}>
-        <div
-          className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
-          onClick={() =>
-            canEdit && !isLocked("answerByTerm") &&
-            handleChange("answerByTerm", !currentSettings.answerByTerm)
-          }
-        >
-          <label
-            className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
-          >
-            Use Definition
-          </label>
-          <CustomCheckbox
-            checked={!currentSettings.answerByTerm}
-            disabled={!canEdit || isLocked("answerByTerm")}
-            onChange={() =>
-              canEdit && !isLocked("answerByTerm") &&
-              handleChange("answerByTerm", !currentSettings.answerByTerm)
-            }
-          />
-        </div>
-
-        <div
-          className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
-          onClick={() =>
-            canEdit && !isLocked("answerByTerm") &&
-            handleChange("answerByTerm", !currentSettings.answerByTerm)
-          }
-        >
-          <label
-            className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
-          >
-            Use Term
-          </label>
-          <CustomCheckbox
-            checked={!!currentSettings.answerByTerm}
-            disabled={!canEdit || isLocked("answerByTerm")}
-            onChange={() =>
-              canEdit && !isLocked("answerByTerm") &&
-              handleChange("answerByTerm", !currentSettings.answerByTerm)
-            }
-          />
-        </div>
-      </div>
-
-      <div className={`flex justify-between items-center py-1 ${isLocked("multipleChoice") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}>
-        <div
-          className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
-          onClick={() =>
-            canEdit && !isLocked("multipleChoice") &&
-            handleChange("multipleChoice", !currentSettings.multipleChoice)
-          }
-        >
-          <label
-            className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
-          >
-            Written
-          </label>
-          <CustomCheckbox
-            checked={!currentSettings.multipleChoice}
-            disabled={!canEdit || isLocked("multipleChoice")}
-            onChange={() =>
-              canEdit && !isLocked("multipleChoice") &&
-              handleChange("multipleChoice", !currentSettings.multipleChoice)
-            }
-          />
-        </div>
-
-        <div
-          className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
-          onClick={() =>
-            canEdit && !isLocked("multipleChoice") &&
-            handleChange("multipleChoice", !currentSettings.multipleChoice)
-          }
-        >
-          <label
-            className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
-          >
-            Multiple Choice
-          </label>
-          <CustomCheckbox
-            checked={!!currentSettings.multipleChoice}
-            disabled={!canEdit || isLocked("multipleChoice")}
-            onChange={() =>
-              canEdit && !isLocked("multipleChoice") &&
-              handleChange("multipleChoice", !currentSettings.multipleChoice)
-            }
-          />
-        </div>
-      </div>
-
-      <div className={`flex flex-col gap-0.5 ${isLocked("roundTime") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}>
-        <div className="flex justify-between items-center">
-          <label className="font-bold text-xs text-coffee">Round Time</label>
-          <span className="font-bold text-coffee text-xs">
-            {Number(currentSettings.roundTime) || 10}s
-          </span>
-        </div>
-        <input
-          type="range"
-          min={3}
-          max={20}
-          step={1}
-          value={Number(currentSettings.roundTime) || 10}
-          onChange={(e) => handleChange("roundTime", Number(e.target.value))}
-          disabled={!canEdit || isLocked("roundTime")}
-          className="w-full h-1.5 bg-coffee/20 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-coffee [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-      </div>
 
       {canEdit && (
         <>

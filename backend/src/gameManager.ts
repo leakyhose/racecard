@@ -1,5 +1,9 @@
 import type { Gamestate } from "@shared/types.js";
-import { getLobbyBySocket, getLobbyByCode } from "./lobbyManager.js";
+import {
+  getLobbyBySocket,
+  getLobbyByCode,
+  resetPlayerStats,
+} from "./lobbyManager.js";
 import { generateResponse } from "./generateDistractors.js";
 
 import { shuffle, swap } from "./util.js";
@@ -314,4 +318,5 @@ export function advanceToNextFlashcard(
 export function endGame(lobbyCode: string) {
   codeToGamestate.delete(lobbyCode);
   cleanupDistractorStatus(lobbyCode);
+  resetPlayerStats(lobbyCode);
 }

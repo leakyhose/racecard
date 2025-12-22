@@ -45,6 +45,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
       answerByTerm: false,
       multipleChoice: true,
       roundTime: 10,
+      pointsToWin: 100,
     }, // DEFAULT SETTINGS HERE WHEN CREATING LOBBY
     leader: hostID,
     endGameVotes: [],
@@ -69,6 +70,32 @@ export function updateFlashcard(
   lobby.flashcards = flashcards;
   lobby.flashcardName = setName == " " ? "Unnamed Set" : setName;
   lobby.flashcardID = setID == " " ? "UNNAMED" : setID;
+  
+  // Update pointsToWin default
+  const maxPoints = 5 * flashcards.length;
+  lobby.settings.pointsToWin = Math.min(100, maxPoints);
+  if (lobby.settings.pointsToWin < 10) lobby.settings.pointsToWin = 10; // Ensure min 10
+
+  resetPlayerStats(lobby.code);
+  return lobby;
+}
+
+// Resets player stats in a lobby
+export function resetPlayerStats(code: string) {
+  const lobby = lobbies.get(code);
+  if (!lobby) return;
+
+  lobby.players.forEach((player) => {
+    player.score = 0;
+    player.wins = 0;
+    player.miniStatus = null;
+    player.answerTimes = [];
+    player.totalAnswers = 0;
+    player.correctAnswers = 0;
+    delete player.isCorrect;
+  });
+
+  lobby.endGameVotes = [];
   return lobby;
 }
 

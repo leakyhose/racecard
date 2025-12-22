@@ -26,6 +26,7 @@ export interface Settings {
   answerByTerm: boolean;
   multipleChoice: boolean;
   roundTime: number; // Round duration in seconds (3-20)
+  pointsToWin: number; // Points needed to win (10 - 5*flashcards.length)
 }
 
 export type GameStatus = "waiting" | "ongoing" | "finished" | "starting";

@@ -333,6 +333,27 @@ io.on("connection", (socket) => {
 
             // Wait 5 seconds to show results
             setLobbyTimeout(lobbyCode, () => {
+              // Check for winner based on points
+              const currentLobby = getLobbyByCode(lobbyCode);
+              const pointsToWin = currentLobby?.settings.pointsToWin || 100;
+              const winner = currentLobby?.players.find(
+                (p) => p.score >= pointsToWin,
+              );
+
+              if (winner) {
+                const finalLobby = getLobbyByCode(lobbyCode);
+                if (finalLobby) {
+                  finalLobby.status = "finished";
+                  if (finalLobby.players[0]) {
+                    finalLobby.players[0].wins += 1;
+                  }
+                  finalLobby.players = sortPlayersByMetric(finalLobby);
+                  io.to(lobbyCode).emit("lobbyUpdated", finalLobby);
+                  endGame(lobbyCode);
+                }
+                return;
+              }
+
               const nextQuestionData = advanceToNextFlashcard(lobbyCode);
 
               if (nextQuestionData) {
@@ -400,17 +421,22 @@ io.on("connection", (socket) => {
     result.lobby.players = sortPlayersByMetric(result.lobby);
     io.to(result.lobby.code).emit("lobbyUpdated", result.lobby);
 
-    // Check if all players have answered correctly
+    // Check if all players have answered correctly or someone won
+    const pointsToWin = result.lobby.settings.pointsToWin || 100;
+    const someoneWon = result.lobby.players.some((p) => p.score >= pointsToWin);
+
     if (
       roundInfo &&
       !roundInfo.roundEnded &&
-      allPlayersAnsweredCorrectly(result.lobby.code)
+      (allPlayersAnsweredCorrectly(result.lobby.code) || someoneWon)
     ) {
       const elapsedTime = Date.now() - roundInfo.roundStartTime;
-      const ROUND_DURATION = 10000;
+      const ROUND_DURATION = (result.lobby.settings.roundTime || 10) * 1000;
       const MIN_DELAY_AFTER_ALL_ANSWERED = 1000;
       const timeUntilEnd = ROUND_DURATION - elapsedTime;
-      const delay = Math.min(timeUntilEnd, MIN_DELAY_AFTER_ALL_ANSWERED);
+      const delay = someoneWon
+        ? 500
+        : Math.min(timeUntilEnd, MIN_DELAY_AFTER_ALL_ANSWERED);
 
       setLobbyTimeout(result.lobby.code, () => roundInfo.endRound(), delay);
     }

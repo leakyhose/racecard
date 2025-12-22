@@ -50,7 +50,7 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderP
       <div className="flex flex-row gap-0">
         <div
           onClick={handleCopyCode}
-          className="font-bold shrink-0 w-60 text-2xl tracking-widest group cursor-pointer inline-block relative"
+          className="font-bold shrink-0 w-70 text-2xl tracking-widest group cursor-pointer inline-block relative"
         >
           RaceCard.io/{code}
           <div className="leading-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-coffee text-vanilla font-bold tracking-wider text-xs pointer-events-none">
