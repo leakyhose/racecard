@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
@@ -36,6 +36,7 @@ export function LoadFlashcardsModal({
   const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [publishingSet, setPublishingSet] = useState<FlashcardSet | null>(null);
+  const mouseDownOnBackdrop = useRef(false);
 
   const fetchSets = async () => {
     if (!user) return;
@@ -169,7 +170,17 @@ export function LoadFlashcardsModal({
   return (
     <div
       className="fixed inset-0 bg-coffee/50 flex items-center justify-center z-50"
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          mouseDownOnBackdrop.current = true;
+        }
+      }}
+      onClick={(e) => {
+        if (mouseDownOnBackdrop.current && e.target === e.currentTarget) {
+          onClose();
+        }
+        mouseDownOnBackdrop.current = false;
+      }}
     >
       <div
         className="bg-vanilla border-3 border-coffee p-8 max-w-2xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] max-h-[80vh] flex flex-col"

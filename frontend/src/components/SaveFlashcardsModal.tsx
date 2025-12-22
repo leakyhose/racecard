@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
@@ -26,6 +26,7 @@ export function SaveFlashcardsModal({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const mouseDownOnBackdrop = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -119,7 +120,17 @@ export function SaveFlashcardsModal({
   return (
     <div
       className="fixed inset-0 bg-coffee/50 flex items-center justify-center z-50"
-      onClick={handleClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          mouseDownOnBackdrop.current = true;
+        }
+      }}
+      onClick={(e) => {
+        if (mouseDownOnBackdrop.current && e.target === e.currentTarget) {
+          handleClose();
+        }
+        mouseDownOnBackdrop.current = false;
+      }}
     >
       <div
         className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536]"

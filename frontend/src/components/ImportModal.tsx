@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import {
   parseFlashcards,
@@ -23,6 +23,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   const [customTermSep, setCustomTermSep] = useState("");
   const [customRowSep, setCustomRowSep] = useState("");
   const [inputText, setInputText] = useState("");
+  const mouseDownOnBackdrop = useRef(false);
 
   if (!isOpen) return null;
 
@@ -57,7 +58,17 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-50 bg-coffee/50 backdrop-blur-sm"
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          mouseDownOnBackdrop.current = true;
+        }
+      }}
+      onClick={(e) => {
+        if (mouseDownOnBackdrop.current && e.target === e.currentTarget) {
+          onClose();
+        }
+        mouseDownOnBackdrop.current = false;
+      }}
     >
       <div
         className="border-3 border-coffee bg-vanilla p-6 max-w-5xl w-full h-[80vh] flex flex-col shadow-[8px_8px_0px_0px_#644536]"
