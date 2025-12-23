@@ -31,6 +31,12 @@ export function PublicFlashcardsModal({
   const [error, setError] = useState("");
   const mouseDownOnBackdrop = useRef(false);
 
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const PAGE_SIZE = 20;
+
   const handleLoad = async (setId: string) => {
     const loadedSet = await loadPublicSet(setId);
     if (loadedSet) {
@@ -39,11 +45,18 @@ export function PublicFlashcardsModal({
     }
   };
 
-  const fetchSets = async () => {
-    setLoading(true);
+  const fetchSets = async (pageToFetch: number, isInitial: boolean = false) => {
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     setError("");
 
     try {
+      const from = pageToFetch * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       // Fetch public flashcard sets
       const { data: setsData, error: fetchError } = await supabase
         .from("public_flashcard_sets")
@@ -51,9 +64,13 @@ export function PublicFlashcardsModal({
           "id, name, description, created_at, updated_at, plays, user_id, username",
         )
         .order("plays", { ascending: false })
-        .limit(10);
+        .range(from, to);
 
       if (fetchError) throw fetchError;
+
+      if (setsData.length < PAGE_SIZE) {
+        setHasMore(false);
+      }
 
       // Get flashcard counts for each set
       const setsWithCounts = await Promise.all(
@@ -81,20 +98,41 @@ export function PublicFlashcardsModal({
         }),
       );
 
-      setSets(setsWithCounts);
+      if (isInitial) {
+        setSets(setsWithCounts);
+      } else {
+        setSets((prev) => [...prev, ...setsWithCounts]);
+      }
     } catch (err) {
       console.error(err);
       setError("Failed to load public flashcard sets");
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
     if (isOpen) {
-      fetchSets();
+      setPage(0);
+      setHasMore(true);
+      fetchSets(0, true);
     }
   }, [isOpen]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (
+      scrollHeight - scrollTop <= clientHeight + 50 &&
+      !loading &&
+      !isLoadingMore &&
+      hasMore
+    ) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchSets(nextPage, false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -114,7 +152,7 @@ export function PublicFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-2xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] max-h-[80vh] flex flex-col"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-6">
@@ -137,15 +175,20 @@ export function PublicFlashcardsModal({
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto mb-6 space-y-3">
-            {sets.map((set) => (
-              <div
-                key={set.id}
-                className="border-2 border-coffee p-4 bg-vanilla hover:bg-light-vanilla transition-colors cursor-default"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
+          <div
+            className="flex-1 overflow-y-auto mb-6 pr-2"
+            onScroll={handleScroll}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              {sets.map((set) => (
+                <div
+                  key={set.id}
+                  className="border-2 border-coffee p-4 bg-vanilla hover:bg-light-vanilla transition-colors cursor-default flex flex-col h-full"
+                >
+                  <div className="flex-1 min-w-0 mb-4">
                     <div className="font-bold text-lg truncate">
+                      {set.user_id ===
+                        "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && "⭐ "}
                       {set.name}
                     </div>
                     <div className="text-sm text-coffee/70 font-bold mb-4">
@@ -159,17 +202,22 @@ export function PublicFlashcardsModal({
                       Updated {new Date(set.updated_at).toLocaleDateString()}
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0 items-center">
+                  <div className="flex gap-2 shrink-0 items-center mt-auto">
                     <button
                       onClick={() => handleLoad(set.id)}
-                      className="border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                      className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
                     >
                       Load
                     </button>
                   </div>
                 </div>
+              ))}
+            </div>
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-6 h-6 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
               </div>
-            ))}
+            )}
           </div>
         )}
 

@@ -38,21 +38,39 @@ export function LoadFlashcardsModal({
   const [publishingSet, setPublishingSet] = useState<FlashcardSet | null>(null);
   const mouseDownOnBackdrop = useRef(false);
 
-  const fetchSets = async () => {
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const PAGE_SIZE = 20;
+
+  const fetchSets = async (pageToFetch: number, isInitial: boolean = false) => {
     if (!user) return;
 
-    setLoading(true);
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
     setError("");
 
     try {
+      const from = pageToFetch * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       // Fetch flashcard sets with count
       const { data, error: fetchError } = await supabase
         .from("flashcard_sets")
         .select("id, name, created_at")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (fetchError) throw fetchError;
+
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false);
+      }
 
       // Get flashcard counts for each set
       const setsWithCounts = await Promise.all(
@@ -79,20 +97,41 @@ export function LoadFlashcardsModal({
         }),
       );
 
-      setSets(setsWithCounts);
+      if (isInitial) {
+        setSets(setsWithCounts);
+      } else {
+        setSets((prev) => [...prev, ...setsWithCounts]);
+      }
     } catch {
       setError("Failed to load flashcard sets");
     } finally {
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
     if (isOpen && user) {
-      fetchSets();
+      setPage(0);
+      setHasMore(true);
+      fetchSets(0, true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, user, refreshTrigger]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (
+      scrollHeight - scrollTop <= clientHeight + 50 &&
+      !loading &&
+      !isLoadingMore &&
+      hasMore
+    ) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchSets(nextPage, false);
+    }
+  };
 
   const handleLoadSet = async (setId: string, setName: string) => {
     setLoadingSetId(setId);
@@ -158,7 +197,9 @@ export function LoadFlashcardsModal({
       if (deleteSetError) throw deleteSetError;
 
       // Refresh the list
-      fetchSets();
+      setPage(0);
+      setHasMore(true);
+      fetchSets(0, true);
       onDeleteSuccess?.();
     } catch {
       setError("Failed to delete flashcard set");
@@ -183,7 +224,7 @@ export function LoadFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-2xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] max-h-[80vh] flex flex-col"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] max-h-[80vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-6">
@@ -201,19 +242,21 @@ export function LoadFlashcardsModal({
         ) : sets.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12 text-coffee/70">
             <div className="text-center">
-              <div className="text-4xl mb-4">📚</div>
-              <div>No saved flashcard sets yet</div>
+              <div>No saved flashcards</div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto mb-6 space-y-3">
-            {sets.map((set) => (
-              <div
-                key={set.id}
-                className="border-2 border-coffee p-4 bg-vanilla hover:bg-light-vanilla transition-colors"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
+          <div
+            className="flex-1 overflow-y-auto mb-6 pr-2"
+            onScroll={handleScroll}
+          >
+            <div className="grid grid-cols-2 gap-4">
+              {sets.map((set) => (
+                <div
+                  key={set.id}
+                  className="border-2 border-coffee p-4 bg-vanilla hover:bg-light-vanilla transition-colors flex flex-col h-full"
+                >
+                  <div className="flex-1 min-w-0 mb-4">
                     <div className="font-bold text-lg mb-1 truncate">
                       {set.name}
                     </div>
@@ -232,32 +275,37 @@ export function LoadFlashcardsModal({
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="flex gap-2 shrink-0 mt-auto">
                     <button
                       onClick={() => setPublishingSet(set)}
                       disabled={loadingSetId !== null}
-                      className="border-2 border-coffee bg-mint text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-2 border-coffee bg-mint text-coffee px-2 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Publish
                     </button>
                     <button
                       onClick={() => handleLoadSet(set.id, set.name)}
                       disabled={loadingSetId !== null}
-                      className="border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-2 border-coffee bg-powder text-coffee px-2 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loadingSetId === set.id ? "Loading..." : "Load"}
+                      {loadingSetId === set.id ? "..." : "Load"}
                     </button>
                     <button
                       onClick={() => handleDelete(set.id, set.name)}
                       disabled={loadingSetId !== null}
-                      className="border-2 border-coffee bg-terracotta text-vanilla px-4 py-2 hover:bg-coffee transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-2 border-coffee bg-terracotta text-vanilla px-2 py-2 hover:bg-coffee transition-colors text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Delete
                     </button>
                   </div>
                 </div>
+              ))}
+            </div>
+            {isLoadingMore && (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-6 h-6 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
               </div>
-            ))}
+            )}
           </div>
         )}
 

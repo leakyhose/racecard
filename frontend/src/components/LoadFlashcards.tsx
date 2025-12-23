@@ -12,6 +12,7 @@ interface FlashcardSet {
   flashcard_count: number;
   has_generated: boolean;
   plays?: number;
+  user_id?: string;
 }
 
 interface LoadFlashcardsProps {
@@ -84,7 +85,7 @@ export function LoadFlashcards({
           // Fetch public sets
           const result = await supabase
             .from("public_flashcard_sets")
-            .select("id, name, created_at, plays")
+            .select("id, name, created_at, plays, user_id")
             .order("plays", { ascending: false })
             .limit(10);
             
@@ -330,6 +331,10 @@ export function LoadFlashcards({
                       <div className="flex flex-col w-full">
                         <div className="w-full">
                           <h3 className="truncate font-bold text-sm transition-colors">
+                            {activeTab === "community" &&
+                              set.user_id ===
+                                "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" &&
+                              "⭐ "}
                             {set.name}
                           </h3>
                         </div>
