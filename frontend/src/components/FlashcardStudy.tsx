@@ -128,8 +128,8 @@ export function FlashcardStudy({
                             ✓ {answer}
                           </div>
                           {(answerByTerm
-                            ? currentCard.trickDefinitions
-                            : currentCard.trickTerms
+                            ? currentCard.trickTerms
+                            : currentCard.trickDefinitions
                           )?.map((trick, idx) => (
                             <div
                               key={idx}

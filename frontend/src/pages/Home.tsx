@@ -7,14 +7,12 @@ import { useAuth } from "../hooks/useAuth";
 export default function Home() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut, updateProfile } = useAuth();
+  const { user, signOut } = useAuth();
   const [notFound, setNotFound] = useState(false);
   const [nickname, setNickname] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [creatingLobby, setCreatingLobby] = useState(false);
   const [joiningLobby, setJoiningLobby] = useState(false);
-  const [newUsername, setNewUsername] = useState("");
-  const [updatingProfile, setUpdatingProfile] = useState(false);
 
   useEffect(() => {
     document.title = "RaceCard";
@@ -32,16 +30,6 @@ export default function Home() {
       setNickname(user.user_metadata.username);
     }
   }, [user]);
-
-  const handleUpdateProfile = async () => {
-    if (!newUsername.trim()) return;
-    setUpdatingProfile(true);
-    const { error } = await updateProfile({ username: newUsername.trim() });
-    setUpdatingProfile(false);
-    if (error) {
-      alert("Failed to update username: " + error.message);
-    }
-  };
 
   const handleCreateLobby = () => {
     setCreatingLobby(true);
@@ -147,36 +135,6 @@ export default function Home() {
           >
             Sign In / Sign Up
           </button>
-        </div>
-      )}
-
-      {user && !user.user_metadata?.username && (
-        <div className="fixed inset-0 bg-coffee/50 flex items-center justify-center z-50">
-          <div className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536]">
-            <h2 className="text-2xl font-bold text-coffee mb-4">
-              Set Username
-            </h2>
-            <p className="text-coffee/70 mb-6">
-              Please set a username to continue. This will be displayed in
-              lobbies.
-            </p>
-            <div className="flex gap-2">
-              <input
-                className="flex-1 border-2 border-coffee bg-white/50 p-3 focus:outline-none focus:bg-white font-bold"
-                placeholder="Username"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-                maxLength={15}
-              />
-              <button
-                onClick={handleUpdateProfile}
-                disabled={updatingProfile || !newUsername.trim()}
-                className="border-2 border-coffee bg-terracotta text-vanilla px-6 py-3 font-bold hover:bg-coffee transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {updatingProfile ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

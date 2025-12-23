@@ -180,8 +180,8 @@ export function getCurrentQuestion(
     // answerByTerm: show term, need definition distractors (trickDefinitions)
     // answerByDefinition: show definition, need term distractors (trickTerms)
     const distractors = answerByTerm
-      ? currentFlashcard.trickDefinitions
-      : currentFlashcard.trickTerms;
+      ? currentFlashcard.trickTerms
+      : currentFlashcard.trickDefinitions;
 
     if (distractors && distractors.length === 3) {
       choices = shuffle([correctAnswer, ...distractors]);

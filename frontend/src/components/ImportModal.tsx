@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import {
   parseFlashcards,
+  parseAdvancedFlashcards,
   type TermDefinitionSeparator,
   type RowSeparator,
 } from "../utils/flashcardUtils";
@@ -17,6 +18,7 @@ interface ImportModalProps {
 
 export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   const { user } = useAuth();
+  const [mode, setMode] = useState<"simple" | "advanced">("simple");
   const [termSeparator, setTermSeparator] =
     useState<TermDefinitionSeparator>("tab");
   const [rowSeparator, setRowSeparator] = useState<RowSeparator>("newline");
@@ -28,12 +30,23 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
   if (!isOpen) return null;
 
   const handleImport = () => {
-    const flashcards = parseFlashcards(inputText, {
-      termDefinitionSeparator: termSeparator,
-      rowSeparator: rowSeparator,
-      customTermSeparator: customTermSep,
-      customRowSeparator: customRowSep,
-    });
+    let flashcards: Flashcard[] = [];
+
+    if (mode === "simple") {
+      flashcards = parseFlashcards(inputText, {
+        termDefinitionSeparator: termSeparator,
+        rowSeparator: rowSeparator,
+        customTermSeparator: customTermSep,
+        customRowSeparator: customRowSep,
+      });
+    } else {
+      flashcards = parseAdvancedFlashcards(inputText, {
+        termDefinitionSeparator: termSeparator,
+        rowSeparator: rowSeparator,
+        customTermSeparator: customTermSep,
+        customRowSeparator: customRowSep,
+      });
+    }
 
     if (flashcards.length === 0) {
       alert("No valid flashcards found. Check your formatting.");
@@ -95,41 +108,52 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         </div>
 
         <div className="flex flex-1 gap-8 overflow-hidden text-coffee">
-          {/* Left Column */}
-          <div className="w-3/7 border-r-3 border-coffee pr-6 overflow-y-auto">
-            <h3 className="font-bold text-lg mb-4">
-              How to Import From Quizlet
-            </h3>
-            <div className="space-y-4 text-sm font-bold">
-              <div>
-                <p className="mb-8">
-                  1. Make sure that the set you want to import is{" "}
-                  <span className="font-bold">in your own library</span>. If it
-                  isn't, click the "Make a copy" then "Create".
-                </p>
-                <img
-                  src={step1Image}
-                  alt="Step 1: Make a copy"
-                  className="w-full border-2 border-coffee mb-4"
-                />
+          {/* Left Column - Only in Simple Mode */}
+          {mode === "simple" && (
+            <div className="w-3/7 border-r-3 border-coffee pr-6 overflow-y-auto">
+              <h3 className="font-bold text-lg mb-4">
+                How to Import From Quizlet
+              </h3>
+              <div className="space-y-4 text-sm font-bold">
+                <div>
+                  <p className="mb-3">
+                    1. Download{" "}
+                    <a
+                      href="https://chromewebstore.google.com/detail/quizlet-exporter-export-f/lkoaedeomnobdibjfdfggjhoiiabpgkl"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-terracotta hover:text-coffee transition-colors"
+                    >
+                      Quizlet Exporter
+                    </a>{" "}
+                    from Chrome Web Store
+                  </p>
+                  <img
+                    src={step1Image}
+                    alt="Step 1: Make a copy"
+                    className="w-full border-2 border-coffee mb-2"
+                  />
+                </div>
+                <div>
+                  <p className="mb-3">
+                    2. Click on Quizlet Exporter extension while viewing a
+                    Quizlet flashcard set.
+                  </p>
+                  <img
+                    src={step2Image}
+                    alt="Step 2: Export flashcards"
+                    className="w-full border-2 border-coffee mb-4"
+                  />
+                </div>
+                <p>3. Click copy and paste it here!</p>
               </div>
-              <div>
-                <p className="mb-8">
-                  2. Click the three dot menu button the flashcard set, then
-                  click "Export".
-                </p>
-                <img
-                  src={step2Image}
-                  alt="Step 2: Export flashcards"
-                  className="w-full border-2 border-coffee mb-4"
-                />
-              </div>
-              <p>3. Copy the text over and import!</p>
             </div>
-          </div>
+          )}
 
-          {/* Right Column */}
-          <div className="w-4/7 flex flex-col overflow-hidden">
+          {/* Right Column / Full Width */}
+          <div
+            className={`${mode === "simple" ? "w-4/7" : "w-full"} flex flex-col overflow-hidden`}
+          >
             <div className="flex gap-8 mb-6 shrink-0">
               <div>
                 <h3 className="font-bold mb-2">Between term and definition</h3>
@@ -211,14 +235,67 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   </label>
                 </div>
               </div>
+
+              {/* Advanced Mode Instructions */}
+              {mode === "advanced" && (
+                <div className="flex-1 flex flex-col justify-center text-sm font-bold text-coffee">
+                  <p className="mb-2">
+                    Each row MUST have 5 values separated by your chosen
+                    separator:
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 mb-2">
+                    <li>Question</li>
+                    <li>Correct Answer</li>
+                    <li>Wrong Answer 1</li>
+                    <li>Wrong Answer 2</li>
+                    <li>Wrong Answer 3</li>
+                  </ul>
+                  <p className="mb-0">
+                    If these are not satisfied, you will not be allowed to import.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center mb-2">
+              <button
+                onClick={() =>
+                  setMode(mode === "simple" ? "advanced" : "simple")
+                }
+                className="text-xs font-bold text-coffee hover:text-coffee underline decoration-2 underline-offset-2 transition-colors"
+              >
+                {mode === "simple"
+                  ? "Add multiple choice too (advanced)"
+                  : "Input only term and definition"}
+              </button>
             </div>
 
             <div className="flex-1 flex flex-col min-h-0">
               <textarea
                 className="flex-1 border-2 border-coffee bg-white/50 p-3 resize-none font-mono text-sm focus:outline-none focus:bg-white text-coffee placeholder-coffee/50"
-                placeholder="Paste copied text here..."
+                placeholder={
+                  mode === "simple"
+                    ? "Paste copied text here..."
+                    : "Question\tAnswer\tWrong1\tWrong2\tWrong3"
+                }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Tab") {
+                    e.preventDefault();
+                    const target = e.currentTarget;
+                    const start = target.selectionStart;
+                    const end = target.selectionEnd;
+                    const newValue =
+                      inputText.substring(0, start) +
+                      "\t" +
+                      inputText.substring(end);
+                    setInputText(newValue);
+                    setTimeout(() => {
+                      target.selectionStart = target.selectionEnd = start + 1;
+                    }, 0);
+                  }
+                }}
               />
             </div>
 

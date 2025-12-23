@@ -40,7 +40,7 @@ export function FlashcardPreview({
                     <div className="p-2 border border-coffee bg-mint/30 text-sm text-center">
                       ✓ {flashcard.question}
                     </div>
-                    {flashcard.trickDefinitions?.map((trick, idx) => (
+                    {flashcard.trickTerms?.map((trick, idx) => (
                       <div
                         key={idx}
                         className="p-2 border border-coffee bg-vanilla text-sm text-center"
@@ -54,7 +54,7 @@ export function FlashcardPreview({
                     <div className="p-2 border border-coffee bg-mint/30 text-sm text-center">
                       ✓ {flashcard.answer}
                     </div>
-                    {flashcard.trickTerms?.map((trick, idx) => (
+                    {flashcard.trickDefinitions?.map((trick, idx) => (
                       <div
                         key={idx}
                         className="p-2 border border-coffee bg-vanilla text-sm text-center"
