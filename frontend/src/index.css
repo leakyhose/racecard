@@ -212,3 +212,118 @@
     transform: rotate(-58deg);
   }
 }
+
+/* Tab Button Styles */
+.tab-btn {
+  --primary-color: var(--color-coffee);
+  --hovered-color: var(--color-coffee);
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  font-weight: 700;
+  font-size: 0.875rem;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--primary-color);
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.tab-btn.active {
+  opacity: 1;
+}
+
+.tab-btn:hover {
+  opacity: 1;
+}
+
+.tab-btn p {
+  margin: 0;
+  position: relative;
+  color: var(--primary-color);
+}
+
+/* Underline effect */
+.tab-btn p::after {
+  position: absolute;
+  content: "";
+  width: 0;
+  left: 0;
+  bottom: -4px;
+  background: var(--hovered-color);
+  height: 2px;
+  transition: 0.3s ease-out;
+}
+
+.tab-btn:hover p::after {
+  width: 100%;
+}
+
+.tab-btn.active p::after {
+  width: 100%;
+}
+
+/* Text fill effect */
+.tab-btn p::before {
+  position: absolute;
+  content: attr(data-text);
+  width: 0%;
+  inset: 0;
+  color: var(--hovered-color);
+  overflow: hidden;
+  transition: 0.3s ease-out;
+  white-space: nowrap;
+}
+
+.tab-btn:hover p::before {
+  width: 100%;
+}
+
+.tab-btn.active p::before {
+  width: 100%;
+}
+
+/* Arrow styles */
+.tab-btn svg {
+  color: var(--primary-color);
+  transition: all 0.3s ease-out;
+  position: relative;
+  width: 15px;
+  opacity: 0;
+}
+
+/* Right arrow (Public) */
+.tab-btn.right-arrow svg {
+  transform: translateX(-10px);
+}
+
+.tab-btn.right-arrow:hover svg {
+  transform: translateX(0);
+  opacity: 1;
+  color: var(--hovered-color);
+  transition-delay: 0.1s;
+}
+
+.tab-btn.active.right-arrow:hover svg {
+  transition-delay: 0s;
+}
+
+/* Left arrow (Private) */
+.tab-btn.left-arrow svg {
+  transform: translateX(10px);
+}
+
+.tab-btn.left-arrow:hover svg {
+  transform: translateX(0);
+  opacity: 1;
+  color: var(--hovered-color);
+  transition-delay: 0.1s;
+}
+
+.tab-btn.active.left-arrow:hover svg {
+  transition-delay: 0s;
+}

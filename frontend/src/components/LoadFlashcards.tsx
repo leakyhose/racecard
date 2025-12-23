@@ -223,7 +223,29 @@ export function LoadFlashcards({
         ></div>
       )}
       {/* Toggle Switch */}
-      <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
+      <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 gap-6">
+        <button
+          className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("personal");
+            onOpenModal?.();
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          <p data-text="Private">Private</p>
+        </button>
+
         <label className="relative inline-flex items-center cursor-pointer select-none">
           <input
             type="checkbox"
@@ -241,19 +263,29 @@ export function LoadFlashcards({
               className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
             ></div>
           </div>
-
-          {/* Labels */}
-          <span
-            className={`absolute right-[calc(100%+20px)] text-sm font-bold text-coffee transition-all duration-300 ${activeTab === "personal" ? "underline decoration-2 underline-offset-4" : "no-underline opacity-60"}`}
-          >
-            Private
-          </span>
-          <span
-            className={`absolute left-[calc(100%+20px)] text-sm font-bold text-coffee transition-all duration-300 ${activeTab === "community" ? "underline decoration-2 underline-offset-4" : "no-underline opacity-60"}`}
-          >
-            Public
-          </span>
         </label>
+
+        <button
+          className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
+          onClick={() => {
+            setActiveTab("community");
+            onOpenPublicModal?.();
+          }}
+        >
+          <p data-text="Public">Public</p>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
 
       {/* Content */}
