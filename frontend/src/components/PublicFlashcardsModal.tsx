@@ -176,14 +176,14 @@ export function PublicFlashcardsModal({
           </div>
         ) : (
           <div
-            className="flex-1 overflow-y-auto mb-6 pr-2"
+            className="flex-1 overflow-y-auto pr-2"
             onScroll={handleScroll}
           >
-            <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
               {sets.map((set) => (
                 <div
                   key={set.id}
-                  className="border-2 border-coffee p-4 bg-white/60 transition-colors cursor-default flex flex-col h-full"
+                  className="border-2 border-coffee p-4 bg-light-vanilla/60 transition-colors cursor-default flex flex-col h-full"
                 >
                   <div className="flex-1 min-w-0 mb-4">
                     <div className="font-bold text-lg truncate">
@@ -223,13 +223,14 @@ export function PublicFlashcardsModal({
             )}
           </div>
         )}
-
-        <button
-          onClick={onClose}
-          className="w-full border-2 border-coffee bg-vanilla text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors font-bold"
-        >
-          Close
-        </button>
+        <div className="border-t-3 border-coffee pt-4 mt-auto">
+          <button
+            onClick={onClose}
+            className="w-full border-2 border-coffee bg-vanilla text-coffee px-4 py-3 hover:bg-coffee hover:text-vanilla transition-colors font-bold"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
