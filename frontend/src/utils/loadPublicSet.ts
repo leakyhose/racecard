@@ -39,7 +39,9 @@ export async function loadPublicSet(setId: string): Promise<LoadedPublicSet | nu
     // 2. Fetch flashcards
     const { data: cardsData, error: cardsError } = await supabase
       .from("flashcards")
-      .select("term, definition, trick_terms, trick_definitions, is_generated")
+      .select(
+        "term, definition, trick_terms, trick_definitions, is_generated, term_generated, definition_generated",
+      )
       .eq("public_set_id", setId)
       .order("id", { ascending: true });
 
@@ -51,7 +53,12 @@ export async function loadPublicSet(setId: string): Promise<LoadedPublicSet | nu
       answer: card.definition,
       trickTerms: card.trick_terms || [],
       trickDefinitions: card.trick_definitions || [],
-      isGenerated: card.is_generated || false,
+      isGenerated:
+        (card.term_generated && card.definition_generated) ||
+        card.is_generated ||
+        false,
+      termGenerated: card.term_generated || false,
+      definitionGenerated: card.definition_generated || false,
     }));
 
     // 3. Emit socket event

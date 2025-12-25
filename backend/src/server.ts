@@ -156,7 +156,7 @@ io.on("connection", (socket) => {
   });
 
   // Manual generation of multiple choice options
-  socket.on("generateMultipleChoice", async () => {
+  socket.on("generateMultipleChoice", async (mode) => {
     const lobby = getLobbyBySocket(socket.id);
     if (!lobby) {
       console.log("Failed to generate: lobby not found");
@@ -187,7 +187,7 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("lobbyUpdated", lobby);
 
     try {
-      await generateDistractors(lobby.code, (progress) => {
+      await generateDistractors(lobby.code, mode, (progress) => {
         lobby.generationProgress = progress;
         io.to(lobby.code).emit("lobbyUpdated", lobby);
       });

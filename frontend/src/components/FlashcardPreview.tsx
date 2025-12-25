@@ -19,7 +19,11 @@ export function FlashcardPreview({
     );
   }
 
-  const showMCPreview = multipleChoice && flashcards[0]?.isGenerated;
+  const showMCPreview =
+    multipleChoice &&
+    (answerByTerm
+      ? flashcards[0]?.termGenerated
+      : flashcards[0]?.definitionGenerated);
 
   return (
     <div className="space-y-6">
@@ -72,10 +76,10 @@ export function FlashcardPreview({
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 grow pr-0 ">
-              <div className="whitespace-pre-wrap wrap-break-word p-1 rounded-none text-center font-bold text-coffee">
+              <div className="whitespace-pre-wrap wrap-break-words hyphens-auto p-1 rounded-none text-center font-bold text-coffee">
                 {answerByTerm ? flashcard.answer : flashcard.question}
               </div>
-              <div className="whitespace-pre-wrap wrap-break-word p-1 rounded-none text-center font-bold text-coffee">
+              <div className="whitespace-pre-wrap wrap-break-words hyphens-auto p-1 rounded-none text-center font-bold text-coffee">
                 {answerByTerm ? flashcard.question : flashcard.answer}
               </div>
             </div>

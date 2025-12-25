@@ -21,6 +21,8 @@ interface FlashcardSet {
   created_at: string;
   flashcard_count: number;
   has_generated: boolean;
+  term_generated?: boolean;
+  definition_generated?: boolean;
 }
 
 export function LoadFlashcardsModal({
@@ -85,9 +87,9 @@ export function LoadFlashcardsModal({
           // Check if any flashcards have generated MC options
           const { data: generatedCards } = await supabase
             .from("flashcards")
-            .select("is_generated")
+            .select("term_generated, definition_generated")
             .eq("set_id", set.id)
-            .eq("is_generated", true)
+            .or("term_generated.eq.true,definition_generated.eq.true")
             .limit(1);
 
           return {
@@ -95,6 +97,9 @@ export function LoadFlashcardsModal({
             flashcard_count: count || 0,
             has_generated:
               (generatedCards && generatedCards.length > 0) || false,
+            term_generated: generatedCards?.[0]?.term_generated || false,
+            definition_generated:
+              generatedCards?.[0]?.definition_generated || false,
           };
         }),
       );
@@ -144,7 +149,7 @@ export function LoadFlashcardsModal({
       const { data, error: fetchError } = await supabase
         .from("flashcards")
         .select(
-          "term, definition, trick_terms, trick_definitions, is_generated",
+          "term, definition, trick_terms, trick_definitions, is_generated, term_generated, definition_generated",
         )
         .eq("set_id", setId)
         .order("id", { ascending: true });
@@ -163,7 +168,12 @@ export function LoadFlashcardsModal({
         answer: card.definition,
         trickTerms: card.trick_terms || [],
         trickDefinitions: card.trick_definitions || [],
-        isGenerated: card.is_generated || false,
+        isGenerated:
+          (card.term_generated && card.definition_generated) ||
+          card.is_generated ||
+          false,
+        termGenerated: card.term_generated || false,
+        definitionGenerated: card.definition_generated || false,
       }));
 
       socket.emit("updateFlashcard", flashcards, setName, setId);
@@ -328,6 +338,8 @@ export function LoadFlashcardsModal({
           setId={publishingSet.id}
           initialName={publishingSet.name}
           hasGenerated={publishingSet.has_generated}
+          termGenerated={publishingSet.term_generated}
+          definitionGenerated={publishingSet.definition_generated}
           currentSettings={currentSettings}
         />
       )}

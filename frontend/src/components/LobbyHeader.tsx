@@ -20,13 +20,18 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderP
   };
 
   const handleGenerateMultipleChoice = () => {
-    socket.emit("generateMultipleChoice");
+    const mode = lobby.settings.answerByTerm ? "term" : "definition";
+    socket.emit("generateMultipleChoice", mode);
   };
 
   // Check if all flashcards have generated MC options
   const allCardsGenerated =
     lobby.flashcards.length > 0 &&
-    lobby.flashcards.every((card) => card.isGenerated);
+    lobby.flashcards.every((card) =>
+      lobby.settings.answerByTerm
+        ? card.termGenerated
+        : card.definitionGenerated,
+    );
 
   const needsGeneration =
     lobby.settings.multipleChoice &&

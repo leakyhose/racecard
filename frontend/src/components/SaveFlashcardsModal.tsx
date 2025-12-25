@@ -87,6 +87,8 @@ export function SaveFlashcardsModal({
         trick_terms: card.trickTerms || [],
         trick_definitions: card.trickDefinitions || [],
         is_generated: card.isGenerated || false,
+        term_generated: card.termGenerated || false,
+        definition_generated: card.definitionGenerated || false,
       }));
 
       const { error: cardsError } = await supabase

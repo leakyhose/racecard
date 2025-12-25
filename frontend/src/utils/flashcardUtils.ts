@@ -136,6 +136,8 @@ export function parseAdvancedFlashcards(
           answer,
           trickDefinitions,
           isGenerated: true,
+          definitionGenerated: true,
+          termGenerated: false,
         });
       }
     }

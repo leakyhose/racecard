@@ -9,6 +9,8 @@ interface PublishFlashcardsModalProps {
   setId: string;
   initialName: string;
   hasGenerated: boolean;
+  termGenerated?: boolean;
+  definitionGenerated?: boolean;
   currentSettings: Settings;
 }
 
@@ -23,6 +25,8 @@ export function PublishFlashcardsModal({
   setId,
   initialName,
   hasGenerated,
+  termGenerated,
+  definitionGenerated,
   currentSettings,
 }: PublishFlashcardsModalProps) {
   const { user } = useAuth();
@@ -51,17 +55,57 @@ export function PublishFlashcardsModal({
       setDescription("");
       setError("");
       setSuccess(false);
+
+      // Determine if we should lock "Answer by Term"
+      // If only Term is generated, lock to Term (true)
+      // If only Definition is generated, lock to Definition (false)
+      // If both or neither, don't lock
+      let termValue = currentSettings.answerByTerm;
+
+      if (termGenerated && !definitionGenerated) {
+        termValue = true;
+      } else if (definitionGenerated && !termGenerated) {
+        termValue = false;
+      }
+
+      // If MC is off, term shouldn't be locked by generation status necessarily,
+      // but if we are publishing settings for a game, maybe it matters.
+      // The user said: "you shouldnt be able to publish cards of mulitple choice on a term or defintino that doesnt have multiple choice options."
+      // So if MC is ON, we must enforce valid term/def choice.
+
+      const mcValue = hasGenerated ? currentSettings.multipleChoice : false;
+
+      if (mcValue) {
+        // If MC is ON, enforce term lock if partial generation
+        if (termGenerated && !definitionGenerated) {
+          termValue = true;
+        } else if (definitionGenerated && !termGenerated) {
+          termValue = false;
+        }
+      } else {
+        // If MC is OFF, maybe we don't care?
+        // But the user might turn MC ON.
+        // If they turn MC ON, we need to ensure Term is correct.
+      }
+
       setSettings({
         shuffle: { locked: true, value: currentSettings.shuffle },
         fuzzy: { locked: true, value: currentSettings.fuzzyTolerance },
-        term: { locked: true, value: currentSettings.answerByTerm },
+        term: { locked: true, value: termValue },
         mc: {
           locked: true,
-          value: hasGenerated ? currentSettings.multipleChoice : false,
+          value: mcValue,
         },
       });
     }
-  }, [isOpen, initialName, currentSettings, hasGenerated]);
+  }, [
+    isOpen,
+    initialName,
+    currentSettings,
+    hasGenerated,
+    termGenerated,
+    definitionGenerated,
+  ]);
 
   const handleSettingChange = (
     key: keyof typeof settings,
@@ -69,6 +113,16 @@ export function PublishFlashcardsModal({
     value: boolean,
   ) => {
     setSettings((prev) => {
+      // Prevent invalid term selection if MC is ON
+      if (key === "term" && field === "value" && prev.mc.value) {
+        if (termGenerated && !definitionGenerated && !value) {
+          return prev;
+        }
+        if (definitionGenerated && !termGenerated && value) {
+          return prev;
+        }
+      }
+
       const newSettings = { ...prev };
       if (field === "locked") {
         newSettings[key] = {
@@ -96,6 +150,15 @@ export function PublishFlashcardsModal({
         // If MC value changes to ON and is locked, disable Fuzzy
         if (key === "mc" && newSettings.mc.locked && value) {
           newSettings.fuzzy = { locked: true, value: false };
+        }
+
+        // If MC is turned ON, check generation status and lock Term if needed
+        if (key === "mc" && value) {
+          if (termGenerated && !definitionGenerated) {
+            newSettings.term = { ...newSettings.term, value: true };
+          } else if (definitionGenerated && !termGenerated) {
+            newSettings.term = { ...newSettings.term, value: false };
+          }
         }
       }
       return newSettings;
@@ -153,6 +216,8 @@ export function PublishFlashcardsModal({
         trick_terms: card.trick_terms || [],
         trick_definitions: card.trick_definitions || [],
         is_generated: card.is_generated || false,
+        term_generated: card.term_generated || false,
+        definition_generated: card.definition_generated || false,
       }));
 
       const { error: insertError } = await supabase
@@ -269,9 +334,18 @@ export function PublishFlashcardsModal({
                   const config = settings[setting.key as keyof typeof settings];
                   const isMcLockedOn =
                     settings.mc.locked && settings.mc.value === true;
+
+                  // Check if Term setting is constrained by MC + Partial Generation
+                  const isTermConstrained =
+                    setting.key === "term" &&
+                    settings.mc.value === true &&
+                    ((termGenerated && !definitionGenerated) ||
+                      (definitionGenerated && !termGenerated));
+
                   const isFuzzyDisabled =
                     setting.key === "fuzzy" && isMcLockedOn;
-                  const isDisabled = setting.disabled || isFuzzyDisabled;
+                  const isDisabled =
+                    setting.disabled || isFuzzyDisabled || isTermConstrained;
 
                   return (
                     <div
@@ -291,6 +365,11 @@ export function PublishFlashcardsModal({
                         {isFuzzyDisabled && (
                           <div className="text-xs text-terracotta font-bold mt-1">
                             Disabled when Multiple Choice is ON
+                          </div>
+                        )}
+                        {isTermConstrained && (
+                          <div className="text-xs text-terracotta font-bold mt-1">
+                            Fixed by generated options
                           </div>
                         )}
                       </div>

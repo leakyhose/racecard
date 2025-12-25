@@ -230,6 +230,7 @@ async function generateDistractors(
 
 export async function generateResponse(
   flashcards: Flashcard[],
+  mode: "term" | "definition" | "both",
   onProgress?: (message: string) => void,
 ) {
   const apiClient = getClient();
@@ -237,8 +238,14 @@ export async function generateResponse(
     throw new Error("OpenAI API key not configured");
   }
 
-  const totalTermBatches = Math.ceil(flashcards.length / BATCH_SIZE);
-  const totalDefinitionBatches = Math.ceil(flashcards.length / BATCH_SIZE);
+  const totalTermBatches =
+    mode === "definition" || mode === "both"
+      ? Math.ceil(flashcards.length / BATCH_SIZE)
+      : 0;
+  const totalDefinitionBatches =
+    mode === "term" || mode === "both"
+      ? Math.ceil(flashcards.length / BATCH_SIZE)
+      : 0;
   const totalBatches = totalTermBatches + totalDefinitionBatches;
 
   let completedBatches = 0;
@@ -259,27 +266,50 @@ export async function generateResponse(
     answer: card.question,
   }));
 
-  // Generate distractors for both in parallel
-  const [termResult, definitionResult] = await Promise.all([
-    generateDistractors(apiClient, termPairs, () => updateProgress()), // First call
-    generateDistractors(apiClient, definitionPairs, () => updateProgress()), // Second call
-  ]);
+  let termResult, definitionResult;
+
+  const promises = [];
+
+  if (mode === "definition" || mode === "both") {
+    promises.push(
+      generateDistractors(apiClient, termPairs, () => updateProgress()),
+    );
+  }
+
+  if (mode === "term" || mode === "both") {
+    promises.push(
+      generateDistractors(apiClient, definitionPairs, () => updateProgress()),
+    );
+  }
+
+  const results = await Promise.all(promises);
+
+  if (mode === "definition") {
+    termResult = results[0];
+  } else if (mode === "term") {
+    definitionResult = results[0];
+  } else {
+    termResult = results[0];
+    definitionResult = results[1];
+  }
 
   // Calculate total usage
   const totalUsage = {
     promptTokens:
-      termResult.usage.promptTokens + definitionResult.usage.promptTokens,
+      (termResult?.usage.promptTokens || 0) +
+      (definitionResult?.usage.promptTokens || 0),
     completionTokens:
-      termResult.usage.completionTokens +
-      definitionResult.usage.completionTokens,
+      (termResult?.usage.completionTokens || 0) +
+      (definitionResult?.usage.completionTokens || 0),
     totalTokens:
-      termResult.usage.totalTokens + definitionResult.usage.totalTokens,
+      (termResult?.usage.totalTokens || 0) +
+      (definitionResult?.usage.totalTokens || 0),
   };
 
   console.log(totalUsage);
 
   return JSON.stringify({
-    termDistractors: termResult.distractors,
-    definitionDistractors: definitionResult.distractors,
+    termDistractors: termResult?.distractors,
+    definitionDistractors: definitionResult?.distractors,
   });
 }

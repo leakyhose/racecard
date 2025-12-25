@@ -24,5 +24,7 @@ export function swap(array: Flashcard[]): Flashcard[] {
     trickTerms: flashcard.trickDefinitions || [],
     trickDefinitions: flashcard.trickTerms || [],
     isGenerated: flashcard.isGenerated || false,
+    termGenerated: flashcard.definitionGenerated || false,
+    definitionGenerated: flashcard.termGenerated || false,
   }));
 }

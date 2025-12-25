@@ -191,6 +191,8 @@ export default function Lobby() {
           trick_terms: card.trickTerms || [],
           trick_definitions: card.trickDefinitions || [],
           is_generated: card.isGenerated || false,
+          term_generated: card.termGenerated || false,
+          definition_generated: card.definitionGenerated || false,
         }));
 
         const { error: insertError } = await supabase
@@ -291,7 +293,9 @@ export default function Lobby() {
         // It is a private set
         setIsPublicSet(false);
 
-        const lobbyHasGenerated = lobby?.flashcards.some((f) => f.isGenerated);
+        const lobbyHasGenerated = lobby?.flashcards.some(
+          (f) => f.termGenerated || f.definitionGenerated,
+        );
 
         if (!lobbyHasGenerated) {
           setIsSaved(true);
@@ -301,9 +305,9 @@ export default function Lobby() {
         // Lobby has generated content, check if it matches DB
         const { data: generatedCards } = await supabase
           .from("flashcards")
-          .select("is_generated")
+          .select("term_generated, definition_generated")
           .eq("set_id", trackedSetId)
-          .eq("is_generated", true)
+          .or("term_generated.eq.true,definition_generated.eq.true")
           .limit(1);
 
         const dbHasGenerated = generatedCards && generatedCards.length > 0;
@@ -443,6 +447,8 @@ export default function Lobby() {
   }
 
   const isInLobby = lobby.players.some((player) => player.id === socket.id);
+
+
 
   if (!nickname || !isInLobby) {
     return (

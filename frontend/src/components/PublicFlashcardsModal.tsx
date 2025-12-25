@@ -84,9 +84,9 @@ export function PublicFlashcardsModal({
           // Check if any flashcards have generated MC options
           const { data: generatedCards } = await supabase
             .from("flashcards")
-            .select("is_generated")
+            .select("term_generated, definition_generated")
             .eq("public_set_id", set.id)
-            .eq("is_generated", true)
+            .or("term_generated.eq.true,definition_generated.eq.true")
             .limit(1);
 
           return {

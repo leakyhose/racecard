@@ -112,9 +112,9 @@ export function LoadFlashcards({
 
             const { data: generatedCards } = await supabase
               .from("flashcards")
-              .select("is_generated")
+              .select("term_generated, definition_generated")
               .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
-              .eq("is_generated", true)
+              .or("term_generated.eq.true,definition_generated.eq.true")
               .limit(1);
 
             return {
@@ -173,7 +173,7 @@ export function LoadFlashcards({
       const { data, error: fetchError } = await supabase
         .from("flashcards")
         .select(
-          "term, definition, trick_terms, trick_definitions, is_generated",
+          "term, definition, trick_terms, trick_definitions, is_generated, term_generated, definition_generated",
         )
         .eq("set_id", setId)
         .order("id", { ascending: true });
@@ -186,7 +186,12 @@ export function LoadFlashcards({
         answer: card.definition,
         trickTerms: card.trick_terms || [],
         trickDefinitions: card.trick_definitions || [],
-        isGenerated: card.is_generated || false,
+        isGenerated:
+          (card.term_generated && card.definition_generated) ||
+          card.is_generated ||
+          false,
+        termGenerated: card.term_generated || false,
+        definitionGenerated: card.definition_generated || false,
       }));
 
       const set = sets.find((s) => s.id === setId);

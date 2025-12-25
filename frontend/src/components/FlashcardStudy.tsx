@@ -37,7 +37,11 @@ export function FlashcardStudy({
   // Ensure currentIndex is within bounds
   const safeIndex = Math.min(currentIndex, flashcards.length - 1);
   const currentCard = flashcards[safeIndex];
-  const showMC = multipleChoice && currentCard?.isGenerated;
+  const showMC =
+    multipleChoice &&
+    (answerByTerm
+      ? currentCard?.termGenerated
+      : currentCard?.definitionGenerated);
 
   const handlePrevious = () => {
     setIsSwitching(true);
@@ -97,7 +101,7 @@ export function FlashcardStudy({
                       <div className="text-sm text-coffee/60 mb-4 font-bold">
                         {safeIndex + 1} of {flashcards.length}
                       </div>
-                      <div className="text-2xl font-bold text-coffee whitespace-pre-wrap warp-break-word break-all w-full max-w-full overflow-hidden">
+                      <div className="text-2xl font-bold text-coffee whitespace-pre-wrap wrap-break-word hyphens-auto w-full max-w-full overflow-hidden">
                         {question}
                       </div>
                     </div>
@@ -146,7 +150,7 @@ export function FlashcardStudy({
                         </div>
                       ) : (
                         // Simple answer view
-                        <div className="text-xl font-bold text-coffee text-center whitespace-pre-wrap wrap-break-words break-all w-full max-w-full overflow-hidden">
+                        <div className="text-xl font-bold text-coffee text-center whitespace-pre-wrap warp-break-words hyphens-auto w-full max-w-full overflow-hidden">
                           {answer}
                         </div>
                       )}

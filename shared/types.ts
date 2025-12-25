@@ -5,6 +5,8 @@ export interface Flashcard {
   trickTerms?: string[]; // 3 fake questions
   trickDefinitions?: string[]; // 3 fake answers
   isGenerated?: boolean; // Whether MC options have been generated
+  termGenerated?: boolean;
+  definitionGenerated?: boolean;
   distractors?: string[]; // 3 incorrect alternatives for answer
 }
 
@@ -83,7 +85,7 @@ export interface ClientToServerEvents {
   sendChat: (msg: string) => void;
   getLobby: (code: string) => void;
   requestCurrentQuestion: () => void;
-  generateMultipleChoice: () => void;
+  generateMultipleChoice: (mode: "term" | "definition" | "both") => void;
 
   answer: (text: string) => void;
   voteEndGame: () => void;

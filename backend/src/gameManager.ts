@@ -19,6 +19,7 @@ const distractorStatus = new Map<
 // Generate distractors for flashcards using OpenAI
 export async function generateDistractors(
   lobbyCode: string,
+  mode: "term" | "definition" | "both",
   onProgress?: (message: string) => void,
 ) {
   const lobby = getLobbyByCode(lobbyCode);
@@ -41,7 +42,11 @@ export async function generateDistractors(
   distractorStatus.set(lobbyCode, { ready: false, generating: true });
 
   try {
-    const response = await generateResponse(flashcardsToGenerate, onProgress);
+    const response = await generateResponse(
+      flashcardsToGenerate,
+      mode,
+      onProgress,
+    );
 
     if (!response) {
       console.error("Failed to generate distractors: empty response");
@@ -50,17 +55,20 @@ export async function generateDistractors(
     }
 
     const parsedResponse: {
-      termDistractors: string[][];
-      definitionDistractors: string[][];
+      termDistractors?: string[][];
+      definitionDistractors?: string[][];
     } = JSON.parse(response);
 
     // Validate the response
     if (
-      !Array.isArray(parsedResponse.termDistractors) ||
-      !Array.isArray(parsedResponse.definitionDistractors) ||
-      parsedResponse.termDistractors.length !== flashcardsToGenerate.length ||
-      parsedResponse.definitionDistractors.length !==
-        flashcardsToGenerate.length
+      ((mode === "definition" || mode === "both") &&
+        (!Array.isArray(parsedResponse.termDistractors) ||
+          parsedResponse.termDistractors.length !==
+            flashcardsToGenerate.length)) ||
+      ((mode === "term" || mode === "both") &&
+        (!Array.isArray(parsedResponse.definitionDistractors) ||
+          parsedResponse.definitionDistractors.length !==
+            flashcardsToGenerate.length))
     ) {
       console.error("Invalid distractors format: array length mismatch");
       distractorStatus.set(lobbyCode, { ready: false, generating: false });
@@ -69,26 +77,34 @@ export async function generateDistractors(
 
     // Assign distractors to each flashcard in the lobby
     flashcardsToGenerate.forEach((flashcard, index) => {
-      const termDistractors = parsedResponse.termDistractors[index];
-      const definitionDistractors = parsedResponse.definitionDistractors[index];
-
-      if (
-        Array.isArray(termDistractors) &&
-        termDistractors.length === 3 &&
-        Array.isArray(definitionDistractors) &&
-        definitionDistractors.length === 3
-      ) {
-        // termDistractors are generated from termPairs (question=Term, answer=Definition) -> Fake Definitions
-        // definitionDistractors are generated from definitionPairs (question=Definition, answer=Term) -> Fake Terms
-        flashcard.trickTerms = definitionDistractors;
-        flashcard.trickDefinitions = termDistractors;
-        flashcard.isGenerated = true;
-      } else {
-        console.error(`Invalid distractors for flashcard ${index}`);
-        flashcard.trickTerms = [];
-        flashcard.trickDefinitions = [];
-        flashcard.isGenerated = false;
+      if (mode === "definition" || mode === "both") {
+        const termDistractors = parsedResponse.termDistractors![index];
+        if (Array.isArray(termDistractors) && termDistractors.length === 3) {
+          flashcard.trickDefinitions = termDistractors;
+          flashcard.definitionGenerated = true;
+        } else {
+          flashcard.trickDefinitions = [];
+          flashcard.definitionGenerated = false;
+        }
       }
+
+      if (mode === "term" || mode === "both") {
+        const definitionDistractors =
+          parsedResponse.definitionDistractors![index];
+        if (
+          Array.isArray(definitionDistractors) &&
+          definitionDistractors.length === 3
+        ) {
+          flashcard.trickTerms = definitionDistractors;
+          flashcard.termGenerated = true;
+        } else {
+          flashcard.trickTerms = [];
+          flashcard.termGenerated = false;
+        }
+      }
+
+      flashcard.isGenerated =
+        (flashcard.termGenerated && flashcard.definitionGenerated) || false;
     });
 
     console.log(`Distractors generated successfully for lobby ${lobbyCode}`);
@@ -178,7 +194,11 @@ export function getCurrentQuestion(
     : currentFlashcard.answer;
 
   let choices: string[] | null = null;
-  if (isMultipleChoice && currentFlashcard.isGenerated) {
+  const isSideGenerated = answerByTerm
+    ? currentFlashcard.termGenerated
+    : currentFlashcard.definitionGenerated;
+
+  if (isMultipleChoice && isSideGenerated) {
     // answerByTerm: show term, need definition distractors (trickDefinitions)
     // answerByDefinition: show definition, need term distractors (trickTerms)
     const distractors = answerByTerm
