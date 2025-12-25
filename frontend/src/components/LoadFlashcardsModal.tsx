@@ -65,6 +65,7 @@ export function LoadFlashcardsModal({
         .select("id, name, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
         .range(from, to);
 
       if (fetchError) throw fetchError;

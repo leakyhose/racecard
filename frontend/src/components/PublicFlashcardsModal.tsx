@@ -64,6 +64,7 @@ export function PublicFlashcardsModal({
           "id, name, description, created_at, updated_at, plays, user_id, username",
         )
         .order("plays", { ascending: false })
+        .order("id", { ascending: true })
         .range(from, to);
 
       if (fetchError) throw fetchError;

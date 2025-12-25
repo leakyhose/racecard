@@ -73,6 +73,7 @@ export function LoadFlashcards({
             .select("id, name, created_at")
             .eq("user_id", user.id)
             .order("created_at", { ascending: false })
+            .order("id", { ascending: true })
             .limit(10);
           
           // Map result to FlashcardSet type
@@ -88,6 +89,7 @@ export function LoadFlashcards({
             .from("public_flashcard_sets")
             .select("id, name, created_at, plays, user_id")
             .order("plays", { ascending: false })
+            .order("id", { ascending: true })
             .limit(10);
             
           // Map result to FlashcardSet type
