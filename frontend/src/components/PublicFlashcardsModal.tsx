@@ -192,7 +192,10 @@ export function PublicFlashcardsModal({
                       {set.name}
                     </div>
                     <div className="text-sm text-coffee/70 font-bold mb-4">
-                      by {set.username} • {set.plays} plays
+                      {set.user_id === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278"
+                        ? "Featured Quiz"
+                        : `by ${set.username}`}{" "}
+                      • {set.plays} plays
                     </div>
                     <div className="text-sm text-coffee mb-4 truncate">
                       {set.description || "No description"}

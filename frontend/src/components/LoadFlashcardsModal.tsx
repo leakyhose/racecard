@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
 import type { Flashcard, Settings } from "@shared/types";
 import { PublishFlashcardsModal } from "./PublishFlashcardsModal";
+import { getRelativeTime } from "../utils/flashcardUtils";
 
 interface LoadFlashcardsModalProps {
   isOpen: boolean;
@@ -263,7 +264,7 @@ export function LoadFlashcardsModal({
                     <div className="text-sm text-coffee/70">
                       {set.flashcard_count} card
                       {set.flashcard_count !== 1 ? "s" : ""} • Created{" "}
-                      {new Date(set.created_at).toLocaleDateString()}
+                      {getRelativeTime(set.created_at)}
                     </div>
                     {set.has_generated ? (
                       <div className="text-xs text-coffee font-bold mt-1">

@@ -263,16 +263,15 @@ export function GameSettings({
                 Points to Win
               </label>
               <span className="font-bold text-coffee text-xs">
-                {currentSettings.pointsToWin ===
-                Math.max(10, (lobby?.flashcards.length || 0) * 5)
-                  ? "Play all flashcards"
+                {currentSettings.pointsToWin >= 500
+                  ? "Play all cards"
                   : currentSettings.pointsToWin || 100}
               </span>
             </div>
             <input
               type="range"
               min={10}
-              max={Math.max(10, (lobby?.flashcards.length || 0) * 5)}
+              max={500}
               step={10}
               value={currentSettings.pointsToWin || 100}
               onChange={(e) =>

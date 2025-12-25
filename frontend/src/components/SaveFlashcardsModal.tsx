@@ -30,13 +30,18 @@ export function SaveFlashcardsModal({
 
   useEffect(() => {
     if (isOpen) {
+      setError("");
+      setSuccess(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
       if (currentName && currentName !== "UNNAMED") {
         setSetName(currentName);
       } else {
         setSetName("");
       }
-      setError("");
-      setSuccess(false);
     }
   }, [isOpen, currentName]);
 

@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
 import type { Flashcard } from "@shared/types";
 import { loadPublicSet, type LoadedPublicSet } from "../utils/loadPublicSet";
+import { getRelativeTime } from "../utils/flashcardUtils";
 
 interface FlashcardSet {
   id: string;
@@ -348,7 +349,7 @@ export function LoadFlashcards({
                           >
                             {set.flashcard_count} cards •{" "}
                             {activeTab === "personal"
-                              ? new Date(set.created_at).toLocaleDateString()
+                              ? getRelativeTime(set.created_at)
                               : `${set.plays || 0} plays`}
                           </p>
                           {loadingSetId === set.id && (
