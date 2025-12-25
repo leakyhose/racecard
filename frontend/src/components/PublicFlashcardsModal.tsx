@@ -196,14 +196,10 @@ export function PublicFlashcardsModal({
                       {set.user_id === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278"
                         ? "Featured Quiz"
                         : `by ${set.username}`}{" "}
-                      • {set.plays} plays
+                      • {set.flashcard_count} cards • {set.plays} plays
                     </div>
-                    <div className="text-sm text-coffee mb-4 truncate">
+                    <div className="text-sm text-coffee truncate">
                       {set.description || "No description"}
-                    </div>
-                    <div className="text-xs text-coffee/50">
-                      Created {new Date(set.created_at).toLocaleDateString()} •
-                      Updated {new Date(set.updated_at).toLocaleDateString()}
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0 items-center mt-auto">
