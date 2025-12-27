@@ -493,6 +493,7 @@ export default function Lobby() {
           isLeader={isLeader}
           lobby={lobby}
           isPublicSet={isPublicSet}
+          userId={user?.id}
         />
       </div>
       <div className="flex flex-1 min-h-0 border-coffee">

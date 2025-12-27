@@ -28,6 +28,7 @@ export function PublicFlashcardsModal({
 }: PublicFlashcardsModalProps) {
   const [sets, setSets] = useState<PublicFlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const mouseDownOnBackdrop = useRef(false);
 
@@ -38,10 +39,18 @@ export function PublicFlashcardsModal({
   const PAGE_SIZE = 20;
 
   const handleLoad = async (setId: string) => {
-    const loadedSet = await loadPublicSet(setId);
-    if (loadedSet) {
-      onPublicSetLoaded?.(loadedSet);
-      onClose();
+    setLoadingSetId(setId);
+    try {
+      const loadedSet = await loadPublicSet(setId);
+      if (loadedSet) {
+        onPublicSetLoaded?.(loadedSet);
+        onClose();
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load public set");
+    } finally {
+      setLoadingSetId(null);
     }
   };
 
@@ -208,9 +217,10 @@ export function PublicFlashcardsModal({
                   <div className="flex gap-2 shrink-0 items-center mt-auto">
                     <button
                       onClick={() => handleLoad(set.id)}
-                      className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                      disabled={loadingSetId !== null}
+                      className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0.5 disabled:translate-y-0.5"
                     >
-                      Load
+                      {loadingSetId === set.id ? "..." : "Load"}
                     </button>
                   </div>
                 </div>

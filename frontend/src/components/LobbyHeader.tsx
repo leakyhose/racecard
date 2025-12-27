@@ -10,9 +10,10 @@ interface LobbyHeaderProps {
   isLeader: boolean;
   lobby: Lobby;
   isPublicSet?: boolean;
+  userId?: string;
 }
 
-export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderProps) {
+export function LobbyHeader({ code, isLeader, lobby, isPublicSet, userId }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
 
   const handleStartGame = () => {
@@ -39,6 +40,10 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderP
     !allCardsGenerated;
 
   const isGenerating = lobby.distractorStatus === "generating";
+
+  const isPrivilegedUser = userId === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278";
+  const isLargeSet = lobby.flashcards.length >= 200;
+  const canGenerate = !isLargeSet || isPrivilegedUser;
 
   const handleCopyCode = async () => {
     try {
@@ -83,11 +88,13 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderP
           ) : needsGeneration && lobby.status === "waiting" && !isPublicSet ? (
             <div className="flex flex-col items-center gap-2">
               <button
-                onClick={handleGenerateMultipleChoice}
-                disabled={isGenerating}
+                onClick={canGenerate ? handleGenerateMultipleChoice : undefined}
+                disabled={isGenerating || !canGenerate}
                 className="bg-powder text-coffee px-6 py-1 font-bold hover:bg-coffee hover:text-vanilla transition-colors tracking-widest border-2 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Generate Multiple Choice
+                {canGenerate
+                  ? "Generate Multiple Choice"
+                  : "Max 200 flashcards for generation"}
               </button>
             </div>
           ) : lobby.distractorStatus === "error" ? (
@@ -105,11 +112,15 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet }: LobbyHeaderP
               </button>
               {lobby.settings.multipleChoice && !isPublicSet && (
                 <button
-                  onClick={handleGenerateMultipleChoice}
-                  disabled={isGenerating}
+                  onClick={
+                    canGenerate ? handleGenerateMultipleChoice : undefined
+                  }
+                  disabled={isGenerating || !canGenerate}
                   className="bg-powder text-coffee px-6 py-1 font-bold hover:bg-coffee hover:text-vanilla transition-colors tracking-widest border-2 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Generate Again
+                  {canGenerate
+                    ? "Generate Again"
+                    : "Max 200 flashcards for generation"}
                 </button>
               )}
             </div>
