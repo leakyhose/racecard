@@ -114,7 +114,6 @@ async function generateDistractors(
           ],
           //reasoning:{"effort": "minimal"},
           response_format: zodResponseFormat(DistractorSet, "distractor_set"),
-
         });
 
         const parsed = response.choices[0]!.message.parsed;

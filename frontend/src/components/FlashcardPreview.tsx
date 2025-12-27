@@ -29,7 +29,7 @@ export function FlashcardPreview({
           setVisibleCount((prev) => prev + BATCH_SIZE);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     const currentLoader = loaderRef.current;

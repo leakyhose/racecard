@@ -44,9 +44,9 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
       {/* Stats Section */}
       <div className="flex flex-col w-full">
         <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 pt-2">
-        <div className="h-4 flex items-center">
-          <span className="text-sm font-bold text-coffee">Stats</span>
-        </div>
+          <div className="h-4 flex items-center">
+            <span className="text-sm font-bold text-coffee">Stats</span>
+          </div>
         </div>
         <div className="p-4 flex flex-col gap-2">
           <div className="flex justify-between items-center text-coffee font-bold">
@@ -67,9 +67,9 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
       {/* Commands Section */}
       <div className="flex flex-col w-full mt-4">
         <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
-        <div className="h-4 flex items-center">
-          <span className="text-sm font-bold text-coffee">Commands</span>
-        </div>
+          <div className="h-4 flex items-center">
+            <span className="text-sm font-bold text-coffee">Commands</span>
+          </div>
         </div>
         <div className="p-4 flex flex-col gap-2 items-center">
           {lobby.status === "ongoing" ? (

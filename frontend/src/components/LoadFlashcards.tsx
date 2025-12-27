@@ -86,13 +86,15 @@ export function LoadFlashcards({
             .order("created_at", { ascending: false })
             .order("id", { ascending: true })
             .limit(10);
-          
+
           // Map result to FlashcardSet type
-          data = result.data ? result.data.map(item => ({
-            ...item,
-            flashcard_count: 0,
-            has_generated: false
-          })) : [];
+          data = result.data
+            ? result.data.map((item) => ({
+                ...item,
+                flashcard_count: 0,
+                has_generated: false,
+              }))
+            : [];
           fetchError = result.error;
         } else {
           // Fetch public sets
@@ -102,13 +104,15 @@ export function LoadFlashcards({
             .order("plays", { ascending: false })
             .order("id", { ascending: true })
             .limit(10);
-            
+
           // Map result to FlashcardSet type
-          data = result.data ? result.data.map(item => ({
-            ...item,
-            flashcard_count: 0,
-            has_generated: false
-          })) : [];
+          data = result.data
+            ? result.data.map((item) => ({
+                ...item,
+                flashcard_count: 0,
+                has_generated: false,
+              }))
+            : [];
           fetchError = result.error;
         }
 
@@ -119,7 +123,10 @@ export function LoadFlashcards({
             const { count } = await supabase
               .from("flashcards")
               .select("*", { count: "exact", head: true })
-              .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id);
+              .eq(
+                activeTab === "personal" ? "set_id" : "public_set_id",
+                set.id,
+              );
 
             const { data: generatedCards } = await supabase
               .from("flashcards")
@@ -162,7 +169,7 @@ export function LoadFlashcards({
     if (isGenerating) {
       return;
     }
-    
+
     if (!isLeader) {
       setShakingSetId(setId);
       setTimeout(() => setShakingSetId(null), 500);

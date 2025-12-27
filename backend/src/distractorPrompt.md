@@ -14,7 +14,7 @@ For each object, you will generate distractors ONLY for the TEXT in the `"answer
 
 ## YOUR TASK
 
-For **each object**, generate **3 incorrect alternatives** for the text that appears in the `"answer"` field. These incorrect alternative must relate to the topic, you must try to deduce the focus and breadth of the flashcard set and make educate distractors that can trick someone. For example if the `"question"` is the name of a capital, and the `"answer"` is a country, the distractors must be other countries. 
+For **each object**, generate **3 incorrect alternatives** for the text that appears in the `"answer"` field. These incorrect alternative must relate to the topic, you must try to deduce the focus and breadth of the flashcard set and make educate distractors that can trick someone. For example if the `"question"` is the name of a capital, and the `"answer"` is a country, the distractors must be other countries.
 
 These alternatives are called **distractors**.
 
@@ -31,7 +31,6 @@ Treat the `"answer"` field strictly as TEXT that you must imitate in:
 - formatting
 
 ---
-
 
 ## STRICT MATCHING RULES
 

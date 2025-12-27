@@ -360,7 +360,9 @@ export function Game() {
                           />
                         ) : (
                           <div className="text-center p-6">
-                            <div className="text-4xl text-coffee/50 mb-2">✗</div>
+                            <div className="text-4xl text-coffee/50 mb-2">
+                              ✗
+                            </div>
                             <div className="text-xl font-bold text-coffee tracking-widest">
                               No Correct Answers
                             </div>

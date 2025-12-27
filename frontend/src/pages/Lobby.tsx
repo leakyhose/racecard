@@ -449,8 +449,6 @@ export default function Lobby() {
 
   const isInLobby = lobby.players.some((player) => player.id === socket.id);
 
-
-
   if (!nickname || !isInLobby) {
     return (
       <div>

@@ -296,10 +296,7 @@ export function LoadFlashcardsModal({
             </div>
           </div>
         ) : (
-          <div
-            className="flex-1 overflow-y-auto pr-2"
-            onScroll={handleScroll}
-          >
+          <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
             <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
               {sets.map((set) => (
                 <div

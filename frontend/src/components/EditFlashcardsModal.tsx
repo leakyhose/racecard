@@ -48,55 +48,58 @@ export function EditFlashcardsModal({
     setTotalCount(count || 0);
   }, [setId]);
 
-  const fetchFlashcards = useCallback(async (pageToFetch: number, isInitial: boolean = false) => {
-    if (isInitial) {
-      setLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
-    setError("");
-
-    try {
-      const from = pageToFetch * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      const { data, error } = await supabase
-        .from("flashcards")
-        .select("*")
-        .eq("set_id", setId)
-        .order("order_index", { ascending: true })
-        .order("id", { ascending: true })
-        .range(from, to);
-
-      if (error) throw error;
-
-      if (data) {
-        if (data.length < PAGE_SIZE) {
-          setHasMore(false);
-        }
-
-        const newCards = data.map((card) => ({
-          id: card.id,
-          term: card.term,
-          definition: card.definition,
-          trick_terms: card.trick_terms || [],
-          trick_definitions: card.trick_definitions || [],
-        }));
-
-        if (isInitial) {
-          setFlashcards(newCards);
-        } else {
-          setFlashcards((prev) => [...prev, ...newCards]);
-        }
+  const fetchFlashcards = useCallback(
+    async (pageToFetch: number, isInitial: boolean = false) => {
+      if (isInitial) {
+        setLoading(true);
+      } else {
+        setIsLoadingMore(true);
       }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load flashcards");
-    } finally {
-      setLoading(false);
-      setIsLoadingMore(false);
-    }
-  }, [setId]);
+      setError("");
+
+      try {
+        const from = pageToFetch * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+
+        const { data, error } = await supabase
+          .from("flashcards")
+          .select("*")
+          .eq("set_id", setId)
+          .order("order_index", { ascending: true })
+          .order("id", { ascending: true })
+          .range(from, to);
+
+        if (error) throw error;
+
+        if (data) {
+          if (data.length < PAGE_SIZE) {
+            setHasMore(false);
+          }
+
+          const newCards = data.map((card) => ({
+            id: card.id,
+            term: card.term,
+            definition: card.definition,
+            trick_terms: card.trick_terms || [],
+            trick_definitions: card.trick_definitions || [],
+          }));
+
+          if (isInitial) {
+            setFlashcards(newCards);
+          } else {
+            setFlashcards((prev) => [...prev, ...newCards]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load flashcards");
+      } finally {
+        setLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [setId],
+  );
 
   useEffect(() => {
     if (isOpen && setId) {
@@ -195,7 +198,7 @@ export function EditFlashcardsModal({
     id: string,
     type: "trick_terms" | "trick_definitions",
     index: number,
-    value: string
+    value: string,
   ) => {
     setFlashcards((prev) =>
       prev.map((c) => {
@@ -203,7 +206,7 @@ export function EditFlashcardsModal({
         const newDistractors = [...c[type]];
         newDistractors[index] = value;
         return { ...c, [type]: newDistractors };
-      })
+      }),
     );
   };
 
@@ -285,7 +288,7 @@ export function EditFlashcardsModal({
                       className="w-full bg-vanilla border-2 border-coffee/20 focus:border-coffee p-2 min-h-20 resize-none font-bold text-lg outline-none transition-colors"
                       placeholder="Enter term..."
                     />
-                    
+
                     <div className="mt-4 space-y-2">
                       <label className="block text-xs font-bold text-coffee uppercase tracking-wider">
                         Trick Terms
@@ -299,7 +302,7 @@ export function EditFlashcardsModal({
                               card.id,
                               "trick_terms",
                               i,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           className="w-full bg-vanilla/50 border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"
@@ -340,7 +343,7 @@ export function EditFlashcardsModal({
                               card.id,
                               "trick_definitions",
                               i,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                           className="w-full bg-vanilla/50 border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"

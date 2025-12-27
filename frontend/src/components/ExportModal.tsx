@@ -19,7 +19,12 @@ interface FlashcardDBRow {
 
 type ExportMode = "standard" | "term-distractors" | "definition-distractors";
 
-export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProps) {
+export function ExportModal({
+  isOpen,
+  onClose,
+  setId,
+  setName,
+}: ExportModalProps) {
   const [loading, setLoading] = useState(false);
   const [exportText, setExportText] = useState("");
   const [mode, setMode] = useState<ExportMode>("standard");
@@ -61,8 +66,12 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
 
       if (allData.length === 0) return;
 
-      const hasTerms = allData.some((c) => c.trick_terms && c.trick_terms.length > 0);
-      const hasDefs = allData.some((c) => c.trick_definitions && c.trick_definitions.length > 0);
+      const hasTerms = allData.some(
+        (c) => c.trick_terms && c.trick_terms.length > 0,
+      );
+      const hasDefs = allData.some(
+        (c) => c.trick_definitions && c.trick_definitions.length > 0,
+      );
 
       setHasTermDistractors(hasTerms);
       setHasDefDistractors(hasDefs);
@@ -78,9 +87,9 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
         } else if (mode === "term-distractors") {
           const distractors = card.trick_terms || [];
           const uniqueDistractors = [...new Set(distractors as string[])]
-            .map(d => d.replace(/[\t\n|]/g, " ").trim())
+            .map((d) => d.replace(/[\t\n|]/g, " ").trim())
             .filter((d) => d !== term && d !== "");
-          
+
           text += `${def}|${term}`;
           if (uniqueDistractors.length > 0) {
             text += `|${uniqueDistractors.join("|")}`;
@@ -89,7 +98,7 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
         } else if (mode === "definition-distractors") {
           const distractors = card.trick_definitions || [];
           const uniqueDistractors = [...new Set(distractors as string[])]
-            .map(d => d.replace(/[\t\n|]/g, " ").trim())
+            .map((d) => d.replace(/[\t\n|]/g, " ").trim())
             .filter((d) => d !== def && d !== "");
 
           text += `${term}|${def}`;

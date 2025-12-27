@@ -185,10 +185,7 @@ export function PublicFlashcardsModal({
             </div>
           </div>
         ) : (
-          <div
-            className="flex-1 overflow-y-auto pr-2"
-            onScroll={handleScroll}
-          >
+          <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
             <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
               {sets.map((set) => (
                 <div
@@ -197,8 +194,8 @@ export function PublicFlashcardsModal({
                 >
                   <div className="flex-1 min-w-0 mb-4">
                     <div className="font-bold text-lg truncate">
-                      {set.user_id ===
-                        "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && "⭐ "}
+                      {set.user_id === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" &&
+                        "⭐ "}
                       {set.name}
                     </div>
                     <div className="text-sm text-coffee/70 font-bold mb-4">

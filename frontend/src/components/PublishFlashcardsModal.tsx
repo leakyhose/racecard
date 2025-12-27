@@ -301,9 +301,7 @@ export function PublishFlashcardsModal({
 
         {success ? (
           <div className="flex-1 flex items-center justify-center py-12">
-            <div className="text-coffee font-bold text-xl">
-              Published!
-            </div>
+            <div className="text-coffee font-bold text-xl">Published!</div>
           </div>
         ) : (
           <div className="space-y-6">

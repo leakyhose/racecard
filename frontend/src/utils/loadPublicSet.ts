@@ -8,7 +8,9 @@ export interface LoadedPublicSet {
   settings: Partial<Settings>;
 }
 
-export async function loadPublicSet(setId: string): Promise<LoadedPublicSet | null> {
+export async function loadPublicSet(
+  setId: string,
+): Promise<LoadedPublicSet | null> {
   try {
     const { data: setData, error: setError } = await supabase
       .from("public_flashcard_sets")
@@ -90,18 +92,28 @@ export async function loadPublicSet(setId: string): Promise<LoadedPublicSet | nu
     socket.emit("updateFlashcard", flashcards, setData.name, setId);
 
     const settings: Partial<Settings> = {};
-    if (setData.shuffle_flashcard !== null && setData.shuffle_flashcard !== undefined) settings.shuffle = setData.shuffle_flashcard;
-    if (setData.fuzzy_tolerance !== null && setData.fuzzy_tolerance !== undefined) settings.fuzzyTolerance = setData.fuzzy_tolerance;
-    if (setData.use_term !== null && setData.use_term !== undefined) settings.answerByTerm = setData.use_term;
-    if (setData.use_mc !== null && setData.use_mc !== undefined) settings.multipleChoice = setData.use_mc;
-    if (setData.round_time !== null && setData.round_time !== undefined) settings.roundTime = setData.round_time;
+    if (
+      setData.shuffle_flashcard !== null &&
+      setData.shuffle_flashcard !== undefined
+    )
+      settings.shuffle = setData.shuffle_flashcard;
+    if (
+      setData.fuzzy_tolerance !== null &&
+      setData.fuzzy_tolerance !== undefined
+    )
+      settings.fuzzyTolerance = setData.fuzzy_tolerance;
+    if (setData.use_term !== null && setData.use_term !== undefined)
+      settings.answerByTerm = setData.use_term;
+    if (setData.use_mc !== null && setData.use_mc !== undefined)
+      settings.multipleChoice = setData.use_mc;
+    if (setData.round_time !== null && setData.round_time !== undefined)
+      settings.roundTime = setData.round_time;
 
     return {
       id: setId,
       name: setData.name,
-      settings
+      settings,
     };
-
   } catch (err) {
     console.error("Error loading public set:", err);
     return null;

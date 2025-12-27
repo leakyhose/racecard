@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { socket } from "../socket";
-import type { Lobby, Player, Settings, Flashcard, GameStatus } from "@shared/types";
+import type {
+  Lobby,
+  Player,
+  Settings,
+  Flashcard,
+  GameStatus,
+} from "@shared/types";
 
 // Keeps lobby instnance updated, redirecting to home if lobby ever doesnt exist
 export function useLobbyData(code: string | undefined) {

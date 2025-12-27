@@ -70,7 +70,7 @@ export function updateFlashcard(
   lobby.flashcards = flashcards;
   lobby.flashcardName = setName == " " ? "Unnamed Set" : setName;
   lobby.flashcardID = setID == " " ? "UNNAMED" : setID;
-  
+
   // Update pointsToWin default
   const maxPoints = 5 * flashcards.length;
   lobby.settings.pointsToWin = Math.min(100, maxPoints);

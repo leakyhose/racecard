@@ -228,7 +228,10 @@ export function validateAnswer(socketId: string, answerText: string) {
   if (!player) return null;
 
   // Check if player already submitted in MC mode
-  if (lobby.settings.multipleChoice && gs.submittedPlayers.includes(player.id)) {
+  if (
+    lobby.settings.multipleChoice &&
+    gs.submittedPlayers.includes(player.id)
+  ) {
     return null;
   }
 

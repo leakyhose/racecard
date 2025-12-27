@@ -112,22 +112,29 @@ export function parseAdvancedFlashcards(
     if (parts.length >= 3) {
       const question = parts[0].trim();
       const answer = parts[1].trim();
-      
+
       // Get all wrong answers (distractors)
-      const rawDistractors = parts.slice(2).map(p => p.trim()).filter(p => p !== "");
+      const rawDistractors = parts
+        .slice(2)
+        .map((p) => p.trim())
+        .filter((p) => p !== "");
 
       if (question && answer && rawDistractors.length >= 1) {
         let trickDefinitions: string[] = [];
-        
+
         if (rawDistractors.length === 1) {
-             // [Correct, wrong, wrong]
-             trickDefinitions = [answer, rawDistractors[0], rawDistractors[0]];
+          // [Correct, wrong, wrong]
+          trickDefinitions = [answer, rawDistractors[0], rawDistractors[0]];
         } else if (rawDistractors.length === 2) {
-             // [wrong1, wrong2, wrong2]
-             trickDefinitions = [rawDistractors[0], rawDistractors[1], rawDistractors[1]];
+          // [wrong1, wrong2, wrong2]
+          trickDefinitions = [
+            rawDistractors[0],
+            rawDistractors[1],
+            rawDistractors[1],
+          ];
         } else {
-             // [wrong1, wrong2, wrong3] (take first 3)
-             trickDefinitions = rawDistractors.slice(0, 3);
+          // [wrong1, wrong2, wrong3] (take first 3)
+          trickDefinitions = rawDistractors.slice(0, 3);
         }
 
         flashcards.push({

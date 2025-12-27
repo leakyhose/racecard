@@ -12,7 +12,13 @@ interface LobbyHeaderProps {
   userId?: string;
 }
 
-export function LobbyHeader({ code, isLeader, lobby, isPublicSet, userId }: LobbyHeaderProps) {
+export function LobbyHeader({
+  code,
+  isLeader,
+  lobby,
+  isPublicSet,
+  userId,
+}: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
 
   const handleStartGame = () => {
@@ -65,11 +71,8 @@ export function LobbyHeader({ code, isLeader, lobby, isPublicSet, userId }: Lobb
           <div className="leading-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-coffee text-vanilla font-bold tracking-wider text-xs pointer-events-none">
             {showCopyMessage ? "Copied!" : "Click to Copy"}
           </div>
-
         </div>
-
       </div>
-      
 
       <div className="absolute left-1/2 -translate-x-1/2 text-coffee">
         {isGenerating ? (

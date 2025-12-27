@@ -202,7 +202,10 @@ export function GameSettings({
                 onChange={() =>
                   canEdit &&
                   !isLocked("multipleChoice") &&
-                  handleChange("multipleChoice", !currentSettings.multipleChoice)
+                  handleChange(
+                    "multipleChoice",
+                    !currentSettings.multipleChoice,
+                  )
                 }
               />
             </div>
@@ -226,7 +229,10 @@ export function GameSettings({
                 onChange={() =>
                   canEdit &&
                   !isLocked("multipleChoice") &&
-                  handleChange("multipleChoice", !currentSettings.multipleChoice)
+                  handleChange(
+                    "multipleChoice",
+                    !currentSettings.multipleChoice,
+                  )
                 }
               />
             </div>

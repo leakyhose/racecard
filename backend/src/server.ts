@@ -143,7 +143,12 @@ io.on("connection", (socket) => {
     }
 
     lobby.distractorStatus = "idle";
-    io.to(lobby.code).emit("flashcardsUpdated", lobby.flashcards, lobby.flashcardID, lobby.flashcardName);
+    io.to(lobby.code).emit(
+      "flashcardsUpdated",
+      lobby.flashcards,
+      lobby.flashcardID,
+      lobby.flashcardName,
+    );
   });
 
   // Updates settings
@@ -186,17 +191,30 @@ io.on("connection", (socket) => {
 
     lobby.distractorStatus = "generating";
     lobby.generationProgress = "Starting generation...";
-    io.to(lobby.code).emit("distractorStatusUpdated", "generating", "Starting generation...");
+    io.to(lobby.code).emit(
+      "distractorStatusUpdated",
+      "generating",
+      "Starting generation...",
+    );
 
     try {
       await generateDistractors(lobby.code, mode, (progress) => {
         lobby.generationProgress = progress;
-        io.to(lobby.code).emit("distractorStatusUpdated", "generating", progress);
+        io.to(lobby.code).emit(
+          "distractorStatusUpdated",
+          "generating",
+          progress,
+        );
       });
       lobby.distractorStatus = "ready";
       lobby.generationProgress = undefined;
       io.to(lobby.code).emit("distractorStatusUpdated", "ready");
-      io.to(lobby.code).emit("flashcardsUpdated", lobby.flashcards, lobby.flashcardID, lobby.flashcardName);
+      io.to(lobby.code).emit(
+        "flashcardsUpdated",
+        lobby.flashcards,
+        lobby.flashcardID,
+        lobby.flashcardName,
+      );
     } catch (error) {
       console.error("Error generating distractors:", error);
       lobby.distractorStatus = "error";
@@ -339,58 +357,66 @@ io.on("connection", (socket) => {
             if (lobby) io.to(lobbyCode).emit("playersUpdated", lobby.players);
 
             // Wait 5 seconds to show results
-            setLobbyTimeout(lobbyCode, () => {
-              // Check for winner based on points
-              const currentLobby = getLobbyByCode(lobbyCode);
-              const pointsToWin = currentLobby?.settings.pointsToWin || 100;
-              const winner = currentLobby?.players.find(
-                (p) => p.score >= pointsToWin,
-              );
+            setLobbyTimeout(
+              lobbyCode,
+              () => {
+                // Check for winner based on points
+                const currentLobby = getLobbyByCode(lobbyCode);
+                const pointsToWin = currentLobby?.settings.pointsToWin || 100;
+                const winner = currentLobby?.players.find(
+                  (p) => p.score >= pointsToWin,
+                );
 
-              if (winner) {
-                const finalLobby = getLobbyByCode(lobbyCode);
-                if (finalLobby) {
-                  finalLobby.status = "finished";
-                  if (finalLobby.players[0]) {
-                    finalLobby.players[0].wins += 1;
+                if (winner) {
+                  const finalLobby = getLobbyByCode(lobbyCode);
+                  if (finalLobby) {
+                    finalLobby.status = "finished";
+                    if (finalLobby.players[0]) {
+                      finalLobby.players[0].wins += 1;
+                    }
+                    finalLobby.players = sortPlayersByMetric(finalLobby);
+                    io.to(lobbyCode).emit("lobbyStatusUpdated", "finished");
+                    io.to(lobbyCode).emit("playersUpdated", finalLobby.players);
+                    endGame(lobbyCode);
                   }
-                  finalLobby.players = sortPlayersByMetric(finalLobby);
-                  io.to(lobbyCode).emit("lobbyStatusUpdated", "finished");
-                  io.to(lobbyCode).emit("playersUpdated", finalLobby.players);
-                  endGame(lobbyCode);
+                  return;
                 }
-                return;
-              }
 
-              const nextQuestionData = advanceToNextFlashcard(lobbyCode);
+                const nextQuestionData = advanceToNextFlashcard(lobbyCode);
 
-              if (nextQuestionData) {
-                // Continue to next round
-                runGameplayLoop(lobbyCode);
-              } else {
-                // Game over
-                const finalLobby = getLobbyByCode(lobbyCode);
-                if (finalLobby) {
-                  finalLobby.status = "finished";
-                  if (finalLobby.players[0]) {
-                    finalLobby.players[0].wins += 1;
+                if (nextQuestionData) {
+                  // Continue to next round
+                  runGameplayLoop(lobbyCode);
+                } else {
+                  // Game over
+                  const finalLobby = getLobbyByCode(lobbyCode);
+                  if (finalLobby) {
+                    finalLobby.status = "finished";
+                    if (finalLobby.players[0]) {
+                      finalLobby.players[0].wins += 1;
+                    }
+                    finalLobby.players = sortPlayersByMetric(finalLobby);
+                    io.to(lobbyCode).emit("lobbyStatusUpdated", "finished");
+                    io.to(lobbyCode).emit("playersUpdated", finalLobby.players);
+                    endGame(lobbyCode);
                   }
-                  finalLobby.players = sortPlayersByMetric(finalLobby);
-                  io.to(lobbyCode).emit("lobbyStatusUpdated", "finished");
-                  io.to(lobbyCode).emit("playersUpdated", finalLobby.players);
-                  endGame(lobbyCode);
+                  return;
                 }
-                return;
-              }
-            }, 3000);
+              },
+              3000,
+            );
           };
 
           // Store round info, callback endRound is called if answers are given faster than round
           activeRounds.set(lobbyCode, { endRound, roundStartTime, roundEnded });
 
-          setLobbyTimeout(lobbyCode, () => {
-            endRound();
-          }, ROUND_DURATION);
+          setLobbyTimeout(
+            lobbyCode,
+            () => {
+              endRound();
+            },
+            ROUND_DURATION,
+          );
         };
 
         runGameplayLoop(lobby.code);
