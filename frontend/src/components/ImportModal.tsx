@@ -7,8 +7,9 @@ import {
   type RowSeparator,
 } from "../utils/flashcardUtils";
 import type { Flashcard } from "@shared/types";
-import step1Image from "@shared/images/step1.png";
-import step2Image from "@shared/images/step2.png";
+
+const step1Image = "/images/step1.png";
+const step2Image = "/images/step2.png";
 
 interface ImportModalProps {
   isOpen: boolean;

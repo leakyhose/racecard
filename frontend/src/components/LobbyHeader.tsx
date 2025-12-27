@@ -2,7 +2,6 @@ import type { Lobby } from "@shared/types";
 import { socket } from "../socket";
 import { useState } from "react";
 import { UserStatusHeader } from "./UserStatusHeader";
-//import racecatImage from "@shared/images/racecat.png";
 
 interface LobbyHeaderProps {
   code: string;
