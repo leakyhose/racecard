@@ -70,31 +70,31 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
       let text = "";
 
       allData.forEach((card) => {
-        const term = (card.term || "").replace(/[\t\n]/g, " ").trim();
-        const def = (card.definition || "").replace(/[\t\n]/g, " ").trim();
+        const term = (card.term || "").replace(/[\t\n|]/g, " ").trim();
+        const def = (card.definition || "").replace(/[\t\n|]/g, " ").trim();
 
         if (mode === "standard") {
-          text += `${term}\t${def}\n`;
+          text += `${term}|${def}\n`;
         } else if (mode === "term-distractors") {
           const distractors = card.trick_terms || [];
           const uniqueDistractors = [...new Set(distractors as string[])]
-            .map(d => d.replace(/[\t\n]/g, " ").trim())
+            .map(d => d.replace(/[\t\n|]/g, " ").trim())
             .filter((d) => d !== term && d !== "");
           
-          text += `${def}\t${term}`;
+          text += `${def}|${term}`;
           if (uniqueDistractors.length > 0) {
-            text += `\t${uniqueDistractors.join("\t")}`;
+            text += `|${uniqueDistractors.join("|")}`;
           }
           text += "\n";
         } else if (mode === "definition-distractors") {
           const distractors = card.trick_definitions || [];
           const uniqueDistractors = [...new Set(distractors as string[])]
-            .map(d => d.replace(/[\t\n]/g, " ").trim())
+            .map(d => d.replace(/[\t\n|]/g, " ").trim())
             .filter((d) => d !== def && d !== "");
 
-          text += `${term}\t${def}`;
+          text += `${term}|${def}`;
           if (uniqueDistractors.length > 0) {
-            text += `\t${uniqueDistractors.join("\t")}`;
+            text += `|${uniqueDistractors.join("|")}`;
           }
           text += "\n";
         }
@@ -142,7 +142,7 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-4xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] flex flex-col h-[80vh] overflow-hidden"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 shadow-[8px_8px_0px_0px_#644536] flex flex-col h-[80vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-4">
@@ -192,9 +192,7 @@ export function ExportModal({ isOpen, onClose, setId, setName }: ExportModalProp
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
               <div className="mb-2 text-sm text-coffee/70 font-bold shrink-0">
-                {mode === "standard" && "Format: Term [TAB] Definition"}
-                {mode === "term-distractors" && "Format: Definition [TAB] Term [TAB] Distractor1 [TAB] Distractor2..."}
-                {mode === "definition-distractors" && "Format: Term [TAB] Definition [TAB] Distractor1 [TAB] Distractor2..."}
+                Seperated using |
               </div>
               <textarea
                 readOnly
