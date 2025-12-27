@@ -244,7 +244,7 @@ export function Game() {
               <div className="w-full max-w-2xl mx-auto p-6">
                 {!hasAnswered ? (
                   currentChoices ? (
-                    <div className="grid grid-cols-2 gap-6 auto-rows-fr min-h-[11.5rem]">
+                    <div className="grid grid-cols-2 gap-6 auto-rows-fr min-h-46">
                       {Array.from(new Set(currentChoices)).map(
                         (choice, index) => (
                           <button

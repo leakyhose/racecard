@@ -8,7 +8,7 @@ import fs from "fs";
 const distractorPrompt = fs.readFileSync("./src/distractorPrompt.md", "utf-8");
 
 const MODEL_NAME = "gpt-4.1";
-const BATCH_SIZE = 25;
+const BATCH_SIZE = 50;
 
 // Load environment variables
 config();
@@ -185,7 +185,42 @@ async function generateDistractors(
         console.warn(
           `Batch ${batchIndex + 1} attempt ${attempt + 1}: Retrying ${nextBatch.length} missing items...`,
         );
-      } catch (error) {
+      } catch (error: any) {
+        // Handle Rate Limiting
+        if (error.status === 429) {
+          let retryAfterMs = error.headers?.["retry-after-ms"];
+          let retryAfter = error.headers?.["retry-after"];
+
+          // Handle Headers object if present
+          if (
+            !retryAfterMs &&
+            !retryAfter &&
+            error.headers &&
+            typeof error.headers.get === "function"
+          ) {
+            retryAfterMs = error.headers.get("retry-after-ms");
+            retryAfter = error.headers.get("retry-after");
+          }
+
+          let waitTime = 1000; // Default 1s
+          if (retryAfterMs) {
+            waitTime = parseInt(retryAfterMs, 10);
+          } else if (retryAfter) {
+            waitTime = parseInt(retryAfter, 10) * 1000;
+          }
+
+          console.warn(
+            `Batch ${
+              batchIndex + 1
+            }: Rate limit hit. Waiting ${waitTime}ms before retrying...`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
+
+          // Don't count this as a failed attempt
+          attempt--;
+          continue;
+        }
+
         if (attempt === MAX_RETRIES - 1) throw error;
         console.warn(
           `Batch ${batchIndex + 1} attempt ${attempt + 1} failed:`,

@@ -96,7 +96,6 @@ export function LoadFlashcardsModal({
             .eq("set_id", set.id);
 
           // Check if any flashcards have generated MC options
-          // We check for existence of ANY card with term_generated=true or definition_generated=true
           const { count: termGenCount } = await supabase
             .from("flashcards")
             .select("*", { count: "exact", head: true })
@@ -163,7 +162,6 @@ export function LoadFlashcardsModal({
     setError("");
 
     try {
-      // Fetch flashcards for this set with pagination to handle >1000 cards
       let allData: FlashcardDBRow[] = [];
       let page = 0;
       const pageSize = 1000;
