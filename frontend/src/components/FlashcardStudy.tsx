@@ -56,7 +56,10 @@ export function FlashcardStudy({
       ? currentCard?.termGenerated
       : currentCard?.definitionGenerated);
 
+  const allowView = publicSetInfo ? publicSetInfo.allow_view !== false : true;
+
   const handlePrevious = () => {
+    if (!allowView) return;
     setIsSwitching(true);
     setCurrentIndex((prev) => {
       if (publicSetInfo) {
@@ -69,6 +72,7 @@ export function FlashcardStudy({
   };
 
   const handleNext = () => {
+    if (!allowView) return;
     setIsSwitching(true);
     setCurrentIndex((prev) => {
       if (publicSetInfo) {
@@ -86,6 +90,7 @@ export function FlashcardStudy({
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!allowView) return;
     setIsSwitching(true);
     setCurrentIndex(parseInt(e.target.value));
     setIsFlipped(false);
@@ -105,10 +110,17 @@ export function FlashcardStudy({
 
   return (
     <div className="flex items-center justify-center w-full p-8 relative">
-      <div className="flex flex-col items-center justify-center w-full max-w-3xl gap-6">
+      <div className="flex flex-col items-center justify-center w-full max-w-5xl gap-6">
         <div className="flex flex-col-reverse items-center justify-center w-full gap-6">
-          {/* Flashcard */}
-          <div className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
+          <div className="peer flex items-center justify-center w-full gap-4">
+            <ArrowButton
+              onClick={handlePrevious}
+              direction="right"
+              disabled={!allowView}
+              className={!allowView ? "cursor-not-allowed opacity-50" : ""}
+            />
+            {/* Flashcard */}
+            <div className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
             <div
               onClick={handleFlip}
               className={`
@@ -257,6 +269,13 @@ export function FlashcardStudy({
               )}
             </div>
           </div>
+            <ArrowButton
+              onClick={handleNext}
+              direction="left"
+              disabled={!allowView}
+              className={!allowView ? "cursor-not-allowed opacity-50" : ""}
+            />
+          </div>
           <div
             className={`transition-all duration-400 peer-hover:-translate-y-[23px] flex items-center gap-3 ${currentIndex === -1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
           >
@@ -271,19 +290,21 @@ export function FlashcardStudy({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 w-full relative z-40">
-          <ArrowButton onClick={handlePrevious} direction="right" />
-
-          <input
-            type="range"
-            min={publicSetInfo ? -1 : 0}
-            max={flashcards.length - 1}
-            value={currentIndex}
-            onChange={handleSliderChange}
-            className="flex-1 h-0 bg-vanilla border rounded-xl border-coffee appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-coffee [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
-          />
-
-          <ArrowButton onClick={handleNext} direction="left" />
+        <div className="flex items-center gap-4 w-full max-w-3xl relative z-40 mt-6">
+          {allowView ? (
+            <input
+              type="range"
+              min={publicSetInfo ? -1 : 0}
+              max={flashcards.length - 1}
+              value={currentIndex}
+              onChange={handleSliderChange}
+              className="flex-1 h-0 bg-vanilla border rounded-xl border-coffee appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-coffee [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+            />
+          ) : (
+            <div className="w-full text-center text-sm font-bold text-coffee/60 italic">
+              Viewing all flashcards disabled by publisher.
+            </div>
+          )}
         </div>
       </div>
     </div>

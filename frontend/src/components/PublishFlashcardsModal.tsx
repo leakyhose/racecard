@@ -47,6 +47,7 @@ export function PublishFlashcardsModal({
   const { user } = useAuth();
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState("");
+  const [allowView, setAllowView] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -68,6 +69,7 @@ export function PublishFlashcardsModal({
     if (isOpen) {
       setName(initialName);
       setDescription("");
+      setAllowView(false);
       setError("");
       setSuccess(false);
 
@@ -187,6 +189,7 @@ export function PublishFlashcardsModal({
           username: user.user_metadata?.username || "Unknown",
           name: name.trim(),
           description: description.trim(),
+          allow_view: allowView,
           shuffle_flashcard: settings.shuffle.locked
             ? settings.shuffle.value
             : null,
@@ -331,6 +334,23 @@ export function PublishFlashcardsModal({
                 placeholder="Describe your set..."
                 maxLength={200}
               />
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-light-vanilla border-2 border-coffee/20">
+              <div>
+                <div className="font-bold text-sm">Allow Viewing All Cards</div>
+                <div className="text-xs text-coffee/60">
+                  Let users browse all flashcards in the set
+                </div>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={allowView}
+                  onChange={(e) => setAllowView(e.target.checked)}
+                  className="w-5 h-5 accent-coffee cursor-pointer"
+                />
+              </div>
             </div>
 
             <div>

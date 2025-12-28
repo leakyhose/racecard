@@ -327,3 +327,16 @@
 .tab-btn.active.left-arrow:hover svg {
   transition-delay: 0s;
 }
+
+.swallow-icon:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
+.swallow-icon:disabled:hover span:before {
+  transform: rotate(40deg);
+}
+
+.swallow-icon:disabled:hover span:after {
+  transform: rotate(-40deg);
+}

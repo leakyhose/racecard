@@ -608,7 +608,7 @@ export default function Lobby() {
               {(currentSection === "study" || isTransitioning) && (
                 <div
                   ref={studyRef}
-                  className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full"
+                  className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full pb-20"
                 >
                   <FlashcardStudy
                     flashcards={lobby.flashcards}
@@ -628,15 +628,16 @@ export default function Lobby() {
                     saveShake={saveShake}
                     publicSetInfo={publicSetInfo}
                   />
-                  {lobby.flashcards.length > 0 && (
-                    <div className="mt-8 relative z-30">
-                      <ArrowButton
-                        onClick={scrollToAllCards}
-                        disabled={isTransitioning}
-                        direction="down"
-                      />
-                    </div>
-                  )}
+                  {lobby.flashcards.length > 0 &&
+                    (!publicSetInfo || publicSetInfo.allow_view !== false) && (
+                      <div className="mt-2 relative z-30">
+                        <ArrowButton
+                          onClick={scrollToAllCards}
+                          disabled={isTransitioning}
+                          direction="down"
+                        />
+                      </div>
+                    )}
                 </div>
               )}
 
