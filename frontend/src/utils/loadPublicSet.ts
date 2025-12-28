@@ -6,6 +6,9 @@ export interface LoadedPublicSet {
   id: string;
   name: string;
   description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  username?: string;
   settings: Partial<Settings>;
 }
 
@@ -120,6 +123,9 @@ export async function loadPublicSet(
       id: setId,
       name: setData.name,
       description: setData.description,
+      createdAt: setData.created_at,
+      updatedAt: setData.updated_at,
+      username: setData.username,
       settings,
     };
   } catch (err) {

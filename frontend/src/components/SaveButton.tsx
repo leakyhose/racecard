@@ -1,6 +1,6 @@
 interface SaveButtonProps {
   isSaved: boolean;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   className?: string;
@@ -18,7 +18,7 @@ export function SaveButton({
       className={`pl-2 pt-0.5 flex justify-center items-center relative cursor-pointer select-none text-[20px] text-coffee fill-current ${className}`}
       onClick={(e) => {
         e.preventDefault();
-        onClick();
+        onClick(e);
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

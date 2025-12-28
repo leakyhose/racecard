@@ -65,10 +65,14 @@ export default function Lobby() {
   const [showTooltip, setShowTooltip] = useState(false);
   const [lockedSettings, setLockedSettings] = useState<Partial<Settings>>({});
   const [isPublicSet, setIsPublicSet] = useState(false);
+  const [publicSetInfo, setPublicSetInfo] = useState<LoadedPublicSet | null>(
+    null,
+  );
 
   const handlePublicSetLoaded = (set: LoadedPublicSet) => {
     setIsSaved(true);
     setIsPublicSet(true);
+    setPublicSetInfo(set);
     setLockedSettings(set.settings);
     setTrackedSetId(set.id);
 
@@ -103,6 +107,7 @@ export default function Lobby() {
 
   const handlePrivateSetLoaded = (saved = false) => {
     setIsPublicSet(false);
+    setPublicSetInfo(null);
     setLockedSettings({});
     setIsSaved(saved);
   };
@@ -608,6 +613,7 @@ export default function Lobby() {
                   <FlashcardStudy
                     flashcards={lobby.flashcards}
                     flashcardName={lobby.flashcardName}
+                    flashcardDescription={lobby.flashcardDescription}
                     answerByTerm={lobby.settings.answerByTerm}
                     multipleChoice={lobby.settings.multipleChoice}
                     isSaved={isSaved || isPublicSet}
@@ -620,6 +626,7 @@ export default function Lobby() {
                       }
                     }}
                     saveShake={saveShake}
+                    publicSetInfo={publicSetInfo}
                   />
                   {lobby.flashcards.length > 0 && (
                     <div className="mt-8 relative z-30">
