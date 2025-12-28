@@ -566,7 +566,7 @@ export default function Lobby() {
             </>
           ) : (
             <>
-              <div className="h-[35%] flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)] shrink-0">
+              <div className="flex flex-col min-h-0 pl-4 pr-4 pt-4 pb-2 shrink-0">
                 <GameControls lobby={lobby} userId={socket.id || ""} />
               </div>
 

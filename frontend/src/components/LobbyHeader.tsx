@@ -1,6 +1,6 @@
 import type { Lobby } from "@shared/types";
 import { socket } from "../socket";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserStatusHeader } from "./UserStatusHeader";
 
 interface LobbyHeaderProps {
@@ -20,6 +20,36 @@ export function LobbyHeader({
   userId,
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
+  const [roundCountdown, setRoundCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleNewFlashcard = () => {
+      setRoundCountdown(Number(lobby.settings.roundTime) || 10);
+    };
+
+    const handleEndFlashcard = () => {
+      setRoundCountdown(null);
+    };
+
+    socket.on("newFlashcard", handleNewFlashcard);
+    socket.on("endFlashcard", handleEndFlashcard);
+
+    return () => {
+      socket.off("newFlashcard", handleNewFlashcard);
+      socket.off("endFlashcard", handleEndFlashcard);
+    };
+  }, [lobby.settings.roundTime]);
+
+  useEffect(() => {
+    if (roundCountdown === null) return;
+    if (roundCountdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setRoundCountdown((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [roundCountdown]);
 
   const handleStartGame = () => {
     socket.emit("startGame");
@@ -134,8 +164,14 @@ export function LobbyHeader({
             </div>
           ) : lobby.status === "finished" ? (
             <div className="font-bold text-lg">Game Finished</div>
+          ) : lobby.status === "starting" ? (
+            <></>
           ) : (
-            <div className="text-terracotta font-bold">Game in Progress</div>
+            <div className="text-terracotta font-bold">
+              {roundCountdown !== null && roundCountdown > 0
+                ? `${roundCountdown}`
+                : ""}
+            </div>
           )
         ) : lobby.flashcards.length == 0 ? (
           <div className="font-bold text-lg">
@@ -146,7 +182,13 @@ export function LobbyHeader({
             Error occurred while generating choices
           </div>
         ) : lobby.status === "ongoing" ? (
-          <div className="text-terracotta font-bold">Game in progress...</div>
+            <div className="text-terracotta font-bold">
+              {roundCountdown !== null && roundCountdown > 0
+                ? `${roundCountdown}`
+                : ""}
+            </div>
+        ) : lobby.status === "starting" ? (
+            <></>
         ) : lobby.status === "finished" ? (
           <div className="font-bold text-lg">
             Waiting for leader to continue...

@@ -76,18 +76,26 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
             <button
               onClick={handleVote}
               disabled={hasVoted}
-              className={`text-coffee font-bold transition-colors cursor-pointer ${hasVoted ? "underline decoration-2 underline-offset-4 opacity-50 cursor-default" : "hover:text-terracotta"}`}
+              className="group relative rounded-lg bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-full"
             >
-              Vote to end game
+              <span
+                className={`text-sm block w-full h-full rounded-lg border-2 border-coffee px-4 py-2 font-bold text-vanilla bg-terracotta tracking-widest -translate-y-[0.05rem] transition-transform duration-100 ease-out ${
+                  !hasVoted
+                    ? "group-hover:-translate-y-[0.175rem] group-active:translate-y-0"
+                    : ""
+                }`}
+              >
+                {hasVoted ? "Voted to End" : "Vote to End Game"}
+              </span>
             </button>
           ) : (
             <div className="text-coffee/50 font-bold italic">Game Finished</div>
           )}
 
           {votes > 0 && lobby.status === "ongoing" && (
-            <div className="text-sm text-coffee/70 font-bold">
-              Votes: {votes}/{totalPlayers} ({Math.max(0, votesNeeded - votes)}{" "}
-              more needed)
+            <div className="text-sm text-coffee/70 font-bold text-center mt-1">
+              {votes}/{totalPlayers} votes. {Math.max(0, votesNeeded - votes)}{" "}
+              more needed to end game.
             </div>
           )}
         </div>
