@@ -48,6 +48,7 @@ export function PublishFlashcardsModal({
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState("");
   const [allowView, setAllowView] = useState(false);
+  const [allowSave, setAllowSave] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -70,6 +71,7 @@ export function PublishFlashcardsModal({
       setName(initialName);
       setDescription("");
       setAllowView(false);
+      setAllowSave(false);
       setError("");
       setSuccess(false);
 
@@ -190,6 +192,7 @@ export function PublishFlashcardsModal({
           name: name.trim(),
           description: description.trim(),
           allow_view: allowView,
+          allow_save: allowSave,
           shuffle_flashcard: settings.shuffle.locked
             ? settings.shuffle.value
             : null,
@@ -348,6 +351,23 @@ export function PublishFlashcardsModal({
                   type="checkbox"
                   checked={allowView}
                   onChange={(e) => setAllowView(e.target.checked)}
+                  className="w-5 h-5 accent-coffee cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 bg-light-vanilla border-2 border-coffee/20">
+              <div>
+                <div className="font-bold text-sm">Allow Saving</div>
+                <div className="text-xs text-coffee/60">
+                  Let users save this set to their library
+                </div>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={allowSave}
+                  onChange={(e) => setAllowSave(e.target.checked)}
                   className="w-5 h-5 accent-coffee cursor-pointer"
                 />
               </div>

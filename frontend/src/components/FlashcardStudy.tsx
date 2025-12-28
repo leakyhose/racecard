@@ -30,6 +30,7 @@ export function FlashcardStudy({
   const [currentIndex, setCurrentIndex] = useState(publicSetInfo ? -1 : 0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (publicSetInfo) {
@@ -57,6 +58,7 @@ export function FlashcardStudy({
       : currentCard?.definitionGenerated);
 
   const allowView = publicSetInfo ? publicSetInfo.allow_view !== false : true;
+  const allowSave = publicSetInfo ? publicSetInfo.allow_save !== false : true;
 
   const handlePrevious = () => {
     if (!allowView) return;
@@ -120,9 +122,13 @@ export function FlashcardStudy({
               className={!allowView ? "cursor-not-allowed opacity-50" : ""}
             />
             {/* Flashcard */}
-            <div className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40">
             <div
-              onClick={handleFlip}
+              className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <div
+                onClick={handleFlip}
               className={`
               grid grid-cols-1 w-full flex-1 transition-transform transform-3d cursor-pointer
               ${isSwitching ? "duration-0" : "duration-1000"}
@@ -159,7 +165,7 @@ export function FlashcardStudy({
                           <div className="text-3xl font-bold text-coffee whitespace-pre-wrap wrap-break-word hyphens-auto text-center">
                             {publicSetInfo.name}
                           </div>
-                          {onSave && (
+                          {onSave && allowSave && (
                             <SaveButton
                               isSaved={isSaved}
                               onClick={(e) => {
@@ -277,10 +283,10 @@ export function FlashcardStudy({
             />
           </div>
           <div
-            className={`transition-all duration-400 peer-hover:-translate-y-[23px] flex items-center gap-3 ${currentIndex === -1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+            className={`transition-all duration-400 flex items-center gap-3 ${currentIndex === -1 ? "opacity-0 pointer-events-none" : "opacity-100"} ${isHovered ? "-translate-y-[23px]" : ""}`}
           >
             <div className="font-bold text-xl">{flashcardName}</div>
-            {onSave && (
+            {onSave && allowSave && (
               <SaveButton
                 isSaved={isSaved}
                 onClick={onSave}
