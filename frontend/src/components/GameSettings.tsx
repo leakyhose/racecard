@@ -64,7 +64,7 @@ export function GameSettings({
   };
 
   const handleImport = (flashcards: Flashcard[]) => {
-    socket.emit("updateFlashcard", flashcards, " ", " ");
+    socket.emit("updateFlashcard", flashcards, " ", " ", "Unsaved set");
     onPrivateSetLoaded?.(false);
   };
 

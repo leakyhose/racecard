@@ -39,6 +39,7 @@ export interface Lobby {
   flashcards: Flashcard[];
   flashcardID: string;
   flashcardName: string;
+  flashcardDescription?: string;
   status: GameStatus;
   settings: Settings;
   leader: string; // ID of leader
@@ -68,6 +69,7 @@ export interface ServerToClientEvents {
     flashcards: Flashcard[],
     flashcardID: string,
     flashcardName: string,
+    flashcardDescription?: string,
   ) => void;
   playersUpdated: (players: Player[]) => void;
   lobbyStatusUpdated: (status: GameStatus) => void;
@@ -92,7 +94,12 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   createLobby: (nickname: string) => void;
   joinLobby: (code: string, nickname: string) => void;
-  updateFlashcard: (cards: Flashcard[], name: string, id: string) => void;
+  updateFlashcard: (
+    cards: Flashcard[],
+    name: string,
+    id: string,
+    description?: string,
+  ) => void;
   updateSettings: (settings: Settings) => void;
   updateLeader: (nextLeaderId: string) => void;
   startGame: () => void;

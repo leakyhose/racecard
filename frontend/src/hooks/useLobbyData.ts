@@ -51,9 +51,18 @@ export function useLobbyData(code: string | undefined) {
       flashcards: Flashcard[],
       flashcardID: string,
       flashcardName: string,
+      flashcardDescription?: string,
     ) => {
       setLobby((prev) =>
-        prev ? { ...prev, flashcards, flashcardID, flashcardName } : prev,
+        prev
+          ? {
+              ...prev,
+              flashcards,
+              flashcardID,
+              flashcardName,
+              flashcardDescription,
+            }
+          : prev,
       );
     };
 

@@ -5,6 +5,7 @@ import type { Flashcard, Settings } from "@shared/types";
 export interface LoadedPublicSet {
   id: string;
   name: string;
+  description?: string;
   settings: Partial<Settings>;
 }
 
@@ -89,7 +90,13 @@ export async function loadPublicSet(
       definitionGenerated: card.definition_generated || false,
     }));
 
-    socket.emit("updateFlashcard", flashcards, setData.name, setId);
+    socket.emit(
+      "updateFlashcard",
+      flashcards,
+      setData.name,
+      setId,
+      setData.description,
+    );
 
     const settings: Partial<Settings> = {};
     if (
@@ -112,6 +119,7 @@ export async function loadPublicSet(
     return {
       id: setId,
       name: setData.name,
+      description: setData.description,
       settings,
     };
   } catch (err) {

@@ -214,7 +214,13 @@ export function LoadFlashcardsModal({
         definitionGenerated: card.definition_generated || false,
       }));
 
-      socket.emit("updateFlashcard", flashcards, setName, setId);
+      socket.emit(
+        "updateFlashcard",
+        flashcards,
+        setName,
+        setId,
+        `${user?.user_metadata?.username || "User"}'s private set`,
+      );
       onSetLoaded?.(true);
       onClose();
     } catch {

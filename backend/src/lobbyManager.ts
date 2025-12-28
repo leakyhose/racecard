@@ -38,6 +38,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
     flashcards: [],
     flashcardID: "",
     flashcardName: "",
+    flashcardDescription: "",
     status: "waiting",
     settings: {
       shuffle: true,
@@ -62,6 +63,7 @@ export function updateFlashcard(
   flashcards: Flashcard[],
   setName: string,
   setID: string,
+  description: string = "",
 ) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) {
@@ -70,6 +72,7 @@ export function updateFlashcard(
   lobby.flashcards = flashcards;
   lobby.flashcardName = setName == " " ? "Unnamed Set" : setName;
   lobby.flashcardID = setID == " " ? "UNNAMED" : setID;
+  lobby.flashcardDescription = description;
 
   // Update pointsToWin default
   const maxPoints = 5 * flashcards.length;

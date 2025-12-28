@@ -135,8 +135,8 @@ io.on("connection", (socket) => {
   });
 
   // Loads flashcards
-  socket.on("updateFlashcard", async (cards, setName, setID) => {
-    const lobby = updateFlashcard(socket.id, cards, setName, setID);
+  socket.on("updateFlashcard", async (cards, setName, setID, description) => {
+    const lobby = updateFlashcard(socket.id, cards, setName, setID, description);
     if (!lobby) {
       console.log(`Failed to update flashcards`);
       return;
@@ -148,6 +148,7 @@ io.on("connection", (socket) => {
       lobby.flashcards,
       lobby.flashcardID,
       lobby.flashcardName,
+      lobby.flashcardDescription,
     );
   });
 
