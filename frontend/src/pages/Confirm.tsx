@@ -9,8 +9,8 @@ export default function Confirm() {
 
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const redirectSignOut = () => {
-    signOut();
+  const redirectSignOut = async () => {
+    await signOut();
     navigate("/auth");
   };
 

@@ -92,7 +92,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error("Error signing out:", error);
+    } finally {
+      // Force state clear to ensure UI updates
+      setSession(null);
+      setUser(null);
+    }
   };
 
   const updateProfile = async (data: { username?: string }) => {
