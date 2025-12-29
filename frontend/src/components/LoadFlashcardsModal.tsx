@@ -297,7 +297,7 @@ export function LoadFlashcardsModal({
         }}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4">
-          Load Flashcard Set
+          Private Flashcards
         </h2>
 
         {loading ? (
@@ -323,7 +323,7 @@ export function LoadFlashcardsModal({
                   onClick={() => {
                     if (!loadingSetId) handleLoadSet(set.id, set.name);
                   }}
-                  className={`group relative h-[320px] w-full perspective-[1000px] ${
+                  className={`group relative h-80 w-full perspective-[1000px] ${
                     loadingSetId
                       ? "cursor-not-allowed opacity-70"
                       : "cursor-pointer"
@@ -339,7 +339,7 @@ export function LoadFlashcardsModal({
                   {/* Top Card */}
                   <div className="h-full w-full transition-transform duration-300 ease-out group-hover:-translate-y-[15px]">
                     <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
-                    <div className="absolute inset-0 bg-light-vanilla/40 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                    <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
                       <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
                       {/* Content Container */}
                       <div className="flex-1 flex flex-col items-center justify-center w-full gap-2">

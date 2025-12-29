@@ -188,39 +188,64 @@ export function PublicFlashcardsModal({
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
-            <div className="grid grid-cols-2 gap-4 mt-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 pb-6 px-2">
               {sets.map((set) => (
                 <div
                   key={set.id}
-                  className="rounded-md border-2 border-coffee p-4 bg-light-vanilla/60 transition-colors cursor-default flex flex-col h-full"
+                  onClick={() => {
+                    if (!loadingSetId) handleLoad(set.id);
+                  }}
+                  className={`group relative h-80 w-full perspective-[1000px] ${
+                    loadingSetId
+                      ? "cursor-not-allowed opacity-70"
+                      : "cursor-pointer"
+                  }`}
                 >
-                  <div className="flex-1 min-w-0 mb-4">
-                    <div className="font-bold text-lg truncate">
-                      {set.user_id === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" &&
-                        "⭐ "}
-                      {set.name}
-                    </div>
-                    <div className="text-sm text-coffee/70 font-bold mb-4">
-                      {set.user_id === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278"
-                        ? "Featured Quiz"
-                        : `by ${set.username}`}
-                      {" • "}
-                      {set.flashcard_count} Cards
-                      {" • "}
-                      {set.plays} Plays
-                    </div>
-                    <div className="text-sm text-coffee truncate">
-                      {set.description || "No description"}
+                  {/* Under Card */}
+                  <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-light-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
+                    <div className="text-center text-coffee/80 text-[9px] font-bold tracking-[0.2em]">
+                      click to load
                     </div>
                   </div>
-                  <div className="flex gap-2 shrink-0 items-center mt-auto">
-                    <button
-                      onClick={() => handleLoad(set.id)}
-                      disabled={loadingSetId !== null}
-                      className="w-full border-2 border-coffee bg-powder text-coffee px-4 py-2 hover:bg-coffee hover:text-vanilla transition-colors text-sm font-bold shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-x-0.5 disabled:translate-y-0.5"
-                    >
-                      {loadingSetId === set.id ? "..." : "Load"}
-                    </button>
+
+                  {/* Top Card */}
+                  <div className="h-full w-full transition-transform duration-300 ease-out group-hover:-translate-y-[15px]">
+                    <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
+                      <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                      <div className="relative h-full w-full p-6 flex flex-col items-center text-center">
+                        {/* Star - Fixed at top */}
+                        {set.user_id ===
+                          "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
+                          <div className="shrink-0 mb-1 text-xs">⭐</div>
+                        )}
+
+                        {/* Content Container - Centered vertically */}
+                        <div className="flex-1 flex flex-col items-center justify-center w-full gap-2 overflow-hidden">
+                          <h3 className="text-2xl font-bold text-coffee line-clamp-2 wrap-break-words w-full px-2">
+                            {set.name}
+                          </h3>
+
+                          <div className="flex flex-col gap-1 mt-1 shrink-0">
+                            <p className="text-sm text-coffee/70 font-bold">
+                              {set.user_id ===
+                              "d0c1b157-eb1f-42a9-bf67-c6384b7ca278"
+                                ? "Featured Quiz"
+                                : `by ${set.username}`}
+                            </p>
+                            <p className="text-xs text-coffee/40 font-bold">
+                              {set.flashcard_count} Cards • {set.plays} Plays
+                            </p>
+                          </div>
+
+                          {/* Description */}
+                          <div className="mt-2 w-full overflow-hidden px-2">
+                            <p className="text-sm text-coffee/80 line-clamp-5">
+                              {set.description || "No description provided."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

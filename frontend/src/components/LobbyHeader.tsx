@@ -92,11 +92,13 @@ export function LobbyHeader({
               <button
                 onClick={canGenerate ? handleGenerateMultipleChoice : undefined}
                 disabled={isGenerating || !canGenerate}
-                className="bg-powder text-coffee px-6 py-1 font-bold hover:bg-coffee hover:text-vanilla transition-colors tracking-widest border-2 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {canGenerate
-                  ? "Generate Multiple Choice"
-                  : "Max 200 flashcards for generation"}
+                <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                  {canGenerate
+                    ? "Generate Multiple Choice"
+                    : "Max 200 flashcards for generation"}
+                </span>
               </button>
             </div>
           ) : lobby.distractorStatus === "error" ? (
@@ -108,9 +110,11 @@ export function LobbyHeader({
               <button
                 onClick={handleStartGame}
                 disabled={isGenerating}
-                className="bg-terracotta text-vanilla px-8 py-1 font-bold hover:bg-coffee hover:text-vanilla transition-colors tracking-widest border-2 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Start Game
+                <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                  Start Game
+                </span>
               </button>
               {lobby.settings.multipleChoice && !isPublicSet && (
                 <button
@@ -118,11 +122,13 @@ export function LobbyHeader({
                     canGenerate ? handleGenerateMultipleChoice : undefined
                   }
                   disabled={isGenerating || !canGenerate}
-                  className="bg-powder text-coffee px-6 py-1 font-bold hover:bg-coffee hover:text-vanilla transition-colors tracking-widest border-2 border-coffee shadow-[4px_4px_0px_0px_#644536] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {canGenerate
-                    ? "Generate Again"
-                    : "Max 200 flashcards for generation"}
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                    {canGenerate
+                      ? "Generate Again"
+                      : "Max 200 flashcards for generation"}
+                  </span>
                 </button>
               )}
             </div>

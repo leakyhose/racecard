@@ -146,7 +146,7 @@ export function SaveFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536]"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold tracking-widest border-b-3 border-coffee pb-4 mb-6">

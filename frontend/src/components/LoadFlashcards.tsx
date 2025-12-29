@@ -153,7 +153,7 @@ export function LoadFlashcards({
     };
 
     fetchSets();
-  }, [activeTab, user?.id, refreshTrigger]);
+  }, [activeTab, user, refreshTrigger]);
 
   useEffect(() => {
     setCurrentlyLoaded(autoSelectedSetId || null);
