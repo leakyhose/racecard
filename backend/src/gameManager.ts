@@ -144,15 +144,22 @@ export function startGame(socketId: string) {
     lobby.shuffledFlashcards = [];
   }
 
-  // Check if we have a saved deck state (resuming a shuffled deck)
-  if (!lobby.shuffledFlashcards || lobby.shuffledFlashcards.length === 0) {
-    // New deck or deck exhausted, create new shuffle
-    let deck = [...lobby.flashcards];
-    if (lobby.settings.shuffle) {
-      deck = shuffle(deck);
-    }
-    lobby.shuffledFlashcards = deck;
+  // Ensure the deck is fully replenished for the session
+  // If we have a partial deck (leftovers), we keep them at the front
+  // Then we append the missing cards (shuffled if needed) to reach the full set size
+  if (!lobby.shuffledFlashcards) {
+    lobby.shuffledFlashcards = [];
   }
+
+  const currentDeckIds = new Set(lobby.shuffledFlashcards.map((c) => c.id));
+  let missingCards = lobby.flashcards.filter((c) => !currentDeckIds.has(c.id));
+
+  if (lobby.settings.shuffle) {
+    missingCards = shuffle(missingCards);
+  }
+
+  // Append missing cards to form a full game deck
+  lobby.shuffledFlashcards = [...lobby.shuffledFlashcards, ...missingCards];
 
   // Use the saved deck state for this game
   const gameFlashcards = [...lobby.shuffledFlashcards];
@@ -376,27 +383,15 @@ export function advanceToNextFlashcard(
   gs.cardsPlayed++;
   // roundStart will be set when newFlashcard is emitted
 
-  // Check for "Play All" termination
-  const isPlayAllMode =
-    lobby.settings.pointsToWin === lobby.flashcards.length * 10;
-  if (isPlayAllMode && gs.cardsPlayed >= lobby.flashcards.length) {
-    return null; // End game
+  // If we have played the full set of cards for this session, end the game
+  if (gs.cardsPlayed >= lobby.flashcards.length) {
+    return null;
   }
 
+  // If we run out of cards (shouldn't happen if logic is correct), end game
   if (!gs.flashcards[0]) {
-    if (!lobby.shuffledFlashcards || lobby.shuffledFlashcards.length === 0) {
-      let deck = [...lobby.flashcards];
-      if (lobby.settings.shuffle) {
-        deck = shuffle(deck);
-      }
-      lobby.shuffledFlashcards = deck;
-      gs.flashcards = [...deck]; // Reshuffle if empty
-    } else {
-      gs.flashcards = [...lobby.shuffledFlashcards];
-    }
+    return null;
   }
-
-  if (!gs.flashcards[0]) return null; // Safety check
 
   return getCurrentQuestion(lobbyCode);
 }
@@ -413,6 +408,18 @@ export function processUnansweredPlayers(lobbyCode: string) {
       player.totalAnswers++;
     }
   });
+}
+
+// Remove the current card from the persistent deck (used when game ends prematurely)
+export function removeCurrentCardFromDeck(lobbyCode: string) {
+  const lobby = getLobbyByCode(lobbyCode);
+  if (
+    lobby &&
+    lobby.shuffledFlashcards &&
+    lobby.shuffledFlashcards.length > 0
+  ) {
+    lobby.shuffledFlashcards.shift();
+  }
 }
 
 // Clean up game state when game ends

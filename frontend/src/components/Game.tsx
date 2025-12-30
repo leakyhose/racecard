@@ -27,7 +27,6 @@ export function Game({ lobby }: GameProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [lastAnswer, setLastAnswer] = useState("");
   const [lastResults, setLastResults] = useState<FlashcardEnd | null>(null);
-  const [cardsPlayed, setCardsPlayed] = useState<number>(0);
   const isLeader = lobby?.leader === socket.id;
   const gameInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -86,7 +85,6 @@ export function Game({ lobby }: GameProps) {
     const handleNewFlashcard = (
       question: string,
       choices: string[] | null,
-      playedCount?: number,
     ) => {
       setCountdown(null); // Clear countdown on question
       setCurrentQuestion(question);
@@ -97,7 +95,6 @@ export function Game({ lobby }: GameProps) {
       setShowResults(false);
       setCurrentChoices(choices);
       setIsCorrect(null);
-      if (playedCount !== undefined) setCardsPlayed(playedCount);
     };
 
     const handleEndFlashcard = (flashcardEnd: FlashcardEnd) => {
@@ -224,22 +221,12 @@ export function Game({ lobby }: GameProps) {
             `}
             >
               <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)] select-none">
-                {lobby.settings.pointsToWin === lobby.flashcards.length * 10 && (
-                  <div className="absolute top-4 text-coffee/80 font-bold text-xs">
-                    {cardsPlayed + 1}/{lobby.flashcards.length}
-                  </div>
-                )}
                 <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
                   {currentQuestion}
                 </div>
               </div>
 
               <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)] select-none">
-                {lobby.settings.pointsToWin === lobby.flashcards.length * 10 && (
-                  <div className="absolute top-4 text-coffee/40 font-bold text-sm">
-                    {cardsPlayed + 1}/{lobby.flashcards.length}
-                  </div>
-                )}
                 <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">
                   Correct Answer
                 </div>

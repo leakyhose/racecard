@@ -34,6 +34,7 @@ import {
   areDistractorsReady,
   areDistractorsGenerating,
   processUnansweredPlayers,
+  removeCurrentCardFromDeck,
 } from "./gameManager.js";
 
 const app = express();
@@ -399,6 +400,7 @@ io.on("connection", (socket) => {
                     finalLobby.players = sortPlayersByMetric(finalLobby);
                     io.to(lobbyCode).emit("lobbyStatusUpdated", "finished");
                     io.to(lobbyCode).emit("playersUpdated", finalLobby.players);
+                    removeCurrentCardFromDeck(lobbyCode);
                     endGame(lobbyCode);
                   }
                   return;
@@ -530,6 +532,7 @@ io.on("connection", (socket) => {
 
         io.to(lobby.code).emit("lobbyStatusUpdated", "finished");
         io.to(lobby.code).emit("playersUpdated", lobby.players);
+        removeCurrentCardFromDeck(lobby.code);
         endGame(lobby.code);
       } else {
         io.to(lobby.code).emit("endGameVotesUpdated", lobby.endGameVotes);
