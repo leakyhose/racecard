@@ -15,7 +15,6 @@ import { Game } from "../components/Game";
 import { GameControls } from "../components/GameControls";
 import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
-import { PublicFlashcardsModal } from "../components/PublicFlashcardsModal";
 import { LoadFlashcards } from "../components/LoadFlashcards";
 import { JumboLoadFlashcards } from "../components/JumboLoadFlashcards";
 import { About } from "../components/About";
@@ -42,7 +41,7 @@ export default function Lobby() {
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
-  const [showPublicModal, setShowPublicModal] = useState(false);
+  const [loadModalTab, setLoadModalTab] = useState<"personal" | "community">("personal");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [trackedSetId, setTrackedSetId] = useState<string | null>(null);
   const [saveShake, setSaveShake] = useState(false);
@@ -508,8 +507,14 @@ export default function Lobby() {
                     isLeader={isLeader}
                     refreshTrigger={refreshTrigger}
                     autoSelectedSetId={trackedSetId}
-                    onOpenModal={() => setShowLoadModal(true)}
-                    onOpenPublicModal={() => setShowPublicModal(true)}
+                    onOpenModal={() => {
+                      setLoadModalTab("personal");
+                      setShowLoadModal(true);
+                    }}
+                    onOpenPublicModal={() => {
+                      setLoadModalTab("community");
+                      setShowLoadModal(true);
+                    }}
                     isGenerating={lobby?.distractorStatus === "generating"}
                     onPublicSetLoaded={handlePublicSetLoaded}
                     onPrivateSetLoaded={handlePrivateSetLoaded}
@@ -763,14 +768,9 @@ export default function Lobby() {
         onDeleteSuccess={() => setRefreshTrigger((prev) => prev + 1)}
         currentSettings={lobby.settings}
         onSetLoaded={handlePrivateSetLoaded}
-        isLeader={isLeader}
-      />
-
-      <PublicFlashcardsModal
-        isOpen={showPublicModal}
-        onClose={() => setShowPublicModal(false)}
         onPublicSetLoaded={handlePublicSetLoaded}
         isLeader={isLeader}
+        initialTab={loadModalTab}
       />
     </div>
   );

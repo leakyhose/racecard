@@ -9,6 +9,7 @@ export interface LoadedPublicSet {
   createdAt?: string;
   updatedAt?: string;
   username?: string;
+  user_id?: string;
   allow_view?: boolean;
   allow_save?: boolean;
   settings: Partial<Settings>;
@@ -131,6 +132,7 @@ export async function loadPublicSet(
       createdAt: setData.created_at,
       updatedAt: setData.updated_at,
       username: setData.username,
+      user_id: setData.user_id,
       allow_view: setData.allow_view,
       allow_save: setData.allow_save,
       settings,

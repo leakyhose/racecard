@@ -162,7 +162,16 @@ export function FlashcardStudy({
                   <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
                     <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6 select-text">
                       {/* Title Section */}
-                      <div className="w-full flex items-center justify-center">
+                      <div className="w-full flex flex-col items-center justify-center">
+                        {publicSetInfo.user_id ===
+                          "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
+                          <div className="flex flex-col items-center mb-2 gap-1">
+                            <div className="text-xl">⭐</div>
+                            <div className="text-xs font-bold text-coffee/80 uppercase tracking-wider">
+                              Featured Set
+                            </div>
+                          </div>
+                        )}
                         <div className="flex items-center gap-3 justify-center max-w-full">
                           <div className="text-3xl font-bold text-coffee whitespace-pre-wrap wrap-break-word hyphens-auto text-center">
                             {publicSetInfo.name}

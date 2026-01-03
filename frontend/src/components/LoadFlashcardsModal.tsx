@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
@@ -6,6 +6,7 @@ import type { Flashcard, Settings } from "@shared/types";
 import { PublishFlashcardsModal } from "./PublishFlashcardsModal";
 import { EditFlashcardsModal } from "./EditFlashcardsModal";
 import { getRelativeTime } from "../utils/flashcardUtils";
+import { loadPublicSet, type LoadedPublicSet } from "../utils/loadPublicSet";
 
 interface FlashcardDBRow {
   term: string;
@@ -25,7 +26,9 @@ interface LoadFlashcardsModalProps {
   onDeleteSuccess?: () => void;
   currentSettings: Settings;
   onSetLoaded?: (saved?: boolean) => void;
+  onPublicSetLoaded?: (set: LoadedPublicSet) => void;
   isLeader: boolean;
+  initialTab?: "personal" | "community";
 }
 
 interface FlashcardSet {
@@ -36,6 +39,10 @@ interface FlashcardSet {
   has_generated: boolean;
   term_generated?: boolean;
   definition_generated?: boolean;
+  plays?: number;
+  user_id?: string;
+  username?: string;
+  description?: string;
 }
 
 export function LoadFlashcardsModal({
@@ -45,9 +52,14 @@ export function LoadFlashcardsModal({
   onDeleteSuccess,
   currentSettings,
   onSetLoaded,
+  onPublicSetLoaded,
   isLeader,
+  initialTab = "personal",
 }: LoadFlashcardsModalProps) {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"personal" | "community">(
+    initialTab,
+  );
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
@@ -57,7 +69,6 @@ export function LoadFlashcardsModal({
   const [shakingId, setShakingId] = useState<string | null>(null);
   const mouseDownOnBackdrop = useRef(false);
   const prevRefreshTrigger = useRef(refreshTrigger);
-  const hasInitialLoad = useRef(false);
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -65,97 +76,147 @@ export function LoadFlashcardsModal({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
-  const fetchSets = async (pageToFetch: number, isInitial: boolean = false) => {
-    if (!user) return;
-
-    if (isInitial) {
-      setLoading(true);
-    } else {
-      setIsLoadingMore(true);
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
     }
-    setError("");
+  }, [isOpen, initialTab]);
 
-    try {
-      const from = pageToFetch * PAGE_SIZE;
-      const to = from + PAGE_SIZE - 1;
-
-      // Fetch flashcard sets with count
-      const { data, error: fetchError } = await supabase
-        .from("flashcard_sets")
-        .select("id, name, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .order("id", { ascending: true })
-        .range(from, to);
-
-      if (fetchError) throw fetchError;
-
-      if (data.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
-
-      // Get flashcard counts for each set
-      const setsWithCounts = await Promise.all(
-        (data || []).map(async (set) => {
-          const { count } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq("set_id", set.id);
-
-          // Check if any flashcards have generated MC options
-          const { count: termGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq("set_id", set.id)
-            .eq("term_generated", true);
-
-          const { count: defGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq("set_id", set.id)
-            .eq("definition_generated", true);
-
-          const hasTermGen = (termGenCount || 0) > 0;
-          const hasDefGen = (defGenCount || 0) > 0;
-
-          return {
-            ...set,
-            flashcard_count: count || 0,
-            has_generated: hasTermGen || hasDefGen,
-            term_generated: hasTermGen,
-            definition_generated: hasDefGen,
-          };
-        }),
-      );
-
+  const fetchSets = useCallback(
+    async (pageToFetch: number, isInitial: boolean = false) => {
       if (isInitial) {
-        setSets(setsWithCounts);
+        setLoading(true);
       } else {
-        setSets((prev) => [...prev, ...setsWithCounts]);
+        setIsLoadingMore(true);
       }
-    } catch {
-      setError("Failed to load flashcard sets");
-    } finally {
-      setLoading(false);
-      setIsLoadingMore(false);
-    }
-  };
+      setError("");
+
+      try {
+        const from = pageToFetch * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+        let data: FlashcardSet[] = [];
+        let fetchError = null;
+
+        if (activeTab === "personal") {
+          if (!user) {
+            setSets([]);
+            setLoading(false);
+            setIsLoadingMore(false);
+            return;
+          }
+          const result = await supabase
+            .from("flashcard_sets")
+            .select("id, name, created_at, user_id")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to);
+
+          data = result.data
+            ? result.data.map((item) => ({
+                ...item,
+                flashcard_count: 0,
+                has_generated: false,
+              }))
+            : [];
+          fetchError = result.error;
+        } else {
+          const result = await supabase
+            .from("public_flashcard_sets")
+            .select(
+              "id, name, description, created_at, updated_at, plays, user_id, username",
+            )
+            .order("plays", { ascending: false })
+            .order("id", { ascending: true })
+            .range(from, to);
+
+          data = result.data
+            ? result.data.map((item) => ({
+                ...item,
+                flashcard_count: 0,
+                has_generated: false,
+              }))
+            : [];
+          fetchError = result.error;
+        }
+
+        if (fetchError) throw fetchError;
+
+        if (data.length < PAGE_SIZE) {
+          setHasMore(false);
+        }
+
+        // Get flashcard counts for each set
+        const setsWithCounts = await Promise.all(
+          (data || []).map(async (set) => {
+            const { count } = await supabase
+              .from("flashcards")
+              .select("*", { count: "exact", head: true })
+              .eq(
+                activeTab === "personal" ? "set_id" : "public_set_id",
+                set.id,
+              );
+
+            // Check if any flashcards have generated MC options
+            const { count: termGenCount } = await supabase
+              .from("flashcards")
+              .select("*", { count: "exact", head: true })
+              .eq(
+                activeTab === "personal" ? "set_id" : "public_set_id",
+                set.id,
+              )
+              .eq("term_generated", true);
+
+            const { count: defGenCount } = await supabase
+              .from("flashcards")
+              .select("*", { count: "exact", head: true })
+              .eq(
+                activeTab === "personal" ? "set_id" : "public_set_id",
+                set.id,
+              )
+              .eq("definition_generated", true);
+
+            const hasTermGen = (termGenCount || 0) > 0;
+            const hasDefGen = (defGenCount || 0) > 0;
+
+            return {
+              ...set,
+              flashcard_count: count || 0,
+              has_generated: hasTermGen || hasDefGen,
+              term_generated: hasTermGen,
+              definition_generated: hasDefGen,
+            };
+          }),
+        );
+
+        if (isInitial) {
+          setSets(setsWithCounts);
+        } else {
+          setSets((prev) => [...prev, ...setsWithCounts]);
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load flashcard sets");
+      } finally {
+        setLoading(false);
+        setIsLoadingMore(false);
+      }
+    },
+    [activeTab, user],
+  );
 
   useEffect(() => {
-    if (isOpen && user?.id) {
+    if (isOpen) {
       const isRefresh = refreshTrigger !== prevRefreshTrigger.current;
-      const needsInitialLoad = !hasInitialLoad.current;
-
-      if (isRefresh || needsInitialLoad) {
-        setPage(0);
-        setHasMore(true);
-        fetchSets(0, true);
+      // Always fetch on open or tab change
+      setPage(0);
+      setHasMore(true);
+      fetchSets(0, true);
+      if (isRefresh) {
         prevRefreshTrigger.current = refreshTrigger;
-        hasInitialLoad.current = true;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, user?.id, refreshTrigger]);
+  }, [isOpen, activeTab, refreshTrigger, fetchSets]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -174,6 +235,22 @@ export function LoadFlashcardsModal({
   const handleLoadSet = async (setId: string, setName: string) => {
     setLoadingSetId(setId);
     setError("");
+
+    if (activeTab === "community") {
+      try {
+        const loadedSet = await loadPublicSet(setId);
+        if (loadedSet) {
+          onPublicSetLoaded?.(loadedSet);
+          onClose();
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load public set");
+      } finally {
+        setLoadingSetId(null);
+      }
+      return;
+    }
 
     try {
       let allData: FlashcardDBRow[] = [];
@@ -294,14 +371,71 @@ export function LoadFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 max-h-[80vh] flex flex-col"
+        className="bg-vanilla border-3 border-coffee p-8 max-w-7xl w-full mx-4 h-[90vh] flex flex-col select-text"
         onClick={(e) => {
           e.stopPropagation();
         }}
       >
-        <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4">
-          Private Flashcards
-        </h2>
+        <div className="flex justify-center items-center pb-6 border-b-3 border-coffee gap-6 shrink-0">
+          <button
+            className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
+            onClick={() => setActiveTab("personal")}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            <p data-text="Private">Private</p>
+          </button>
+
+          <label className="relative inline-flex items-center cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={activeTab === "community"}
+              onChange={() =>
+                setActiveTab(
+                  activeTab === "personal" ? "community" : "personal",
+                )
+              }
+            />
+
+            {/* Track */}
+            <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
+              {/* Knob */}
+              <div
+                className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
+              ></div>
+            </div>
+          </label>
+
+          <button
+            className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
+            onClick={() => setActiveTab("community")}
+          >
+            <p data-text="Public">Public</p>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center py-12">
@@ -314,12 +448,19 @@ export function LoadFlashcardsModal({
         ) : sets.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12 text-coffee/70">
             <div className="text-center">
-              <div>No saved flashcards</div>
+              {activeTab === "personal" ? (
+                <div>No saved flashcards</div>
+              ) : (
+                <div>
+                  <div className="text-4xl mb-4">🌍</div>
+                  <div>No public flashcard sets found</div>
+                </div>
+              )}
             </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 pb-6 px-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 pt-6 pb-6 px-2">
               {sets.map((set) => (
                 <div
                   key={set.id}
@@ -332,17 +473,23 @@ export function LoadFlashcardsModal({
                     if (!loadingSetId) handleLoadSet(set.id, set.name);
                   }}
                   className={`group relative h-80 w-full perspective-[1000px] ${
-                    loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                    loadingSetId
+                      ? "cursor-not-allowed opacity-70"
+                      : "cursor-pointer"
                   } ${shakingId === set.id ? "animate-shake" : ""}`}
                 >
                   {/* Under Card */}
                   <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-light-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                     <div
                       className={`text-center text-[9px] font-bold tracking-[0.2em] ${
-                        shakingId === set.id ? "text-terracotta" : "text-coffee/80"
+                        shakingId === set.id
+                          ? "text-terracotta"
+                          : "text-coffee/80"
                       }`}
                     >
-                      {shakingId === set.id ? "MUST BE LEADER" : "CLICK TO LOAD"}
+                      {shakingId === set.id
+                        ? "MUST BE LEADER"
+                        : "CLICK TO LOAD"}
                     </div>
                   </div>
 
@@ -352,103 +499,135 @@ export function LoadFlashcardsModal({
                       !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
                     }`}
                   >
-                    <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
-                    <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                    <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-light-vanilla overflow-hidden">
+                      <div className={`absolute inset-0 bg-white/45 ${activeTab === "community" ? "shadow-[inset_0_0_0_3px_var(--color-powder)]" : "shadow-[inset_0_0_0_2px_var(--color-terracotta)]"} rounded-[18px]`} />
                       <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
-                      {/* Content Container */}
-                      <div className="flex-1 flex flex-col items-center justify-center w-full gap-2">
-                        <h3 className="text-2xl font-bold text-coffee line-clamp-3 wrap-break-words w-full px-2">
-                          {set.name}
-                        </h3>
-                        <div className="flex flex-col gap-1 mt-2">
-                          <p className="text-sm text-coffee/70 font-bold">
-                            {set.flashcard_count} card
-                            {set.flashcard_count !== 1 ? "s" : ""}
-                          </p>
-                          <p className="text-xs text-coffee/40 font-bold">
-                            Created {getRelativeTime(set.created_at)}
-                          </p>
+                        {/* Content Container */}
+                        <div className="flex-1 flex flex-col items-center justify-center w-full gap-2 overflow-hidden">
+                          {activeTab === "community" &&
+                            set.user_id ===
+                              "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
+                              <div className="flex flex-col items-center mb-1">
+                                <div className="text-sm">⭐</div>
+                                <div className="shrink-0 text-xs font-bold text-coffee/80 uppercase tracking-wider">
+                                  Featured Set
+                                </div>
+                              </div>
+                            )}
+                          <h3 className="text-2xl font-bold text-coffee line-clamp-3 wrap-break-words w-full px-2">
+                            {set.name}
+                          </h3>
+                          <div className="flex flex-col gap-1 mt-2 shrink-0">
+                            <p className="text-sm text-coffee/70 font-bold">
+                              {set.flashcard_count} card
+                              {set.flashcard_count !== 1 ? "s" : ""}
+                              {activeTab === "community" && (
+                                <> • {set.plays || 0} plays</>
+                              )}
+                            </p>
+                            {activeTab === "personal" && (
+                              <p className="text-xs text-coffee/40 font-bold">
+                                Created {getRelativeTime(set.created_at)}
+                              </p>
+                            )}
+                            {activeTab === "community" &&
+                              set.username &&
+                              set.user_id !==
+                                "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
+                                <p className="text-xs text-coffee/40 font-bold">
+                                  by {set.username}
+                                </p>
+                              )}
+                          </div>
+                          {activeTab === "community" && (
+                            <div className="mt-2 w-full overflow-hidden px-2">
+                              <p className="text-sm text-coffee/80 line-clamp-3">
+                                {set.description || "No description provided."}
+                              </p>
+                            </div>
+                          )}
                         </div>
-                      </div>
 
-                      {/* Action Buttons */}
-                      <div
-                        className="flex items-center gap-3 mt-2 z-20"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button
-                          onClick={() => setPublishingSet(set)}
-                          disabled={loadingSetId !== null}
-                          className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
-                        >
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
-                            Publish
-                          </div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
+                        {/* Action Buttons (Only for Personal) */}
+                        {activeTab === "personal" && (
+                          <div
+                            className="flex items-center gap-3 mt-2 z-20"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => setEditingSet(set)}
-                          disabled={loadingSetId !== null}
-                          className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
-                        >
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
-                            Edit
+                            <button
+                              onClick={() => setPublishingSet(set)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Publish
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setEditingSet(set)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Edit
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(set.id, set.name)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Delete
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
                           </div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(set.id, set.name)}
-                          disabled={loadingSetId !== null}
-                          className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
-                        >
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
-                            Delete
-                          </div>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                        </button>
+                        )}
                       </div>
                     </div>
-                  </div>
                   </div>
                 </div>
               ))}

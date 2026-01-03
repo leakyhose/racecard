@@ -59,8 +59,8 @@ export function Chat() {
         <div className="flex flex-col space-y-1 [direction:ltr] min-h-full pt-0.5">
           <div className="grow" />
           {messages.length === 0 ? (
-            <div className="text-coffee/40 text-sm font-bold text-center italic py-2">
-              no messages yet
+            <div className="text-coffee/40 text-sm font-bold text-center py-2">
+              No Messages Yet
             </div>
           ) : (
             messages.map((msg, index) => {

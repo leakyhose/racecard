@@ -362,7 +362,12 @@ export function JumboLoadFlashcards({
                         {activeTab === "community" &&
                           set.user_id ===
                             "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
-                            <div className="shrink-0 mb-1 text-xs">⭐</div>
+                            <div className="flex flex-col items-center mb-1">
+                              <div className="text-sm">⭐</div>
+                              <div className="shrink-0 text-xs font-bold text-coffee/80 uppercase tracking-wider">
+                                Featured Set
+                              </div>
+                            </div>
                           )}
                         <h3 className="text-xl font-bold text-coffee line-clamp-3 wrap-break-words w-full px-2">
                           {set.name}
@@ -371,20 +376,23 @@ export function JumboLoadFlashcards({
                           <p className="text-sm text-coffee/70 font-bold">
                             {set.flashcard_count} card
                             {set.flashcard_count !== 1 ? "s" : ""}
+                            {activeTab === "community" && (
+                              <> • {set.plays || 0} plays</>
+                            )}
                           </p>
-                          <p className="text-xs text-coffee/40 font-bold">
-                            {activeTab === "personal"
-                              ? `Created ${getRelativeTime(set.created_at)}`
-                              : `${set.plays || 0} plays`}
-                          </p>
-                          {activeTab === "community" && set.username && (
+                          {activeTab === "personal" && (
                             <p className="text-xs text-coffee/40 font-bold">
-                              {set.user_id ===
-                              "d0c1b157-eb1f-42a9-bf67-c6384b7ca278"
-                                ? "Featured Set"
-                                : `by ${set.username}`}
+                              Created {getRelativeTime(set.created_at)}
                             </p>
                           )}
+                          {activeTab === "community" &&
+                            set.username &&
+                            set.user_id !==
+                              "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
+                              <p className="text-xs text-coffee/40 font-bold">
+                                by {set.username}
+                              </p>
+                            )}
                         </div>
                       </div>
                       
