@@ -1,5 +1,4 @@
 import { useState, useRef } from "react";
-import { useAuth } from "../hooks/useAuth";
 import {
   parseFlashcards,
   parseAdvancedFlashcards,
@@ -18,7 +17,6 @@ interface ImportModalProps {
 }
 
 export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
-  const { user } = useAuth();
   const [mode, setMode] = useState<"simple" | "advanced">("simple");
   const [termSeparator, setTermSeparator] =
     useState<TermDefinitionSeparator>("tab");

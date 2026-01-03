@@ -1,5 +1,3 @@
-import React from "react";
-
 export function About() {
   return (
     <div className="flex flex-col w-full bg-light-vanilla">
