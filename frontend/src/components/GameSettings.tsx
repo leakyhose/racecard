@@ -84,12 +84,12 @@ export function GameSettings({
 
   return (
     <div
-      className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canInteractWithSettings ? "opacity-60 blur-[2px] cursor-not-allowed" : ""}`}
+      className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canInteractWithSettings ? "opacity-60 cursor-not-allowed" : ""}`}
     >
       {lobby && lobby.flashcards.length > 0 && (
         <>
           <div
-            className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60 blur-[0.5px]" : ""}`}
+            className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60" : ""}`}
             onClick={() =>
               canInteractWithSettings &&
               !isLocked("shuffle") &&
@@ -110,7 +110,7 @@ export function GameSettings({
 
           {!currentSettings.multipleChoice && (
             <div
-              className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60 blur-[0.5px]" : ""}`}
+              className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60" : ""}`}
               onClick={() =>
                 canInteractWithSettings &&
                 !isLocked("fuzzyTolerance") &&
@@ -131,7 +131,7 @@ export function GameSettings({
           )}
 
           <div
-            className={`flex justify-between items-center py-1 ${isLocked("answerByTerm") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+            className={`flex justify-between items-center py-1 ${isLocked("answerByTerm") ? "opacity-60 cursor-not-allowed" : ""}`}
           >
             <div
               className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
@@ -183,7 +183,7 @@ export function GameSettings({
           </div>
 
           <div
-            className={`flex justify-between items-center py-1 ${isLocked("multipleChoice") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+            className={`flex justify-between items-center py-1 ${isLocked("multipleChoice") ? "opacity-60 cursor-not-allowed" : ""}`}
           >
             <div
               className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
@@ -241,7 +241,7 @@ export function GameSettings({
           </div>
 
           <div
-            className={`flex flex-col gap-0.5 ${isLocked("roundTime") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+            className={`flex flex-col gap-0.5 ${isLocked("roundTime") ? "opacity-60 cursor-not-allowed" : ""}`}
           >
             <div className="flex justify-between items-center">
               <label className="font-bold text-xs text-coffee">
@@ -322,11 +322,6 @@ export function GameSettings({
               Upload Flashcards
             </span>
           </button>
-          {isGenerating && (
-            <div className="text-center text-[10px] font-bold text-coffee/60 mt-0.5">
-              Generating choices...
-            </div>
-          )}
           <ImportModal
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}

@@ -256,30 +256,7 @@ export function LoadFlashcards({
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full relative">
       {(isGenerating || isLoading) && (
-        <div
-          className="-translate-y-1 absolute inset-0 bg-light-vanilla/60 z-50 cursor-not-allowed pointer-events-auto"
-          onMouseMove={(e) => {
-            onTooltipChange?.(
-              true,
-              isGenerating
-                ? "Please wait for distractors to finish"
-                : "Please wait for flashcards to load",
-              e.clientX,
-              e.clientY,
-            );
-          }}
-          onMouseEnter={() =>
-            onTooltipChange?.(
-              true,
-              isGenerating
-                ? "Please wait for distractors to finish"
-                : "Please wait for flashcards to load",
-              0,
-              0,
-            )
-          }
-          onMouseLeave={() => onTooltipChange?.(false)}
-        ></div>
+        <div className="-translate-y-1 absolute inset-0 bg-light-vanilla/60 z-50 cursor-not-allowed pointer-events-auto"></div>
       )}
       {/* Toggle Switch */}
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 gap-6">

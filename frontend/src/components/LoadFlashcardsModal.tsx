@@ -278,7 +278,7 @@ export function LoadFlashcardsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-coffee/50 flex items-center justify-center z-50"
+      className="fixed inset-0 flex items-center justify-center z-50 bg-coffee/50 cursor-not-allowed"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) {
           mouseDownOnBackdrop.current = true;
