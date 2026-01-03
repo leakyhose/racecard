@@ -17,6 +17,8 @@ import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
 import { PublicFlashcardsModal } from "../components/PublicFlashcardsModal";
 import { LoadFlashcards } from "../components/LoadFlashcards";
+import { JumboLoadFlashcards } from "../components/JumboLoadFlashcards";
+import { About } from "../components/About";
 import { ArrowButton } from "../components/ArrowButton";
 import { supabase } from "../supabaseClient";
 import { type LoadedPublicSet } from "../utils/loadPublicSet";
@@ -68,6 +70,7 @@ export default function Lobby() {
   const [publicSetInfo, setPublicSetInfo] = useState<LoadedPublicSet | null>(
     null,
   );
+  const [isSetLoading, setIsSetLoading] = useState(false);
 
   const handlePublicSetLoaded = (set: LoadedPublicSet) => {
     setIsSaved(true);
@@ -440,6 +443,8 @@ export default function Lobby() {
     ? publicSetInfo.allow_view !== false
     : lobby.allowView !== false;
 
+  const hasFlashcards = lobby.flashcards.length > 0;
+
   if (!nickname || !isInLobby) {
     return (
       <div>
@@ -483,6 +488,7 @@ export default function Lobby() {
           lobby={lobby}
           isPublicSet={isPublicSet}
           userId={user?.id}
+          isSetLoading={isSetLoading}
         />
       </div>
       <div className="flex flex-1 min-h-0 border-coffee">
@@ -491,78 +497,97 @@ export default function Lobby() {
           className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative"
         >
           {lobby.status === "waiting" ? (
-            <>
-              <div
-                style={{ height: `${splitRatio * 100}%` }}
-                className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
-              >
-                <LoadFlashcards
-                  isLeader={isLeader}
-                  refreshTrigger={refreshTrigger}
-                  autoSelectedSetId={trackedSetId}
-                  onOpenModal={() => setShowLoadModal(true)}
-                  onOpenPublicModal={() => setShowPublicModal(true)}
-                  isGenerating={lobby?.distractorStatus === "generating"}
-                  onPublicSetLoaded={handlePublicSetLoaded}
-                  onPrivateSetLoaded={handlePrivateSetLoaded}
-                  onTooltipChange={(
-                    show: boolean,
-                    text?: string,
-                    x?: number,
-                    y?: number,
-                  ) => {
-                    setShowTooltip(show);
-                    if (show && text) {
-                      setTooltipText(text);
-                    } else if (!show) {
-                      setTooltipText(null);
-                    }
-                    if (x !== undefined && y !== undefined)
-                      setTooltipPos({ x, y });
-                  }}
-                />
-              </div>
-
-              <div
-                className={`absolute h-5 flex items-center justify-center cursor-ns-resize z-50 w-full group transition-colors duration-200`}
-                style={{ top: `calc(${splitRatio * 100}% - 10px)` }}
-                onMouseDown={handleMouseDown}
-              >
-                <div className="w-full flex items-center justify-center pointer-events-none px-4">
-                  <div
-                    className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
-                  ></div>
-                  <div
-                    className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}
-                  >
-                    {/* Minimalistic Drag Handle Icon */}
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 15l-6 6-6-6" />
-                      <path d="M18 9l-6-6-6 6" />
-                    </svg>
-                  </div>
-                  <div
-                    className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
-                  ></div>
+            hasFlashcards ? (
+              <>
+                <div
+                  style={{ height: `${splitRatio * 100}%` }}
+                  className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pt-4 pb-2 mask-[linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
+                >
+                  <LoadFlashcards
+                    isLeader={isLeader}
+                    refreshTrigger={refreshTrigger}
+                    autoSelectedSetId={trackedSetId}
+                    onOpenModal={() => setShowLoadModal(true)}
+                    onOpenPublicModal={() => setShowPublicModal(true)}
+                    isGenerating={lobby?.distractorStatus === "generating"}
+                    onPublicSetLoaded={handlePublicSetLoaded}
+                    onPrivateSetLoaded={handlePrivateSetLoaded}
+                    onLoadingChange={setIsSetLoading}
+                    isLoading={isSetLoading}
+                    onTooltipChange={(
+                      show: boolean,
+                      text?: string,
+                      x?: number,
+                      y?: number,
+                    ) => {
+                      setShowTooltip(show);
+                      if (show && text) {
+                        setTooltipText(text);
+                      } else if (!show) {
+                        setTooltipText(null);
+                      }
+                      if (x !== undefined && y !== undefined)
+                        setTooltipPos({ x, y });
+                    }}
+                  />
                 </div>
-              </div>
 
-              <div
-                style={{ height: `${(1 - splitRatio) * 100}%` }}
-                className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]"
-              >
-                <Chat />
-              </div>
-            </>
+                <div
+                  className={`absolute h-5 flex items-center justify-center cursor-ns-resize z-50 w-full group transition-colors duration-200`}
+                  style={{ top: `calc(${splitRatio * 100}% - 10px)` }}
+                  onMouseDown={handleMouseDown}
+                >
+                  <div className="w-full flex items-center justify-center pointer-events-none px-4">
+                    <div
+                      className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
+                    ></div>
+                    <div
+                      className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}
+                    >
+                      {/* Minimalistic Drag Handle Icon */}
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M18 15l-6 6-6-6" />
+                        <path d="M18 9l-6-6-6 6" />
+                      </svg>
+                    </div>
+                    <div
+                      className={`flex-1 transition-colors duration-200 ${isDragging ? "bg-coffee h-[3px]" : "bg-coffee/10 h-0.5 group-hover:h-[3px] group-hover:bg-coffee"}`}
+                    ></div>
+                  </div>
+                </div>
+
+                <div
+                  style={{ height: `${(1 - splitRatio) * 100}%` }}
+                  className="flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]"
+                >
+                  <Chat />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col min-h-0 pl-4 pr-4 pt-4 pb-2 shrink-0">
+                  <About />
+                </div>
+
+                <div className="h-5 flex items-center justify-center w-full px-4 shrink-0">
+                  <div className="flex-1 bg-coffee/10 h-0.5"></div>
+                  <div className="flex-1 bg-coffee/10 h-0.5"></div>
+                </div>
+
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden pl-4 pr-4 pb-4 pt-2 mask-[linear-gradient(to_top,black_calc(100%-1.5rem),transparent)]">
+                  <Chat />
+                </div>
+              </>
+            )
           ) : (
             <>
               <div className="flex flex-col min-h-0 pl-4 pr-4 pt-4 pb-2 shrink-0">
@@ -598,82 +623,97 @@ export default function Lobby() {
               ref={contentWrapperRef}
               className="flex flex-col min-h-full w-full relative"
             >
-              {/* Study section - render when in study mode or transitioning */}
-              {(currentSection === "study" || isTransitioning) && (
-                <div
-                  ref={studyRef}
-                  className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full pb-20"
-                >
-                  <FlashcardStudy
-                    flashcards={lobby.flashcards}
-                    flashcardName={lobby.flashcardName}
-                    flashcardDescription={lobby.flashcardDescription}
-                    answerByTerm={lobby.settings.answerByTerm}
-                    multipleChoice={lobby.settings.multipleChoice}
-                    isSaved={isSaved || isPublicSet}
-                    onSave={() => {
-                      if (user) {
-                        setShowSaveModal(true);
-                      } else {
-                        setSaveShake(true);
-                        setTimeout(() => setSaveShake(false), 500);
-                      }
-                    }}
-                    saveShake={saveShake}
-                    publicSetInfo={
-                      publicSetInfo ||
-                      (lobby.flashcardID
-                        ? {
-                            id: lobby.flashcardID,
-                            name: lobby.flashcardName,
-                            description: lobby.flashcardDescription,
-                            allow_view: lobby.allowView,
-                            allow_save: lobby.allowSave,
-                            settings: {},
-                            flashcardCount: lobby.flashcards.length,
-                          }
-                        : null)
-                    }
+              {!hasFlashcards ? (
+                <div className="h-full w-full bg-light-vanilla">
+                  <JumboLoadFlashcards
+                    isLeader={isLeader}
+                    refreshTrigger={refreshTrigger}
+                    onPublicSetLoaded={handlePublicSetLoaded}
+                    onPrivateSetLoaded={handlePrivateSetLoaded}
+                    onLoadingChange={setIsSetLoading}
+                    isLoading={isSetLoading}
                   />
-                  {lobby.flashcards.length > 0 && canView && (
-                      <div className="mt-2 relative z-30">
-                        <ArrowButton
-                          onClick={scrollToAllCards}
-                          disabled={isTransitioning}
-                          direction="down"
+                </div>
+              ) : (
+                <>
+                  {/* Study section - render when in study mode or transitioning */}
+                  {(currentSection === "study" || isTransitioning) && (
+                    <div
+                      ref={studyRef}
+                      className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full pb-20"
+                    >
+                      <FlashcardStudy
+                        flashcards={lobby.flashcards}
+                        flashcardName={lobby.flashcardName}
+                        flashcardDescription={lobby.flashcardDescription}
+                        answerByTerm={lobby.settings.answerByTerm}
+                        multipleChoice={lobby.settings.multipleChoice}
+                        isSaved={isSaved || isPublicSet}
+                        onSave={() => {
+                          if (user) {
+                            setShowSaveModal(true);
+                          } else {
+                            setSaveShake(true);
+                            setTimeout(() => setSaveShake(false), 500);
+                          }
+                        }}
+                        saveShake={saveShake}
+                        publicSetInfo={
+                          publicSetInfo ||
+                          (lobby.flashcardID
+                            ? {
+                                id: lobby.flashcardID,
+                                name: lobby.flashcardName,
+                                description: lobby.flashcardDescription,
+                                allow_view: lobby.allowView,
+                                allow_save: lobby.allowSave,
+                                settings: {},
+                                flashcardCount: lobby.flashcards.length,
+                              }
+                            : null)
+                        }
+                      />
+                      {lobby.flashcards.length > 0 && canView && (
+                        <div className="mt-2 relative z-30">
+                          <ArrowButton
+                            onClick={scrollToAllCards}
+                            disabled={isTransitioning}
+                            direction="down"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* All flashcards section - render when in all mode or transitioning */}
+                  {(currentSection === "all" || isTransitioning) && canView && (
+                    <div
+                      ref={allCardsRef}
+                      className="bg-light-vanilla w-full pb-20"
+                    >
+                      <div className="bg-light-vanilla px-4 pt-4">
+                        <div className="flex justify-center mb-4">
+                          <ArrowButton
+                            onClick={scrollToStudy}
+                            disabled={isTransitioning}
+                            direction="up"
+                          />
+                        </div>
+                        <h2 className="text-2xl font-bold text-coffee text-center pb-4">
+                          Flashcards
+                        </h2>
+                      </div>
+                      <div className="sticky top-0 z-50 w-full h-0.5 bg-coffee"></div>
+                      <div className="p-4">
+                        <FlashcardPreview
+                          flashcards={lobby.flashcards}
+                          answerByTerm={lobby.settings.answerByTerm}
+                          multipleChoice={lobby.settings.multipleChoice}
                         />
                       </div>
-                    )}
-                </div>
-              )}
-
-              {/* All flashcards section - render when in all mode or transitioning */}
-              {(currentSection === "all" || isTransitioning) && canView && (
-                <div
-                  ref={allCardsRef}
-                  className="bg-light-vanilla w-full pb-20"
-                >
-                  <div className="bg-light-vanilla px-4 pt-4">
-                    <div className="flex justify-center mb-4">
-                      <ArrowButton
-                        onClick={scrollToStudy}
-                        disabled={isTransitioning}
-                        direction="up"
-                      />
                     </div>
-                    <h2 className="text-2xl font-bold text-coffee text-center pb-4">
-                      Flashcards
-                    </h2>
-                  </div>
-                  <div className="sticky top-0 z-50 w-full h-0.5 bg-coffee"></div>
-                  <div className="p-4">
-                    <FlashcardPreview
-                      flashcards={lobby.flashcards}
-                      answerByTerm={lobby.settings.answerByTerm}
-                      multipleChoice={lobby.settings.multipleChoice}
-                    />
-                  </div>
-                </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -695,6 +735,7 @@ export default function Lobby() {
               lobby={lobby}
               lockedSettings={lockedSettings}
               onPrivateSetLoaded={handlePrivateSetLoaded}
+              isLoading={isSetLoading}
             />
           </div>
         </div>

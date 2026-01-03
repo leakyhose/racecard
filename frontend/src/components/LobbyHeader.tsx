@@ -10,6 +10,7 @@ interface LobbyHeaderProps {
   lobby: Lobby;
   isPublicSet?: boolean;
   userId?: string;
+  isSetLoading?: boolean;
 }
 
 export function LobbyHeader({
@@ -18,6 +19,7 @@ export function LobbyHeader({
   lobby,
   isPublicSet,
   userId,
+  isSetLoading,
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -93,15 +95,46 @@ export function LobbyHeader({
   };
 
   return (
-    <div className="flex justify-between relative p-3 items-center bg-light-vanilla text-coffee">
-      <div className="flex flex-row gap-0">
+    <div className="flex justify-between relative px-4 py-3 items-center bg-light-vanilla text-coffee">
+      <div className="flex flex-row items-center">
         <div
           onClick={handleCopyCode}
-          className="font-bold shrink-0 w-70 text-2xl tracking-widest group cursor-pointer inline-block relative"
+          className="font-bold text-2xl tracking-widest cursor-pointer flex items-center gap-2 group relative select-none"
+          title="Click to copy link"
         >
-          RaceCard.io/{code}
-          <div className="leading-none absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-coffee text-vanilla font-bold tracking-wider text-xs pointer-events-none">
-            {showCopyMessage ? "Copied!" : "Click to Copy"}
+          <span>RaceCard.io/{code}</span>
+          <div className="relative flex items-center justify-center w-5 h-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`absolute inset-0 w-5 h-5 text-terracotta transition-opacity duration-300 ${
+                showCopyMessage ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`absolute inset-0 w-5 h-5 transition-opacity duration-300 ${
+                showCopyMessage
+                  ? "opacity-0"
+                  : "opacity-0 group-hover:opacity-50"
+              }`}
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
           </div>
         </div>
       </div>
@@ -109,7 +142,6 @@ export function LobbyHeader({
       <div className="absolute left-1/2 -translate-x-1/2 text-coffee">
         {isGenerating ? (
           <div className="font-bold text-lg tracking-wide text-terracotta flex flex-col items-center">
-            <div>Generating multiple choices...</div>
             {lobby.generationProgress && (
               <div className="text-sm mt-0">{lobby.generationProgress}</div>
             )}
@@ -117,13 +149,13 @@ export function LobbyHeader({
         ) : isLeader ? (
           lobby.flashcards.length == 0 ? (
             <div className="font-bold text-lg tracking-wide">
-              Upload or create Flashcards to start
+              Upload or Create RaceCards to Start
             </div>
           ) : needsGeneration && lobby.status === "waiting" && !isPublicSet ? (
             <div className="flex flex-col items-center gap-2">
               <button
                 onClick={canGenerate ? handleGenerateMultipleChoice : undefined}
-                disabled={isGenerating || !canGenerate}
+                disabled={isGenerating || !canGenerate || isSetLoading}
                 className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
@@ -141,7 +173,7 @@ export function LobbyHeader({
             <div className="flex gap-4">
               <button
                 onClick={handleStartGame}
-                disabled={isGenerating}
+                disabled={isGenerating || isSetLoading}
                 className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
@@ -153,7 +185,7 @@ export function LobbyHeader({
                   onClick={
                     canGenerate ? handleGenerateMultipleChoice : undefined
                   }
-                  disabled={isGenerating || !canGenerate}
+                  disabled={isGenerating || !canGenerate || isSetLoading}
                   className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">

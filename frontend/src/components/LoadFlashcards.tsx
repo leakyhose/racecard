@@ -42,6 +42,8 @@ interface LoadFlashcardsProps {
   ) => void;
   onPublicSetLoaded?: (set: LoadedPublicSet) => void;
   onPrivateSetLoaded?: (saved?: boolean) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
+  isLoading?: boolean;
 }
 
 export function LoadFlashcards({
@@ -54,10 +56,12 @@ export function LoadFlashcards({
   onTooltipChange,
   onPublicSetLoaded,
   onPrivateSetLoaded,
+  onLoadingChange,
+  isLoading = false,
 }: LoadFlashcardsProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "community">(
-    "personal",
+    "community",
   );
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
@@ -166,7 +170,7 @@ export function LoadFlashcards({
   }, [isGenerating, onTooltipChange]);
 
   const handleLoadSet = async (setId: string) => {
-    if (isGenerating) {
+    if (isGenerating || isLoading) {
       return;
     }
 
@@ -176,6 +180,7 @@ export function LoadFlashcards({
       return;
     }
     setLoadingSetId(setId);
+    onLoadingChange?.(true);
 
     if (activeTab === "community") {
       const loadedSet = await loadPublicSet(setId);
@@ -184,6 +189,7 @@ export function LoadFlashcards({
         setCurrentlyLoaded(setId);
       }
       setLoadingSetId(null);
+      onLoadingChange?.(false);
       return;
     }
 
@@ -243,18 +249,21 @@ export function LoadFlashcards({
       console.error("Failed to load set");
     } finally {
       setLoadingSetId(null);
+      onLoadingChange?.(false);
     }
   };
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full relative">
-      {isGenerating && (
+      {(isGenerating || isLoading) && (
         <div
           className="-translate-y-1 absolute inset-0 bg-light-vanilla/60 z-50 cursor-not-allowed pointer-events-auto"
           onMouseMove={(e) => {
             onTooltipChange?.(
               true,
-              "Please wait for distractors to finish",
+              isGenerating
+                ? "Please wait for distractors to finish"
+                : "Please wait for flashcards to load",
               e.clientX,
               e.clientY,
             );
@@ -262,7 +271,9 @@ export function LoadFlashcards({
           onMouseEnter={() =>
             onTooltipChange?.(
               true,
-              "Please wait for distractors to finish",
+              isGenerating
+                ? "Please wait for distractors to finish"
+                : "Please wait for flashcards to load",
               0,
               0,
             )

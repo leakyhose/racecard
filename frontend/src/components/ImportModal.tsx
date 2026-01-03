@@ -54,18 +54,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       return;
     }
 
-    const isAdmin =
-      user?.user_metadata?.username === "leakyhose" ||
-      user?.user_metadata?.username === "RaceCard.io";
-    const limit = isAdmin ? Infinity : 200;
-
-    if (flashcards.length > limit) {
-      alert(
-        `Maximum ${limit} flashcards allowed. Please reduce the number of flashcards.`,
-      );
-      return;
-    }
-
     onImport(flashcards);
     setInputText("");
     onClose();
@@ -96,11 +84,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
             <h2 className="text-2xl font-bold tracking-wide text-coffee">
               Import Flashcards
             </h2>
-            <p className="text-sm text-coffee/70 font-bold mt-1">
-              {user?.user_metadata?.username === "leakyhose"
-                ? "No limit"
-                : "Maximum 200 flashcards"}
-            </p>
           </div>
           <button
             onClick={onClose}

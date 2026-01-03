@@ -7,9 +7,10 @@ interface GameSettingsProps {
   isLeader: boolean;
   currentSettings: Settings;
   onUpdate: (settings: Settings) => void;
-  lobby: Lobby | null;
+  lobby: Lobby;
   lockedSettings?: Partial<Settings>;
   onPrivateSetLoaded?: (saved?: boolean) => void;
+  isLoading?: boolean;
 }
 
 const CustomCheckbox = ({
@@ -46,18 +47,20 @@ export function GameSettings({
   lobby,
   lockedSettings = {},
   onPrivateSetLoaded,
+  isLoading = false,
 }: GameSettingsProps) {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [shake, setShake] = useState(false);
 
   const isGenerating = lobby?.distractorStatus === "generating";
   const canEdit = isLeader && lobby?.status === "waiting";
+  const canInteractWithSettings = canEdit && !isGenerating && !isLoading;
 
   const handleChange = (
     key: keyof Settings,
     value: Settings[keyof Settings],
   ) => {
-    if (!canEdit) return;
+    if (!canInteractWithSettings) return;
     if (lockedSettings[key] !== undefined) return; // Prevent changing locked settings
     const updatedSettings = { ...currentSettings, [key]: value };
     onUpdate(updatedSettings);
@@ -69,7 +72,7 @@ export function GameSettings({
   };
 
   const handleUploadClick = () => {
-    if (isGenerating) {
+    if (isGenerating || isLoading) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
     } else {
@@ -81,48 +84,48 @@ export function GameSettings({
 
   return (
     <div
-      className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canEdit ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
+      className={`flex flex-col gap-2 w-full transition-all duration-300 ${!canInteractWithSettings ? "opacity-60 blur-[2px] cursor-not-allowed" : ""}`}
     >
       {lobby && lobby.flashcards.length > 0 && (
         <>
           <div
-            className={`flex items-center justify-between ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60 blur-[0.5px]" : ""}`}
+            className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("shuffle") ? "opacity-60 blur-[0.5px]" : ""}`}
             onClick={() =>
-              canEdit &&
+              canInteractWithSettings &&
               !isLocked("shuffle") &&
               handleChange("shuffle", !currentSettings.shuffle)
             }
           >
             <label
-              className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"}`}
+              className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.shuffle ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("shuffle") ? "cursor-pointer" : "cursor-not-allowed"}`}
             >
               Shuffle Flashcards
             </label>
             <CustomCheckbox
               checked={!!currentSettings.shuffle}
               onChange={(checked) => handleChange("shuffle", checked)}
-              disabled={!canEdit || isLocked("shuffle")}
+              disabled={!canInteractWithSettings || isLocked("shuffle")}
             />
           </div>
 
           {!currentSettings.multipleChoice && (
             <div
-              className={`flex items-center justify-between ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60 blur-[0.5px]" : ""}`}
+              className={`flex items-center justify-between ${canInteractWithSettings && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"} ${isLocked("fuzzyTolerance") ? "opacity-60 blur-[0.5px]" : ""}`}
               onClick={() =>
-                canEdit &&
+                canInteractWithSettings &&
                 !isLocked("fuzzyTolerance") &&
                 handleChange("fuzzyTolerance", !currentSettings.fuzzyTolerance)
               }
             >
               <label
-                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"}`}
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.fuzzyTolerance ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("fuzzyTolerance") ? "cursor-pointer" : "cursor-not-allowed"}`}
               >
                 Fuzzy Tolerance
               </label>
               <CustomCheckbox
                 checked={!!currentSettings.fuzzyTolerance}
                 onChange={(checked) => handleChange("fuzzyTolerance", checked)}
-                disabled={!canEdit || isLocked("fuzzyTolerance")}
+                disabled={!canInteractWithSettings || isLocked("fuzzyTolerance")}
               />
             </div>
           )}
@@ -131,23 +134,23 @@ export function GameSettings({
             className={`flex justify-between items-center py-1 ${isLocked("answerByTerm") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
           >
             <div
-              className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
+              className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
               onClick={() =>
-                canEdit &&
+                canInteractWithSettings &&
                 !isLocked("answerByTerm") &&
                 handleChange("answerByTerm", !currentSettings.answerByTerm)
               }
             >
               <label
-                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
               >
                 Use Definition
               </label>
               <CustomCheckbox
                 checked={!currentSettings.answerByTerm}
-                disabled={!canEdit || isLocked("answerByTerm")}
+                disabled={!canInteractWithSettings || isLocked("answerByTerm")}
                 onChange={() =>
-                  canEdit &&
+                  canInteractWithSettings &&
                   !isLocked("answerByTerm") &&
                   handleChange("answerByTerm", !currentSettings.answerByTerm)
                 }
@@ -155,23 +158,23 @@ export function GameSettings({
             </div>
 
             <div
-              className={`flex items-center gap-2 ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
+              className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("answerByTerm") ? "cursor-pointer" : "pointer-events-none"}`}
               onClick={() =>
-                canEdit &&
+                canInteractWithSettings &&
                 !isLocked("answerByTerm") &&
                 handleChange("answerByTerm", !currentSettings.answerByTerm)
               }
             >
               <label
-                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.answerByTerm ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("answerByTerm") ? "cursor-pointer" : "cursor-not-allowed"}`}
               >
                 Use Term
               </label>
               <CustomCheckbox
                 checked={!!currentSettings.answerByTerm}
-                disabled={!canEdit || isLocked("answerByTerm")}
+                disabled={!canInteractWithSettings || isLocked("answerByTerm")}
                 onChange={() =>
-                  canEdit &&
+                  canInteractWithSettings &&
                   !isLocked("answerByTerm") &&
                   handleChange("answerByTerm", !currentSettings.answerByTerm)
                 }
@@ -183,23 +186,23 @@ export function GameSettings({
             className={`flex justify-between items-center py-1 ${isLocked("multipleChoice") ? "opacity-60 blur-[0.5px] cursor-not-allowed" : ""}`}
           >
             <div
-              className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
+              className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
               onClick={() =>
-                canEdit &&
+                canInteractWithSettings &&
                 !isLocked("multipleChoice") &&
                 handleChange("multipleChoice", !currentSettings.multipleChoice)
               }
             >
               <label
-                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${!currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
               >
                 Written
               </label>
               <CustomCheckbox
                 checked={!currentSettings.multipleChoice}
-                disabled={!canEdit || isLocked("multipleChoice")}
+                disabled={!canInteractWithSettings || isLocked("multipleChoice")}
                 onChange={() =>
-                  canEdit &&
+                  canInteractWithSettings &&
                   !isLocked("multipleChoice") &&
                   handleChange(
                     "multipleChoice",
@@ -210,23 +213,23 @@ export function GameSettings({
             </div>
 
             <div
-              className={`flex items-center gap-2 ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
+              className={`flex items-center gap-2 ${canInteractWithSettings && !isLocked("multipleChoice") ? "cursor-pointer" : "pointer-events-none"}`}
               onClick={() =>
-                canEdit &&
+                canInteractWithSettings &&
                 !isLocked("multipleChoice") &&
                 handleChange("multipleChoice", !currentSettings.multipleChoice)
               }
             >
               <label
-                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canEdit && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
+                className={`font-bold text-xs text-coffee transition-all duration-300 ${currentSettings.multipleChoice ? "underline decoration-2 underline-offset-2 opacity-100" : "opacity-60"} ${canInteractWithSettings && !isLocked("multipleChoice") ? "cursor-pointer" : "cursor-not-allowed"}`}
               >
                 Multiple Choice
               </label>
               <CustomCheckbox
                 checked={!!currentSettings.multipleChoice}
-                disabled={!canEdit || isLocked("multipleChoice")}
+                disabled={!canInteractWithSettings || isLocked("multipleChoice")}
                 onChange={() =>
-                  canEdit &&
+                  canInteractWithSettings &&
                   !isLocked("multipleChoice") &&
                   handleChange(
                     "multipleChoice",
@@ -257,7 +260,7 @@ export function GameSettings({
               onChange={(e) =>
                 handleChange("roundTime", Number(e.target.value))
               }
-              disabled={!canEdit || isLocked("roundTime")}
+              disabled={!canInteractWithSettings || isLocked("roundTime")}
               className="w-full h-1.5 bg-coffee/20 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-coffee [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
@@ -269,7 +272,7 @@ export function GameSettings({
               </label>
               <span className="font-bold text-coffee text-xs">
                 {currentSettings.pointsToWin >=
-                Math.min(500, (lobby?.flashcards.length || 0) * 10)
+                Math.min(500, lobby.flashcards.length * 10)
                   ? "Play all cards"
                   : currentSettings.pointsToWin || 100}
               </span>
@@ -277,30 +280,23 @@ export function GameSettings({
             <input
               type="range"
               min={10}
-              max={Math.min(500, (lobby?.flashcards.length || 0) * 10)}
+              max={Math.min(500, lobby.flashcards.length * 10)}
               step={10}
               value={
                 currentSettings.pointsToWin > 500
-                  ? Math.min(500, (lobby?.flashcards.length || 0) * 10)
+                  ? Math.min(500, lobby.flashcards.length * 10)
                   : currentSettings.pointsToWin || 100
               }
               onChange={(e) => {
                 const val = Number(e.target.value);
-                const maxVal = Math.min(
-                  500,
-                  (lobby?.flashcards.length || 0) * 10,
-                );
-                // If slider is at max, set points to total cards * 10 (Play All mode)
+                const maxVal = Math.min(500, lobby.flashcards.length * 10);
                 if (val === maxVal) {
-                  handleChange(
-                    "pointsToWin",
-                    (lobby?.flashcards.length || 0) * 10,
-                  );
+                  handleChange("pointsToWin", lobby.flashcards.length * 10);
                 } else {
                   handleChange("pointsToWin", val);
                 }
               }}
-              disabled={!canEdit}
+              disabled={!canInteractWithSettings}
               className="w-full h-1.5 bg-coffee/20 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-terracotta [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-coffee [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-terracotta [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-coffee [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:rounded-none disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
@@ -311,7 +307,8 @@ export function GameSettings({
         <>
           <button
             onClick={handleUploadClick}
-            className={` group relative w-full rounded-md bg-coffee border-none p-0 cursor-pointer outline-none mt-3 ${
+            disabled={isGenerating || isLoading}
+            className={` group relative w-full rounded-md bg-coffee border-none p-0 cursor-pointer outline-none mt-3 disabled:opacity-50 disabled:cursor-not-allowed ${
               shake ? "animate-shake" : ""
             }`}
           >
