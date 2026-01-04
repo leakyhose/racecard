@@ -1,5 +1,5 @@
 import { useParams, useLocation } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { flushSync } from "react-dom";
 import { socket } from "../socket";
 import { useCodeValidation } from "../hooks/useCodeValidation";
@@ -338,6 +338,24 @@ export default function Lobby() {
     setIsLeader(lobby?.leader === socket.id);
   }, [lobby]);
 
+  // Memoize publicSetInfo to avoid re-creating the object on every render
+  // This prevents FlashcardStudy from resetting its state when unrelated settings change
+  const flashcardStudyPublicSetInfo = useMemo(() => {
+    if (!lobby) return null;
+    return publicSetInfo ||
+      (lobby.flashcardID
+        ? {
+            id: lobby.flashcardID,
+            name: lobby.flashcardName,
+            description: lobby.flashcardDescription,
+            allow_view: lobby.allowView,
+            allow_save: lobby.allowSave,
+            settings: {},
+            flashcardCount: lobby.flashcards.length,
+          }
+        : null);
+  }, [publicSetInfo, lobby]);
+
   const smoothTransform = (start: number, end: number, duration: number) => {
     const element = contentWrapperRef.current;
     if (!element) return Promise.resolve();
@@ -664,20 +682,7 @@ export default function Lobby() {
                           }
                         }}
                         saveShake={saveShake}
-                        publicSetInfo={
-                          publicSetInfo ||
-                          (lobby.flashcardID
-                            ? {
-                                id: lobby.flashcardID,
-                                name: lobby.flashcardName,
-                                description: lobby.flashcardDescription,
-                                allow_view: lobby.allowView,
-                                allow_save: lobby.allowSave,
-                                settings: {},
-                                flashcardCount: lobby.flashcards.length,
-                              }
-                            : null)
-                        }
+                        publicSetInfo={flashcardStudyPublicSetInfo}
                       />
                       {lobby.flashcards.length > 0 && canView && (
                         <div className="mt-2 relative z-30">

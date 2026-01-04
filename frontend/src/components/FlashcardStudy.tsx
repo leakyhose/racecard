@@ -38,7 +38,10 @@ export function FlashcardStudy({
     } else {
       setCurrentIndex(0);
     }
-  }, [publicSetInfo]);
+    // Reset flip state when switching to a different set
+    setIsFlipped(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicSetInfo?.id]);
 
   if (!flashcards.length) {
     return (
