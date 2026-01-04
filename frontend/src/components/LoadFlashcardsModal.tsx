@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
@@ -76,147 +76,174 @@ export function LoadFlashcardsModal({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
+  // Request ID to prevent stale responses from updating state
+  const requestIdRef = useRef(0);
+
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialTab);
     }
   }, [isOpen, initialTab]);
 
-  const fetchSets = useCallback(
-    async (pageToFetch: number, isInitial: boolean = false) => {
-      if (isInitial) {
-        setLoading(true);
+  // Clear sets immediately when tab changes to prevent mixing
+  useEffect(() => {
+    setSets([]);
+    setPage(0);
+    setHasMore(true);
+  }, [activeTab]);
+
+  const fetchSets = async (
+    tab: "personal" | "community",
+    pageToFetch: number,
+    isInitial: boolean,
+    currentRequestId: number
+  ) => {
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+    setError("");
+
+    try {
+      const from = pageToFetch * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      let data: FlashcardSet[] = [];
+      let fetchError = null;
+
+      if (tab === "personal") {
+        if (!user) {
+          setSets([]);
+          setLoading(false);
+          setIsLoadingMore(false);
+          return;
+        }
+        const result = await supabase
+          .from("flashcard_sets")
+          .select("id, name, created_at, user_id")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to);
+
+        data = result.data
+          ? result.data.map((item) => ({
+              ...item,
+              flashcard_count: 0,
+              has_generated: false,
+            }))
+          : [];
+        fetchError = result.error;
       } else {
-        setIsLoadingMore(true);
+        const result = await supabase
+          .from("public_flashcard_sets")
+          .select(
+            "id, name, description, created_at, updated_at, plays, user_id, username",
+          )
+          .order("plays", { ascending: false })
+          .order("id", { ascending: true })
+          .range(from, to);
+
+        data = result.data
+          ? result.data.map((item) => ({
+              ...item,
+              flashcard_count: 0,
+              has_generated: false,
+            }))
+          : [];
+        fetchError = result.error;
       }
-      setError("");
 
-      try {
-        const from = pageToFetch * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-        let data: FlashcardSet[] = [];
-        let fetchError = null;
+      // Check if this request is stale (tab changed during fetch)
+      if (requestIdRef.current !== currentRequestId) {
+        return;
+      }
 
-        if (activeTab === "personal") {
-          if (!user) {
-            setSets([]);
-            setLoading(false);
-            setIsLoadingMore(false);
-            return;
-          }
-          const result = await supabase
-            .from("flashcard_sets")
-            .select("id, name, created_at, user_id")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .order("id", { ascending: true })
-            .range(from, to);
+      if (fetchError) throw fetchError;
 
-          data = result.data
-            ? result.data.map((item) => ({
-                ...item,
-                flashcard_count: 0,
-                has_generated: false,
-              }))
-            : [];
-          fetchError = result.error;
-        } else {
-          const result = await supabase
-            .from("public_flashcard_sets")
-            .select(
-              "id, name, description, created_at, updated_at, plays, user_id, username",
-            )
-            .order("plays", { ascending: false })
-            .order("id", { ascending: true })
-            .range(from, to);
+      if (data.length < PAGE_SIZE) {
+        setHasMore(false);
+      }
 
-          data = result.data
-            ? result.data.map((item) => ({
-                ...item,
-                flashcard_count: 0,
-                has_generated: false,
-              }))
-            : [];
-          fetchError = result.error;
-        }
+      // Get flashcard counts for each set
+      const setsWithCounts = await Promise.all(
+        (data || []).map(async (set) => {
+          const { count } = await supabase
+            .from("flashcards")
+            .select("*", { count: "exact", head: true })
+            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id);
 
-        if (fetchError) throw fetchError;
+          // Check if any flashcards have generated MC options
+          const { count: termGenCount } = await supabase
+            .from("flashcards")
+            .select("*", { count: "exact", head: true })
+            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id)
+            .eq("term_generated", true);
 
-        if (data.length < PAGE_SIZE) {
-          setHasMore(false);
-        }
+          const { count: defGenCount } = await supabase
+            .from("flashcards")
+            .select("*", { count: "exact", head: true })
+            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id)
+            .eq("definition_generated", true);
 
-        // Get flashcard counts for each set
-        const setsWithCounts = await Promise.all(
-          (data || []).map(async (set) => {
-            const { count } = await supabase
-              .from("flashcards")
-              .select("*", { count: "exact", head: true })
-              .eq(
-                activeTab === "personal" ? "set_id" : "public_set_id",
-                set.id,
-              );
+          const hasTermGen = (termGenCount || 0) > 0;
+          const hasDefGen = (defGenCount || 0) > 0;
 
-            // Check if any flashcards have generated MC options
-            const { count: termGenCount } = await supabase
-              .from("flashcards")
-              .select("*", { count: "exact", head: true })
-              .eq(
-                activeTab === "personal" ? "set_id" : "public_set_id",
-                set.id,
-              )
-              .eq("term_generated", true);
+          return {
+            ...set,
+            flashcard_count: count || 0,
+            has_generated: hasTermGen || hasDefGen,
+            term_generated: hasTermGen,
+            definition_generated: hasDefGen,
+          };
+        }),
+      );
 
-            const { count: defGenCount } = await supabase
-              .from("flashcards")
-              .select("*", { count: "exact", head: true })
-              .eq(
-                activeTab === "personal" ? "set_id" : "public_set_id",
-                set.id,
-              )
-              .eq("definition_generated", true);
+      // Check again if this request is stale after all the async work
+      if (requestIdRef.current !== currentRequestId) {
+        return;
+      }
 
-            const hasTermGen = (termGenCount || 0) > 0;
-            const hasDefGen = (defGenCount || 0) > 0;
-
-            return {
-              ...set,
-              flashcard_count: count || 0,
-              has_generated: hasTermGen || hasDefGen,
-              term_generated: hasTermGen,
-              definition_generated: hasDefGen,
-            };
-          }),
-        );
-
-        if (isInitial) {
-          setSets(setsWithCounts);
-        } else {
-          setSets((prev) => [...prev, ...setsWithCounts]);
-        }
-      } catch (err) {
+      if (isInitial) {
+        setSets(setsWithCounts);
+      } else {
+        setSets((prev) => [...prev, ...setsWithCounts]);
+      }
+    } catch (err) {
+      // Only show error if this request is still current
+      if (requestIdRef.current === currentRequestId) {
         console.error(err);
         setError("Failed to load flashcard sets");
-      } finally {
+      }
+    } finally {
+      // Only update loading state if this request is still current
+      if (requestIdRef.current === currentRequestId) {
         setLoading(false);
         setIsLoadingMore(false);
       }
-    },
-    [activeTab, user],
-  );
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
       const isRefresh = refreshTrigger !== prevRefreshTrigger.current;
-      // Always fetch on open or tab change
+      // Increment request ID to invalidate any in-flight requests
+      requestIdRef.current += 1;
+      const currentRequestId = requestIdRef.current;
+      
+      // Reset pagination state
       setPage(0);
       setHasMore(true);
-      fetchSets(0, true);
+      
+      // Fetch with current tab and request ID
+      fetchSets(activeTab, 0, true, currentRequestId);
+      
       if (isRefresh) {
         prevRefreshTrigger.current = refreshTrigger;
       }
     }
-  }, [isOpen, activeTab, refreshTrigger, fetchSets]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, activeTab, refreshTrigger, user]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -228,7 +255,8 @@ export function LoadFlashcardsModal({
     ) {
       const nextPage = page + 1;
       setPage(nextPage);
-      fetchSets(nextPage, false);
+      // Use the current request ID for pagination
+      fetchSets(activeTab, nextPage, false, requestIdRef.current);
     }
   };
 
@@ -342,9 +370,10 @@ export function LoadFlashcardsModal({
       if (deleteSetError) throw deleteSetError;
 
       // Refresh the list
+      requestIdRef.current += 1;
       setPage(0);
       setHasMore(true);
-      fetchSets(0, true);
+      fetchSets(activeTab, 0, true, requestIdRef.current);
       onDeleteSuccess?.();
     } catch {
       setError("Failed to delete flashcard set");
@@ -671,9 +700,10 @@ export function LoadFlashcardsModal({
           setId={editingSet.id}
           setName={editingSet.name}
           onSaveSuccess={() => {
+            requestIdRef.current += 1;
             setPage(0);
             setHasMore(true);
-            fetchSets(0, true);
+            fetchSets(activeTab, 0, true, requestIdRef.current);
           }}
         />
       )}

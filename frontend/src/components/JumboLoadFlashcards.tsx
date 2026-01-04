@@ -363,7 +363,7 @@ export function JumboLoadFlashcards({
                           set.user_id ===
                             "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
                             <div className="flex flex-col items-center mb-1">
-                              <div className="text-sm">⭐</div>
+                              <div className="text-xs">⭐</div>
                               <div className="shrink-0 text-xs font-bold text-coffee/80 uppercase tracking-wider">
                                 Featured Set
                               </div>

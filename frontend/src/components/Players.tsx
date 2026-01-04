@@ -39,16 +39,16 @@ export function Players({
           return (
             <li
               key={player.id}
-              className={`rounded-lg border-2 border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all ${
+              className={`rounded-lg border-2 border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all overflow-hidden ${
                 hasCorrectAnswer
                   ? "bg-mint/40"
                   : hasMiniStatus
                     ? "bg-terracotta/20"
                     : "bg-vanilla/80"
-              }`}
+              } ${player.id === leader ? "border-l-4 border-l-terracotta" : ""}`}
             >
               <div
-                className={`flex w-full overflow-hidden rounded-lg ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}
+                className={`flex w-full ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}
                 onClick={() => isLeader && handleUpdateLeader(player.id)}
               >
                 <div className="flex-1 flex flex-col justify-center min-w-0 px-3 py-1 relative">
@@ -56,9 +56,6 @@ export function Players({
                     <>
                       <div className="font-bold truncate leading-tight text-coffee">
                         {player.name}
-                        {player.id === leader && (
-                          <span className="text-[10px] align-middle"> 👑</span>
-                        )}
                       </div>
 
                       <div className="text-sm truncate leading-tight text-coffee font-bold">
@@ -70,9 +67,6 @@ export function Players({
                   ) : (
                     <div className="font-semibold truncate leading-tight text-coffee">
                       {player.name}
-                      {player.id === leader && (
-                        <span className="text-[10px] align-middle"> 👑</span>
-                      )}
                     </div>
                   )}
                 </div>
@@ -91,9 +85,14 @@ export function Players({
                   )}
                 </div>
               </div>
-              {isLeader && player.id != socket.id && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-terracotta text-vanilla font-bold tracking-wider text-sm rounded-lg">
+              {isLeader && player.id !== socket.id && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-terracotta text-vanilla font-bold tracking-wider text-sm">
                   Promote
+                </div>
+              )}
+              {!isLeader && player.id === leader && (
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-powder text-coffee font-bold tracking-wider text-sm">
+                  Leader
                 </div>
               )}
             </li>
