@@ -111,9 +111,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-light-vanilla text-coffee font-executive p-4 select-none">
+    <div className="flex flex-col items-center justify-center min-h-screen text-coffee font-executive p-4 select-none">
       {user ? (
-        <div className="absolute top-4 right-4 flex items-center gap-4 border-2 border-coffee bg-vanilla px-4 py-2">
+        <div className="bg-vanilla absolute top-4 right-4 flex items-center gap-4 border-2 border-coffee px-4 py-2">
           <span className="text-sm">
             Signed in as:{" "}
             <span className="font-bold">

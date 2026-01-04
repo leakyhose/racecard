@@ -95,7 +95,7 @@ export function LobbyHeader({
   };
 
   return (
-    <div className="flex justify-between relative px-4 py-3 items-center bg-light-vanilla text-coffee">
+    <div className="flex justify-between relative px-4 py-3 items-center text-coffee">
       <div className="flex flex-row items-center">
         <div
           onClick={handleCopyCode}

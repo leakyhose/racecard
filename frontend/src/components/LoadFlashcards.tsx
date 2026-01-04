@@ -349,14 +349,14 @@ export function LoadFlashcards({
                   onClick={() => handleLoadSet(set.id)}
                   className={`group relative w-full rounded-lg bg-coffee border-none p-0 cursor-pointer outline-none ${
                     shakingSetId === set.id ? "animate-shake" : ""
-                  }`}
+                  } ${set.id === currentlyLoaded ? "translate-x-[3px]" : ""}`}
                 >
                   <span
                     className={`w-full h-full rounded-lg border-2 border-coffee p-2 text-left -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 flex flex-col justify-center min-h-15 ${
                       shakingSetId === set.id
                         ? "bg-coffee/80 text-vanilla"
-                        : `bg-vanilla text-coffee ${set.id == currentlyLoaded ? "bg-linear-to-r from-powder/30 to-powder/30" : ""}`
-                    }`}
+                        : "bg-vanilla text-coffee"
+                    } ${set.id === currentlyLoaded ? "shadow-[-3px_0_0_0_var(--color-terracotta)]" : ""}`}
                   >
                     {shakingSetId === set.id ? (
                       <div className="text-center font-bold text-sm">

@@ -28,20 +28,7 @@ export async function loadPublicSet(
 
     if (setError) throw setError;
 
-    const { error: rpcError } = await supabase.rpc("increment_plays", {
-      row_id: setId,
-    });
 
-    if (rpcError) {
-      const { error: updateError } = await supabase
-        .from("public_flashcard_sets")
-        .update({ plays: (Number(setData.plays) || 0) + 1 })
-        .eq("id", setId);
-
-      if (updateError) {
-        console.warn("Failed to increment plays", updateError);
-      }
-    }
 
     type CardData = {
       term: string;

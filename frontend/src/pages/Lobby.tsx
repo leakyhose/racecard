@@ -485,7 +485,7 @@ export default function Lobby() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-light-vanilla text-coffee font-executive overflow-hidden relative select-none">
+    <div className="flex flex-col h-screen text-coffee font-executive overflow-hidden relative select-none">
       {/* Global Tooltip */}
       {showTooltip && tooltipText && (
         <div
@@ -512,7 +512,7 @@ export default function Lobby() {
       <div className="flex flex-1 min-h-0 border-coffee">
         <div
           ref={sidebarRef}
-          className="w-65 flex flex-col bg-light-vanilla h-full overflow-hidden relative"
+          className="w-65 flex flex-col h-full overflow-hidden relative"
         >
           {lobby.status === "waiting" ? (
             hasFlashcards ? (
@@ -632,7 +632,7 @@ export default function Lobby() {
 
         <div
           ref={scrollContainerRef}
-          className={`flex-1 bg-light-vanilla relative flex flex-col ${
+          className={`flex-1 relative flex flex-col ${
             currentSection === "all" && !isTransitioning
               ? "overflow-y-auto [&::-webkit-scrollbar]:hidden"
               : "overflow-visible"
@@ -648,7 +648,7 @@ export default function Lobby() {
               className="flex flex-col min-h-full w-full relative"
             >
               {!hasFlashcards ? (
-                <div className="h-full w-full bg-light-vanilla">
+                <div className="h-full w-full">
                   <JumboLoadFlashcards
                     isLeader={isLeader}
                     refreshTrigger={refreshTrigger}
@@ -664,7 +664,7 @@ export default function Lobby() {
                   {(currentSection === "study" || isTransitioning) && (
                     <div
                       ref={studyRef}
-                      className="h-full bg-light-vanilla flex flex-col items-center justify-center shrink-0 w-full pb-20"
+                      className="h-full flex flex-col items-center justify-center shrink-0 w-full pb-20"
                     >
                       <FlashcardStudy
                         flashcards={lobby.flashcards}
@@ -700,9 +700,9 @@ export default function Lobby() {
                   {(currentSection === "all" || isTransitioning) && canView && (
                     <div
                       ref={allCardsRef}
-                      className="bg-light-vanilla w-full pb-20"
+                      className="w-full pb-20"
                     >
-                      <div className="bg-light-vanilla px-4 pt-4">
+                      <div className="px-4 pt-4">
                         <div className="flex justify-center mb-4">
                           <ArrowButton
                             onClick={scrollToStudy}
@@ -730,7 +730,7 @@ export default function Lobby() {
           )}
         </div>
 
-        <div className="w-65 flex flex-col p-4 bg-light-vanilla">
+        <div className="w-65 flex flex-col p-4">
           <Players
             players={lobby.players}
             gameStatus={lobby.status}

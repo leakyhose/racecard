@@ -73,7 +73,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       }}
     >
       <div
-        className="border-3 border-coffee bg-vanilla p-6 max-w-5xl w-full h-[80vh] flex flex-col select-text"
+        className="bg-vanilla border-3 border-coffee p-6 max-w-5xl w-full h-[80vh] flex flex-col select-text"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

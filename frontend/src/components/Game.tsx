@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { socket } from "../socket";
+import { supabase } from "../supabaseClient";
 import type { FlashcardEnd, Lobby } from "@shared/types";
 import { MiniLeaderboard } from "./MiniLeaderboard";
 
@@ -65,6 +66,35 @@ export function Game({ lobby }: GameProps) {
       document.getElementById("chat-input")?.focus();
     };
   }, []);
+
+  // Update play count for public sets
+  useEffect(() => {
+    if (showResults && isLeader && lobby?.flashcardID) {
+      const updatePlays = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("public_flashcard_sets")
+            .select("plays")
+            .eq("id", lobby.flashcardID)
+            .single();
+
+          if (error || !data) return;
+
+          const currentPlays = data.plays || 0;
+          const increment = lobby.players.length;
+
+          await supabase
+            .from("public_flashcard_sets")
+            .update({ plays: currentPlays + increment })
+            .eq("id", lobby.flashcardID);
+        } catch (err) {
+          console.error("Failed to update plays:", err);
+        }
+      };
+
+      updatePlays();
+    }
+  }, [showResults]);
 
   // Update countdown message when lobby status changes to ongoing (for hot joins)
   useEffect(() => {

@@ -24,7 +24,7 @@ export function Players({
   const isOngoing = gameStatus === "ongoing";
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-light-vanilla">
+    <div className="flex-1 flex flex-col overflow-hidden">
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
         <div className="h-4 flex items-center">
           <span className="text-sm font-bold text-coffee">Players</span>
@@ -39,13 +39,13 @@ export function Players({
           return (
             <li
               key={player.id}
-              className={`rounded-lg border-2 border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all overflow-hidden ${
+              className={`rounded-lg border-2 bg-vanilla border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all overflow-hidden ${
                 hasCorrectAnswer
                   ? "bg-mint/40"
                   : hasMiniStatus
                     ? "bg-terracotta/20"
-                    : "bg-vanilla/80"
-              } ${player.id === leader ? "border-l-4 border-l-terracotta" : ""}`}
+                    : ""
+              } ${player.id === leader ? "-translate-x-[3px] shadow-[3px_0_0_0_var(--color-terracotta)]" : ""}`}
             >
               <div
                 className={`flex w-full ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}

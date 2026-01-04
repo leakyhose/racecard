@@ -5,6 +5,7 @@ import { socket } from "../socket";
 import type { Flashcard, Settings } from "@shared/types";
 import { PublishFlashcardsModal } from "./PublishFlashcardsModal";
 import { EditFlashcardsModal } from "./EditFlashcardsModal";
+import { MyPublishedSetsModal } from "./MyPublishedSetsModal";
 import { getRelativeTime } from "../utils/flashcardUtils";
 import { loadPublicSet, type LoadedPublicSet } from "../utils/loadPublicSet";
 
@@ -66,6 +67,7 @@ export function LoadFlashcardsModal({
   const [error, setError] = useState("");
   const [publishingSet, setPublishingSet] = useState<FlashcardSet | null>(null);
   const [editingSet, setEditingSet] = useState<FlashcardSet | null>(null);
+  const [showMyPublishedSets, setShowMyPublishedSets] = useState(false);
   const [shakingId, setShakingId] = useState<string | null>(null);
   const mouseDownOnBackdrop = useRef(false);
   const prevRefreshTrigger = useRef(refreshTrigger);
@@ -400,12 +402,17 @@ export function LoadFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-7xl w-full mx-4 h-[90vh] flex flex-col select-text"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-7xl w-full mx-4 h-[90vh] flex flex-col select-text"
         onClick={(e) => {
           e.stopPropagation();
         }}
       >
-        <div className="flex justify-center items-center pb-6 border-b-3 border-coffee gap-6 shrink-0">
+        <div className="flex justify-between items-center pb-6 border-b-3 border-coffee shrink-0">
+          {/* Left spacer for centering */}
+          <div className="w-48 shrink-0"></div>
+
+          {/* Center tabs */}
+          <div className="flex justify-center items-center gap-6">
           <button
             className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
             onClick={() => setActiveTab("personal")}
@@ -464,6 +471,19 @@ export function LoadFlashcardsModal({
               <path d="M12 5l7 7-7 7" />
             </svg>
           </button>
+          </div>
+
+          {/* Right button */}
+          <div className="w-48 shrink-0 flex justify-end">
+            {user && (
+              <button
+                onClick={() => setShowMyPublishedSets(true)}
+                className="text-sm font-bold text-coffee hover:text-terracotta underline decoration-2 underline-offset-2 whitespace-nowrap"
+              >
+                View my published sets
+              </button>
+            )}
+          </div>
         </div>
 
         {loading ? (
@@ -508,7 +528,7 @@ export function LoadFlashcardsModal({
                   } ${shakingId === set.id ? "animate-shake" : ""}`}
                 >
                   {/* Under Card */}
-                  <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-light-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
+                  <div className="bg-white/30 absolute inset-0 rounded-[20px] border-2 border-coffee bg-light-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                     <div
                       className={`text-center text-[9px] font-bold tracking-[0.2em] ${
                         shakingId === set.id
@@ -705,6 +725,14 @@ export function LoadFlashcardsModal({
             setHasMore(true);
             fetchSets(activeTab, 0, true, requestIdRef.current);
           }}
+        />
+      )}
+
+      {showMyPublishedSets && (
+        <MyPublishedSetsModal
+          isOpen={true}
+          onClose={() => setShowMyPublishedSets(false)}
+          currentSettings={currentSettings}
         />
       )}
     </div>

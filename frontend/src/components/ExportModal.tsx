@@ -6,6 +6,7 @@ interface ExportModalProps {
   onClose: () => void;
   setId: string;
   setName: string;
+  isPublicSet?: boolean;
 }
 
 interface FlashcardDBRow {
@@ -24,6 +25,7 @@ export function ExportModal({
   onClose,
   setId,
   setName,
+  isPublicSet = false,
 }: ExportModalProps) {
   const [loading, setLoading] = useState(false);
   const [exportText, setExportText] = useState("");
@@ -45,7 +47,7 @@ export function ExportModal({
         const { data, error } = await supabase
           .from("flashcards")
           .select("*")
-          .eq("set_id", setId)
+          .eq(isPublicSet ? "public_set_id" : "set_id", setId)
           .order("order_index", { ascending: true })
           .order("id", { ascending: true })
           .range(page * pageSize, (page + 1) * pageSize - 1);
@@ -115,7 +117,7 @@ export function ExportModal({
     } finally {
       setLoading(false);
     }
-  }, [setId, mode]);
+  }, [setId, mode, isPublicSet]);
 
   useEffect(() => {
     if (isOpen) {
@@ -137,7 +139,7 @@ export function ExportModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 bg-coffee/50 cursor-not-allowed"
+      className="fixed inset-0 flex items-center justify-center z-[70] bg-coffee/50 cursor-not-allowed"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) {
           mouseDownOnBackdrop.current = true;
