@@ -270,6 +270,11 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // Remove player's vote if they had voted
+    if (lobby.endGameVotes) {
+      lobby.endGameVotes = lobby.endGameVotes.filter((id) => id !== socket.id);
+    }
+
     if (lobby?.leader === socket.id) {
       if (lobby.players.length > 0) {
         if (!lobby.players[0]) {
@@ -283,7 +288,38 @@ io.on("connection", (socket) => {
     lobby.players = sortPlayersByMetric(lobby);
     io.to(lobby.code).emit("playersUpdated", lobby.players);
     io.to(lobby.code).emit("leaderUpdated", lobby.leader);
-    io.to(lobby.code).emit("endGameVotesUpdated", lobby.endGameVotes || []);
+
+    // Check if game should end due to new player count
+    if (lobby.status === "ongoing") {
+      const totalPlayers = lobby.players.length;
+      const votes = lobby.endGameVotes?.length || 0;
+
+      if (totalPlayers > 0 && votes / totalPlayers > 0.75) {
+        lobby.status = "finished";
+        if (lobby.players[0]) {
+          lobby.players[0].wins += 1;
+        }
+        lobby.players = sortPlayersByMetric(lobby);
+
+        const activeRound = activeRounds.get(lobby.code);
+        if (activeRound) {
+          activeRound.roundEnded = true;
+          activeRounds.delete(lobby.code);
+        }
+
+        clearLobbyTimers(lobby.code);
+
+        io.to(lobby.code).emit("lobbyStatusUpdated", "finished");
+        io.to(lobby.code).emit("playersUpdated", lobby.players);
+        removeCurrentCardFromDeck(lobby.code);
+        endGame(lobby.code);
+      } else {
+        io.to(lobby.code).emit("endGameVotesUpdated", lobby.endGameVotes || []);
+      }
+    } else {
+      io.to(lobby.code).emit("endGameVotesUpdated", lobby.endGameVotes || []);
+    }
+
     // Send leave notification to chat
     if (playerName) {
       io.to(lobby.code).emit("chatMessage", {
