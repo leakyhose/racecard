@@ -70,6 +70,22 @@ export default function Lobby() {
     null,
   );
   const [isSetLoading, setIsSetLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"personal" | "community">("community");
+
+  const handleTabChange = (tab: "personal" | "community") => {
+    setActiveTab(tab);
+    setSearchQuery("");
+    setSubmittedQuery("");
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSubmittedQuery(searchQuery);
+    }, 200);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   const handlePublicSetLoaded = (set: LoadedPublicSet) => {
     setIsSaved(true);
@@ -507,6 +523,10 @@ export default function Lobby() {
           isPublicSet={isPublicSet}
           userId={user?.id}
           isSetLoading={isSetLoading}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          setSubmittedQuery={setSubmittedQuery}
+          activeTab={activeTab}
         />
       </div>
       <div className="flex flex-1 min-h-0 border-coffee">
@@ -656,6 +676,9 @@ export default function Lobby() {
                     onPrivateSetLoaded={handlePrivateSetLoaded}
                     onLoadingChange={setIsSetLoading}
                     isLoading={isSetLoading}
+                    submittedQuery={submittedQuery}
+                    activeTab={activeTab}
+                    onTabChange={handleTabChange}
                   />
                 </div>
               ) : (

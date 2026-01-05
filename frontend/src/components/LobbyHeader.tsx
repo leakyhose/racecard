@@ -13,6 +13,10 @@ interface LobbyHeaderProps {
   isPublicSet?: boolean;
   userId?: string;
   isSetLoading?: boolean;
+  searchQuery?: string;
+  setSearchQuery?: (query: string) => void;
+  setSubmittedQuery?: (query: string) => void;
+  activeTab?: "personal" | "community";
 }
 
 export function LobbyHeader({
@@ -22,6 +26,10 @@ export function LobbyHeader({
   isPublicSet,
   userId,
   isSetLoading,
+  searchQuery,
+  setSearchQuery,
+  setSubmittedQuery,
+  activeTab,
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -211,9 +219,21 @@ export function LobbyHeader({
           </div>
         ) : isLeader ? (
           lobby.flashcards.length == 0 ? (
-            <div className="font-bold text-lg tracking-wide">
-              Upload or Create RaceCards to Start
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSubmittedQuery?.(searchQuery || "");
+              }}
+              className="w-full flex justify-center"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery?.(e.target.value)}
+                placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
+                className="w-64 px-4 py-2 bg-vanilla border-2 border-coffee rounded-md text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out hover:-translate-y-1 focus:-translate-y-1 font-bold text-sm outline-none focus:shadow-[inset_0_0_0_1px_var(--color-powder)] select-text text-center"
+              />
+            </form>
           ) : needsGeneration && lobby.status === "waiting" && !isPublicSet ? (
             <div className="flex flex-col items-center gap-2">
               <button

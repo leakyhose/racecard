@@ -35,6 +35,9 @@ interface JumboLoadFlashcardsProps {
   onPrivateSetLoaded?: (saved?: boolean) => void;
   onLoadingChange?: (isLoading: boolean) => void;
   isLoading?: boolean;
+  submittedQuery?: string;
+  activeTab: "personal" | "community";
+  onTabChange: (tab: "personal" | "community") => void;
 }
 
 export function JumboLoadFlashcards({
@@ -44,11 +47,11 @@ export function JumboLoadFlashcards({
   onPrivateSetLoaded,
   onLoadingChange,
   isLoading = false,
+  submittedQuery = "",
+  activeTab,
+  onTabChange,
 }: JumboLoadFlashcardsProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"personal" | "community">(
-    "community",
-  );
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
@@ -59,10 +62,6 @@ export function JumboLoadFlashcards({
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
-
-  // Search state
-  const [searchQuery, setSearchQuery] = useState("");
-  const [submittedQuery, setSubmittedQuery] = useState("");
 
   const fetchSets = useCallback(async (pageToFetch: number, isInitial: boolean = false) => {
     if (isInitial) {
@@ -83,13 +82,20 @@ export function JumboLoadFlashcards({
           setLoading(false);
           return;
         }
-        const result = await supabase
+        let query = supabase
           .from("flashcard_sets")
           .select("id, name, created_at")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .order("id", { ascending: true })
-          .range(from, to);
+          .eq("user_id", user.id);
+
+        if (submittedQuery.trim()) {
+          query = query.ilike("name", `%${submittedQuery}%`);
+        } else {
+          query = query
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true });
+        }
+
+        const result = await query.range(from, to);
 
         data = result.data
           ? result.data.map((item) => ({
@@ -172,8 +178,6 @@ export function JumboLoadFlashcards({
   useEffect(() => {
     setPage(0);
     setHasMore(true);
-    setSearchQuery("");
-    setSubmittedQuery("");
     fetchSets(0, true);
   }, [activeTab, fetchSets]);
 
@@ -304,10 +308,10 @@ export function JumboLoadFlashcards({
   return (
     <div className="flex flex-col h-full w-full relative">
       {/* Header with Toggle Switch */}
-      <div className={`flex justify-center items-center pb-3 gap-6 shrink-0 pt-[11.1px] ${activeTab !== "community" ? "border-b-2 border-coffee/50" : ""}`}>
+      <div className="flex justify-center items-center pb-3 gap-6 shrink-0 pt-[11.1px] border-b-2 border-coffee/50">
         <button
           className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
-          onClick={() => setActiveTab("personal")}
+          onClick={() => onTabChange("personal")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -330,7 +334,7 @@ export function JumboLoadFlashcards({
             className="sr-only peer"
             checked={activeTab === "community"}
             onChange={() =>
-              setActiveTab(activeTab === "personal" ? "community" : "personal")
+              onTabChange(activeTab === "personal" ? "community" : "personal")
             }
           />
 
@@ -345,7 +349,7 @@ export function JumboLoadFlashcards({
 
         <button
           className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
-          onClick={() => setActiveTab("community")}
+          onClick={() => onTabChange("community")}
         >
           <p data-text="Public">Public</p>
           <svg
@@ -363,40 +367,8 @@ export function JumboLoadFlashcards({
         </button>
       </div>
 
-      {/* Search Bar for Community Tab */}
-      {activeTab === "community" && (
-        <div className="pb-3 flex justify-center border-b-2 border-coffee/50">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSubmittedQuery(searchQuery);
-            }}
-            className="flex gap-2 w-full max-w-xs items-center px-4"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search public sets..."
-              className="flex-1 px-3 py-1 text-sm border-2 border-coffee rounded-md bg-vanilla focus:outline-none focus:border-terracotta text-coffee placeholder-coffee/50"
-            />
-            <button
-              type="submit"
-              className="px-4 py-1 text-sm bg-coffee text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-terracotta hover:border-terracotta transition-colors"
-            >
-              Search
-            </button>
-            <button
-              type="button"
-              onClick={handleRandom}
-              disabled={loadingSetId !== null || isLoading}
-              className="px-4 py-1 text-sm bg-terracotta text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee transition-colors disabled:opacity-50"
-            >
-              Random
-            </button>
-          </form>
-        </div>
-      )}
+      {/* Search Bar for Community Tab - Removed as it's now in header */}
+
 
       {/* Content */}
       <div
@@ -417,6 +389,51 @@ export function JumboLoadFlashcards({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 pb-6">
+            {/* Random Set Card */}
+            {activeTab === "community" && !submittedQuery && (
+              <div
+                onClick={handleRandom}
+                className={`group relative h-64 w-full perspective-[1000px] ${
+                  loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                }`}
+              >
+                {/* Under Card */}
+                <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
+                  <div className="text-center text-[9px] font-bold tracking-[0.2em] text-coffee/80">
+                    CLICK FOR RANDOM SET
+                  </div>
+                </div>
+
+                {/* Top Card */}
+                <div
+                  className={`h-full w-full transition-transform duration-300 ease-out ${
+                    !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
+                  }`}
+                >
+                  <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
+                    <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                    <div className="relative h-full w-full p-6 flex flex-col items-center justify-center text-center">
+                        <div className="text-4xl mb-2">🎲</div>
+                        <h3 className="text-xl font-bold text-coffee line-clamp-3 wrap-break-words w-full px-2">
+                          Random Set
+                        </h3>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <p className="text-sm text-coffee/70 font-bold">
+                            Surprise me!
+                          </p>
+                        </div>
+                      
+                      {loadingSetId === "random" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-vanilla/50 rounded-[18px]">
+                          <div className="w-6 h-6 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {sets.map((set) => (
               <div
                 key={set.id}
