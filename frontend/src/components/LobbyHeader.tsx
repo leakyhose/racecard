@@ -13,10 +13,8 @@ interface LobbyHeaderProps {
   isPublicSet?: boolean;
   userId?: string;
   isSetLoading?: boolean;
-  searchQuery?: string;
-  setSearchQuery?: (query: string) => void;
-  setSubmittedQuery?: (query: string) => void;
   activeTab?: "personal" | "community";
+  onTabChange?: (tab: "personal" | "community") => void;
 }
 
 export function LobbyHeader({
@@ -26,10 +24,8 @@ export function LobbyHeader({
   isPublicSet,
   userId,
   isSetLoading,
-  searchQuery,
-  setSearchQuery,
-  setSubmittedQuery,
   activeTab,
+  onTabChange,
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
@@ -219,21 +215,64 @@ export function LobbyHeader({
           </div>
         ) : isLeader ? (
           lobby.flashcards.length == 0 ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmittedQuery?.(searchQuery || "");
-              }}
-              className="w-full flex justify-center"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery?.(e.target.value)}
-                placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
-                className="w-64 px-4 py-2 bg-vanilla border-2 border-coffee rounded-md text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out hover:-translate-y-1 focus:-translate-y-1 font-bold text-sm outline-none focus:shadow-[inset_0_0_0_1px_var(--color-powder)] select-text text-center"
-              />
-            </form>
+            <div className="flex justify-center items-center gap-6">
+              <button
+                className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
+                onClick={() => onTabChange?.("personal")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 12H5" />
+                  <path d="M12 19l-7-7 7-7" />
+                </svg>
+                <p data-text="Private">Private</p>
+              </button>
+
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={activeTab === "community"}
+                  onChange={() =>
+                    onTabChange?.(activeTab === "personal" ? "community" : "personal")
+                  }
+                />
+
+                {/* Track */}
+                <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
+                  {/* Knob */}
+                  <div
+                    className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
+                  ></div>
+                </div>
+              </label>
+
+              <button
+                className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
+                onClick={() => onTabChange?.("community")}
+              >
+                <p data-text="Public">Public</p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14" />
+                  <path d="M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           ) : needsGeneration && lobby.status === "waiting" && !isPublicSet ? (
             <div className="flex flex-col items-center gap-2">
               <button

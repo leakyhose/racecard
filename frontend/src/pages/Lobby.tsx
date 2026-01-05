@@ -523,10 +523,8 @@ export default function Lobby() {
           isPublicSet={isPublicSet}
           userId={user?.id}
           isSetLoading={isSetLoading}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          setSubmittedQuery={setSubmittedQuery}
           activeTab={activeTab}
+          onTabChange={handleTabChange}
         />
       </div>
       <div className="flex flex-1 min-h-0 border-coffee">
@@ -678,7 +676,8 @@ export default function Lobby() {
                     isLoading={isSetLoading}
                     submittedQuery={submittedQuery}
                     activeTab={activeTab}
-                    onTabChange={handleTabChange}
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
                   />
                 </div>
               ) : (

@@ -37,7 +37,8 @@ interface JumboLoadFlashcardsProps {
   isLoading?: boolean;
   submittedQuery?: string;
   activeTab: "personal" | "community";
-  onTabChange: (tab: "personal" | "community") => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 export function JumboLoadFlashcards({
@@ -49,7 +50,8 @@ export function JumboLoadFlashcards({
   isLoading = false,
   submittedQuery = "",
   activeTab,
-  onTabChange,
+  searchQuery,
+  setSearchQuery,
 }: JumboLoadFlashcardsProps) {
   const { user } = useAuth();
   const [sets, setSets] = useState<FlashcardSet[]>([]);
@@ -307,64 +309,15 @@ export function JumboLoadFlashcards({
 
   return (
     <div className="flex flex-col h-full w-full relative">
-      {/* Header with Toggle Switch */}
-      <div className="flex justify-center items-center pb-3 gap-6 shrink-0 pt-[11.1px] border-b-2 border-coffee/50">
-        <button
-          className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
-          onClick={() => onTabChange("personal")}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
-          <p data-text="Private">Private</p>
-        </button>
-
-        <label className="relative inline-flex items-center cursor-pointer select-none">
-          <input
-            type="checkbox"
-            className="sr-only peer"
-            checked={activeTab === "community"}
-            onChange={() =>
-              onTabChange(activeTab === "personal" ? "community" : "personal")
-            }
-          />
-
-          {/* Track */}
-          <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-            {/* Knob */}
-            <div
-              className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
-            ></div>
-          </div>
-        </label>
-
-        <button
-          className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
-          onClick={() => onTabChange("community")}
-        >
-          <p data-text="Public">Public</p>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5l7 7-7 7" />
-          </svg>
-        </button>
+      {/* Header with Search Bar */}
+      <div className="flex justify-center items-center pb-3 gap-6 shrink-0 pt-2 border-b-2 border-coffee/50">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
+          className="w-64 px-4 h-6 bg-vanilla border-2 border-coffee rounded-md text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out font-bold text-xs outline-none focus:shadow-[inset_0_0_0_1px_var(--color-powder)] select-text text-center"
+        />
       </div>
 
       {/* Search Bar for Community Tab - Removed as it's now in header */}
@@ -372,7 +325,7 @@ export function JumboLoadFlashcards({
 
       {/* Content */}
       <div
-        className="mx-3 flex-1 overflow-y-auto p-6 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40"
+        className="mx-3 flex-1 overflow-y-auto overflow-x-hidden p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40"
         onScroll={handleScroll}
       >
         {loading ? (
