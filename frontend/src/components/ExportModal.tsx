@@ -139,7 +139,7 @@ export function ExportModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-[70] bg-coffee/50 cursor-not-allowed"
+      className="fixed inset-0 flex items-center justify-center z-70 bg-coffee/50 cursor-not-allowed"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) {
           mouseDownOnBackdrop.current = true;

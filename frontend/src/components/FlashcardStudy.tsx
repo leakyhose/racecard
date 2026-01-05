@@ -20,6 +20,7 @@ interface FlashcardStudyProps {
 export function FlashcardStudy({
   flashcards,
   flashcardName = "Unnamed Set",
+  flashcardDescription,
   answerByTerm,
   multipleChoice,
   isSaved = false,
@@ -27,13 +28,15 @@ export function FlashcardStudy({
   saveShake,
   publicSetInfo,
 }: FlashcardStudyProps) {
-  const [currentIndex, setCurrentIndex] = useState(publicSetInfo ? -1 : 0);
+  const [currentIndex, setCurrentIndex] = useState(
+    publicSetInfo || flashcardDescription ? -1 : 0,
+  );
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
-    if (publicSetInfo) {
+    if (publicSetInfo || flashcardDescription) {
       setCurrentIndex(-1);
     } else {
       setCurrentIndex(0);
@@ -41,7 +44,7 @@ export function FlashcardStudy({
     // Reset flip state when switching to a different set
     setIsFlipped(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [publicSetInfo?.id]);
+  }, [publicSetInfo?.id, flashcardDescription]);
 
   if (!flashcards.length) {
     return (
@@ -67,7 +70,7 @@ export function FlashcardStudy({
     if (!allowView) return;
     setIsSwitching(true);
     setCurrentIndex((prev) => {
-      if (publicSetInfo) {
+      if (publicSetInfo || flashcardDescription) {
         return prev === -1 ? flashcards.length - 1 : prev - 1;
       }
       return prev === 0 ? flashcards.length - 1 : prev - 1;
@@ -80,7 +83,7 @@ export function FlashcardStudy({
     if (!allowView) return;
     setIsSwitching(true);
     setCurrentIndex((prev) => {
-      if (publicSetInfo) {
+      if (publicSetInfo || flashcardDescription) {
         return prev === flashcards.length - 1 ? -1 : prev + 1;
       }
       return prev === flashcards.length - 1 ? 0 : prev + 1;
@@ -138,17 +141,17 @@ export function FlashcardStudy({
               ${isFlipped ? "transform-[rotateY(180deg)]" : ""}
             `}
             >
-              {currentIndex === -1 && publicSetInfo ? (
+              {currentIndex === -1 && (publicSetInfo || flashcardDescription) ? (
                 // Cover Card
                 <div className="col-start-1 row-start-1 backface-hidden relative w-full h-full">
                   {/* Under Card (Cover) */}
                   <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
                     <div className="text-center text-coffee/80 text-[0.69rem] font-bold tracking-wider flex gap-2 px-4">
-                      {publicSetInfo.username && (
+                      {publicSetInfo?.username && (
                         <span>Created by {publicSetInfo.username}</span>
                       )}
-                      {publicSetInfo.username && <span>•</span>}
-                      {(publicSetInfo.updatedAt || publicSetInfo.createdAt) && (
+                      {publicSetInfo?.username && <span>•</span>}
+                      {(publicSetInfo?.updatedAt || publicSetInfo?.createdAt) && (
                         <span>
                           Updated{" "}
                           {getRelativeTime(
@@ -166,7 +169,7 @@ export function FlashcardStudy({
                     <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6 select-text">
                       {/* Title Section */}
                       <div className="w-full flex flex-col items-center justify-center">
-                        {publicSetInfo.user_id ===
+                        {publicSetInfo?.user_id ===
                           "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
                           <div className="flex flex-col items-center mb-2 gap-1">
                             <div className="text-xl">⭐</div>
@@ -177,7 +180,7 @@ export function FlashcardStudy({
                         )}
                         <div className="flex items-center gap-3 justify-center max-w-full">
                           <div className="text-3xl font-bold text-coffee whitespace-pre-wrap wrap-break-word hyphens-auto text-center">
-                            {publicSetInfo.name}
+                            {publicSetInfo?.name || flashcardName}
                           </div>
                           {onSave && allowSave && (
                             <SaveButton
@@ -195,11 +198,12 @@ export function FlashcardStudy({
                       {/* Description Section */}
                       <div className="flex items-center justify-center w-full px-8">
                         <div className="text-lg text-center font-bold text-coffee/80 whitespace-pre-wrap wrap-break-word hyphens-auto w-full max-w-full overflow-hidden">
-                          {publicSetInfo.description || (
-                            <span className="opacity-50">
-                              No description provided
-                            </span>
-                          )}
+                          {publicSetInfo?.description ||
+                            flashcardDescription || (
+                              <span className="opacity-50">
+                                No description provided
+                              </span>
+                            )}
                         </div>
                       </div>
 

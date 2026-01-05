@@ -39,12 +39,12 @@ export function Players({
           return (
             <li
               key={player.id}
-              className={`rounded-lg border-2 bg-vanilla border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all overflow-hidden ${
+              className={`rounded-lg border-2 border-coffee flex w-full group relative h-14 hover:shadow-sm transition-all overflow-hidden ${
                 hasCorrectAnswer
                   ? "bg-mint/40"
                   : hasMiniStatus
                     ? "bg-terracotta/20"
-                    : ""
+                    : "bg-vanilla"
               } ${player.id === leader ? "-translate-x-[3px] shadow-[3px_0_0_0_var(--color-terracotta)]" : ""}`}
             >
               <div

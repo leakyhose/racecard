@@ -32,6 +32,7 @@ export function Game({ lobby }: GameProps) {
   const gameInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isResultsVisible, setIsResultsVisible] = useState(false);
+  const hasUpdatedPlays = useRef(false);
 
   // Handle delayed visibility for results to prevent scrolling issues
   useEffect(() => {
@@ -69,32 +70,37 @@ export function Game({ lobby }: GameProps) {
 
   // Update play count for public sets
   useEffect(() => {
-    if (showResults && isLeader && lobby?.flashcardID) {
-      const updatePlays = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("public_flashcard_sets")
-            .select("plays")
-            .eq("id", lobby.flashcardID)
-            .single();
+    if (showResults) {
+      if (isLeader && lobby?.flashcardID && !hasUpdatedPlays.current) {
+        hasUpdatedPlays.current = true;
+        const updatePlays = async () => {
+          try {
+            const { data, error } = await supabase
+              .from("public_flashcard_sets")
+              .select("plays")
+              .eq("id", lobby.flashcardID)
+              .single();
 
-          if (error || !data) return;
+            if (error || !data) return;
 
-          const currentPlays = data.plays || 0;
-          const increment = lobby.players.length;
+            const currentPlays = data.plays || 0;
+            const increment = lobby.players.length;
 
-          await supabase
-            .from("public_flashcard_sets")
-            .update({ plays: currentPlays + increment })
-            .eq("id", lobby.flashcardID);
-        } catch (err) {
-          console.error("Failed to update plays:", err);
-        }
-      };
+            await supabase
+              .from("public_flashcard_sets")
+              .update({ plays: currentPlays + increment })
+              .eq("id", lobby.flashcardID);
+          } catch (err) {
+            console.error("Failed to update plays:", err);
+          }
+        };
 
-      updatePlays();
+        updatePlays();
+      }
+    } else {
+      hasUpdatedPlays.current = false;
     }
-  }, [showResults]);
+  }, [showResults, isLeader, lobby?.flashcardID, lobby?.players.length]);
 
   // Update countdown message when lobby status changes to ongoing (for hot joins)
   useEffect(() => {

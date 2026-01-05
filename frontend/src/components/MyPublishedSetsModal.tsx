@@ -556,7 +556,7 @@ export function MyPublishedSetsModal({
   if (editingSet) {
     return (
       <div
-        className="fixed inset-0 flex items-center justify-center z-[60] bg-coffee/50 cursor-not-allowed"
+        className="fixed inset-0 flex items-center justify-center z-60 bg-coffee/50 cursor-not-allowed"
         onMouseDown={(e) => {
           if (e.target === e.currentTarget) {
             mouseDownOnBackdrop.current = true;
@@ -918,7 +918,7 @@ export function MyPublishedSetsModal({
   // List view
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-[60] bg-coffee/50 cursor-not-allowed"
+      className="fixed inset-0 flex items-center justify-center z-60 bg-coffee/50 cursor-not-allowed"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) {
           mouseDownOnBackdrop.current = true;
