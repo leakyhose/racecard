@@ -155,7 +155,7 @@ export function ExportModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 flex flex-col h-[80vh] overflow-hidden"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 flex flex-col h-[80vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-4">
@@ -210,7 +210,7 @@ export function ExportModal({
               <textarea
                 readOnly
                 value={exportText}
-                className="flex-1 w-full p-4 font-mono text-sm border-2 border-coffee bg-light-vanilla/50 resize-none focus:outline-none mb-4"
+                className="flex-1 w-full p-4 font-mono text-sm border-2 border-coffee bg-vanilla resize-none focus:outline-none mb-4"
                 onClick={(e) => e.currentTarget.select()}
               />
               <div className="flex justify-end gap-4 shrink-0 border-t-3 border-coffee pt-4">

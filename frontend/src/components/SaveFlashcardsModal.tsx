@@ -146,7 +146,7 @@ export function SaveFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536] select-text"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-md w-full mx-4 shadow-[8px_8px_0px_0px_#644536] select-text"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold tracking-widest border-b-3 border-coffee pb-4 mb-6">
@@ -174,7 +174,7 @@ export function SaveFlashcardsModal({
                 onChange={(e) => setSetName(e.target.value)}
                 placeholder="My Flashcard Set"
                 maxLength={50}
-                className="w-full border-2 border-coffee bg-transparent p-3 placeholder-coffee/50 focus:outline-none focus:bg-white/20"
+                className="w-full border-2 border-coffee bg-vanilla p-3 placeholder-coffee/50 focus:outline-none focus:bg-white/20"
                 autoFocus
                 disabled={saving}
               />

@@ -528,7 +528,7 @@ export function LoadFlashcardsModal({
                   } ${shakingId === set.id ? "animate-shake" : ""}`}
                 >
                   {/* Under Card */}
-                  <div className="bg-white/30 absolute inset-0 rounded-[20px] border-2 border-coffee bg-light-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
+                  <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                     <div
                       className={`text-center text-[9px] font-bold tracking-[0.2em] ${
                         shakingId === set.id
@@ -548,8 +548,8 @@ export function LoadFlashcardsModal({
                       !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
                     }`}
                   >
-                    <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-light-vanilla overflow-hidden">
-                      <div className={`absolute inset-0 bg-white/45 ${activeTab === "community" ? "shadow-[inset_0_0_0_3px_var(--color-powder)]" : "shadow-[inset_0_0_0_2px_var(--color-terracotta)]"} rounded-[18px]`} />
+                    <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
+                      <div className={`absolute inset-0 ${activeTab === "community" ? "shadow-[inset_0_0_0_3px_var(--color-powder)]" : "shadow-[inset_0_0_0_2px_var(--color-terracotta)]"} rounded-[18px]`} />
                       <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
                         {/* Content Container */}
                         <div className="flex-1 flex flex-col items-center justify-center w-full gap-2 overflow-hidden">

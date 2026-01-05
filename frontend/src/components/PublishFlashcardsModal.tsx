@@ -300,7 +300,7 @@ export function PublishFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col overflow-y-auto select-text"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col overflow-y-auto select-text"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-6">
@@ -320,7 +320,7 @@ export function PublishFlashcardsModal({
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-coffee bg-white/50 text-coffee focus:outline-none focus:bg-white font-bold"
+                className="w-full px-4 py-3 border-2 border-coffee bg-vanilla text-coffee focus:outline-none focus:bg-white font-bold"
                 placeholder="Name your set"
                 maxLength={50}
               />
@@ -333,13 +333,13 @@ export function PublishFlashcardsModal({
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-coffee bg-white/50 text-coffee focus:outline-none focus:bg-white font-bold h-24 resize-none"
+                className="w-full px-4 py-3 border-2 border-coffee bg-vanilla text-coffee focus:outline-none focus:bg-white font-bold h-24 resize-none"
                 placeholder="Describe your set..."
                 maxLength={200}
               />
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-light-vanilla border-2 border-coffee/20">
+            <div className="flex items-center justify-between p-3 bg-vanilla border-2 border-coffee/20">
               <div>
                 <div className="font-bold text-sm">Allow Viewing All Cards</div>
                 <div className="text-xs text-coffee/60">

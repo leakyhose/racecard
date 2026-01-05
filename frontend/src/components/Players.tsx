@@ -45,7 +45,7 @@ export function Players({
                   : hasMiniStatus
                     ? "bg-terracotta/20"
                     : "bg-vanilla"
-              } ${player.id === leader ? "-translate-x-[3px] shadow-[3px_0_0_0_var(--color-terracotta)]" : ""}`}
+              }`}
             >
               <div
                 className={`flex w-full ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}
@@ -54,7 +54,9 @@ export function Players({
                 <div className="flex-1 flex flex-col justify-center min-w-0 px-3 py-1 relative">
                   {hasMiniStatus ? (
                     <>
-                      <div className="font-bold truncate leading-tight text-coffee">
+                      <div
+                        className={`font-bold truncate leading-tight text-coffee ${player.id === leader ? "underline decoration-2 underline-offset-2" : ""}`}
+                      >
                         {player.name}
                       </div>
 
@@ -65,7 +67,9 @@ export function Players({
                       </div>
                     </>
                   ) : (
-                    <div className="font-semibold truncate leading-tight text-coffee">
+                    <div
+                      className={`font-semibold truncate leading-tight text-coffee ${player.id === leader ? "underline decoration-2 underline-offset-2" : ""}`}
+                    >
                       {player.name}
                     </div>
                   )}
@@ -88,11 +92,6 @@ export function Players({
               {isLeader && player.id !== socket.id && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-terracotta text-vanilla font-bold tracking-wider text-sm">
                   Promote
-                </div>
-              )}
-              {!isLeader && player.id === leader && (
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-powder text-coffee font-bold tracking-wider text-sm">
-                  Leader
                 </div>
               )}
             </li>

@@ -572,7 +572,7 @@ export function MyPublishedSetsModal({
         }}
       >
         <div
-          className="bg-vanilla border-3 border-coffee p-8 max-w-6xl w-full mx-4 max-h-[90vh] flex flex-col select-text"
+          className="bg-light-vanilla border-3 border-coffee p-8 max-w-6xl w-full mx-4 max-h-[90vh] flex flex-col select-text"
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-4 flex justify-between items-center">
@@ -685,7 +685,7 @@ export function MyPublishedSetsModal({
                     return (
                       <div
                         key={setting.key}
-                        className={`flex items-center justify-between p-3 bg-light-vanilla border-2 border-coffee/20 ${isDisabled ? "opacity-50" : ""}`}
+                        className={`flex items-center justify-between p-3 bg-vanilla border-2 border-coffee/20 ${isDisabled ? "opacity-50" : ""}`}
                       >
                         <div className="flex-1 min-w-0">
                           <div className="font-bold text-sm">{setting.label}</div>
@@ -792,7 +792,7 @@ export function MyPublishedSetsModal({
                   {flashcards.map((card) => (
                     <div
                       key={card.id}
-                      className="border-2 border-coffee p-4 bg-light-vanilla/50 relative group"
+                      className="border-2 border-coffee p-4 bg-vanilla relative group"
                     >
                       <div className="absolute top-2 right-2">
                         <button
@@ -932,7 +932,7 @@ export function MyPublishedSetsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 h-[80vh] flex flex-col select-text"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 h-[80vh] flex flex-col select-text"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-4">
@@ -965,7 +965,7 @@ export function MyPublishedSetsModal({
               {sets.map((set) => (
                 <div
                   key={set.id}
-                  className="border-2 border-coffee p-4 bg-white/20"
+                  className="border-2 border-coffee p-4 bg-vanilla"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

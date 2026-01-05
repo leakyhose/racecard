@@ -73,7 +73,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-6 max-w-5xl w-full h-[80vh] flex flex-col select-text"
+        className="bg-light-vanilla border-3 border-coffee p-6 max-w-5xl w-full h-[80vh] flex flex-col select-text"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -170,7 +170,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     <span className="mr-1">Custom:</span>
                     <input
                       type="text"
-                      className="border-2 border-coffee bg-transparent px-1 w-16 focus:outline-none focus:bg-white/20"
+                      className="border-2 border-coffee bg-vanilla px-1 w-16 focus:outline-none focus:bg-white/20"
                       value={customTermSep}
                       onChange={(e) => setCustomTermSep(e.target.value)}
                       disabled={termSeparator !== "custom"}
@@ -211,7 +211,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     <span className="mr-1">Custom:</span>
                     <input
                       type="text"
-                      className="border-2 border-coffee bg-transparent px-1 w-16 focus:outline-none focus:bg-white/20"
+                      className="border-2 border-coffee bg-vanilla px-1 w-16 focus:outline-none focus:bg-white/20"
                       value={customRowSep}
                       onChange={(e) => setCustomRowSep(e.target.value)}
                       disabled={rowSeparator !== "custom"}
@@ -256,7 +256,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
             <div className="flex-1 flex flex-col min-h-0">
               <textarea
-                className="flex-1 border-2 border-coffee bg-white/50 p-3 resize-none font-mono text-sm focus:outline-none focus:bg-white text-coffee placeholder-coffee/50"
+                className="flex-1 border-2 border-coffee bg-vanilla p-3 resize-none font-mono text-sm focus:outline-none focus:bg-white text-coffee placeholder-coffee/50"
                 placeholder={
                   mode === "simple"
                     ? "Paste copied text here..."

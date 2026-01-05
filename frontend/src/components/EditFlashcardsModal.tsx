@@ -230,7 +230,7 @@ export function EditFlashcardsModal({
       }}
     >
       <div
-        className="bg-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 max-h-[80vh] flex flex-col select-text"
+        className="bg-light-vanilla border-3 border-coffee p-8 max-w-5xl w-full mx-4 max-h-[80vh] flex flex-col select-text"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="font-bold text-2xl tracking-widest border-b-3 border-coffee pb-4 mb-4 flex justify-between items-center">
@@ -267,7 +267,7 @@ export function EditFlashcardsModal({
             {flashcards.map((card) => (
               <div
                 key={card.id}
-                className="border-2 border-coffee p-4 mt-4 mb-4 bg-light-vanilla/50 relative group"
+                className="border-2 border-coffee p-4 mt-4 mb-4 bg-vanilla relative group"
               >
                 <div className="absolute top-2 right-2">
                   <button
@@ -288,7 +288,7 @@ export function EditFlashcardsModal({
                       onChange={(e) =>
                         handleUpdateCard(card.id, "term", e.target.value)
                       }
-                      className="w-full bg-vanilla border-2 border-coffee/20 focus:border-coffee p-2 min-h-20 resize-none font-bold text-lg outline-none transition-colors"
+                      className="w-full bg-light-vanilla border-2 border-coffee/20 focus:border-coffee p-2 min-h-20 resize-none font-bold text-lg outline-none transition-colors"
                       placeholder="Enter term..."
                     />
 
@@ -308,7 +308,7 @@ export function EditFlashcardsModal({
                               e.target.value,
                             )
                           }
-                          className="w-full bg-vanilla/50 border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"
+                          className="w-full bg-light-vanilla border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"
                           placeholder={`Trick Term ${i + 1}`}
                         />
                       ))}
@@ -329,7 +329,7 @@ export function EditFlashcardsModal({
                       onChange={(e) =>
                         handleUpdateCard(card.id, "definition", e.target.value)
                       }
-                      className="w-full bg-vanilla border-2 border-coffee/20 focus:border-coffee p-2 min-h-20 resize-none text-base outline-none transition-colors"
+                      className="w-full bg-light-vanilla border-2 border-coffee/20 focus:border-coffee p-2 min-h-20 resize-none text-base outline-none transition-colors"
                       placeholder="Enter definition..."
                     />
 
@@ -349,7 +349,7 @@ export function EditFlashcardsModal({
                               e.target.value,
                             )
                           }
-                          className="w-full bg-vanilla/50 border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"
+                          className="w-full bg-light-vanilla border border-coffee/20 focus:border-coffee p-1.5 text-sm outline-none transition-colors"
                           placeholder={`Trick Definition ${i + 1}`}
                         />
                       ))}
