@@ -1,25 +1,22 @@
 import { config } from "dotenv";
-import OpenAI from "openai";
-import { zodResponseFormat } from "openai/helpers/zod";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import * as z from "zod";
 import type { Flashcard } from "@shared/types.js";
 import fs from "fs";
 
 const distractorPrompt = fs.readFileSync("./src/distractorPrompt.md", "utf-8");
 
-const MODEL_NAME = "gpt-4.1";
+const MODEL_NAME = "gemini-2.5-flash";
 const BATCH_SIZE = 50;
 
 // Load environment variables
 config();
 
-let client: OpenAI | null = null;
+let client: GoogleGenerativeAI | null = null;
 
 function getClient() {
-  if (!client && process.env.OPENAI_API_KEY) {
-    client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+  if (!client && process.env.GEMINI_API_KEY) {
+    client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   }
   return client;
 }
@@ -33,7 +30,7 @@ const DistractorsPerCard = z.array(z.string().min(1)).length(3);
 
 // Generic function to generate distractors for any field
 async function generateDistractors(
-  apiClient: OpenAI,
+  apiClient: GoogleGenerativeAI,
   pairs: { question: string; answer: string }[],
   onProgress?: (completed: number, total: number) => void,
 ): Promise<{
@@ -99,29 +96,51 @@ async function generateDistractors(
           distractors: z.object(batchSchema),
         });
 
-        const response = await apiClient.chat.completions.parse({
+        const model = apiClient.getGenerativeModel({
           model: MODEL_NAME,
-
-          messages: [
-            {
-              role: "system",
-              content: distractorPrompt,
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: SchemaType.OBJECT,
+              properties: {
+                distractors: {
+                  type: SchemaType.OBJECT,
+                  properties: Object.fromEntries(
+                    currentBatch.map((item) => [
+                      item.id,
+                      {
+                        type: SchemaType.ARRAY,
+                        items: { type: SchemaType.STRING },
+                      },
+                    ]),
+                  ),
+                  required: currentBatch.map((item) => item.id),
+                },
+              },
             },
-            {
-              role: "user",
-              content: JSON.stringify(currentBatch),
-            },
-          ],
-          //reasoning:{"effort": "minimal"},
-          response_format: zodResponseFormat(DistractorSet, "distractor_set"),
+          },
         });
 
-        const parsed = response.choices[0]!.message.parsed;
+        const result = await model.generateContent([
+          distractorPrompt,
+          JSON.stringify(currentBatch),
+        ]);
+
+        const response = result.response;
+        const content = response.text();
+
+        if (!content) {
+          throw new Error("Empty response from LLM");
+        }
+
+        const parsedRaw = JSON.parse(content);
+        const parsed = DistractorSet.parse(parsedRaw);
+
         // Track token usage
-        if (response.usage) {
-          totalPromptTokens += response.usage.prompt_tokens;
-          totalCompletionTokens += response.usage.completion_tokens;
-          totalTokens += response.usage.total_tokens;
+        if (response.usageMetadata) {
+          totalPromptTokens += response.usageMetadata.promptTokenCount;
+          totalCompletionTokens += response.usageMetadata.candidatesTokenCount;
+          totalTokens += response.usageMetadata.totalTokenCount;
         }
 
         if (!parsed) {
@@ -269,7 +288,7 @@ export async function generateResponse(
 ) {
   const apiClient = getClient();
   if (!apiClient) {
-    throw new Error("OpenAI API key not configured");
+    throw new Error("Gemini API key not configured");
   }
 
   const totalTermBatches =
