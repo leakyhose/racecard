@@ -141,11 +141,7 @@ export default function Home() {
         </div>
       )}
 
-      {notFound && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 text-terracotta font-bold text-xl z-20 bg-vanilla px-4 py-2 border-2 border-coffee shadow-[4px_4px_0px_0px_var(--color-coffee)]">
-          Lobby not found!
-        </div>
-      )}
+
 
       {/* Main Content Column */}
       <div className="flex flex-col items-center w-full max-w-md z-10">
@@ -263,6 +259,12 @@ export default function Home() {
                  </div>
               </div>
            </div>
+
+           {notFound && (
+            <div className="text-terracotta font-bold text-xl bg-vanilla px-4 py-2 border-2 border-coffee shadow-[4px_4px_0px_0px_var(--color-coffee)]">
+              Lobby not found!
+            </div>
+           )}
         </div>
       </div>
     </div>

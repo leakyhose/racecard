@@ -298,7 +298,7 @@ export function LobbyHeader({
                 disabled={isGenerating || isSetLoading}
                 className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
               >
-                <span className="block w-full h-full rounded-md border-2 border-coffe items-center justify-center text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                <span className="flex w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -348,7 +348,7 @@ export function LobbyHeader({
                   disabled={isGenerating || isSetLoading || isLoadingRandom}
                   className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
                 >
-                  <span className="block w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                  <span className="flex w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
@@ -380,7 +380,7 @@ export function LobbyHeader({
                     className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
                     title="Regenerate Multiple Choice"
                   >
-                    <span className="block w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                    <span className="flex w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
