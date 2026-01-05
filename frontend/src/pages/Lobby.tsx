@@ -120,6 +120,19 @@ export default function Lobby() {
     setIsSaved(saved);
   };
 
+  const handleUnloadSet = () => {
+    if (isLeader && lobby) {
+      socket.emit("updateFlashcard", [], "", "", "", true, true);
+    }
+    setIsPublicSet(false);
+    setPublicSetInfo(null);
+    setLockedSettings({});
+    setTrackedSetId(null);
+    setSearchQuery("");
+    setSubmittedQuery("");
+    setActiveTab("community");
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     e.preventDefault();
@@ -525,6 +538,8 @@ export default function Lobby() {
           isSetLoading={isSetLoading}
           activeTab={activeTab}
           onTabChange={handleTabChange}
+          onUnloadSet={handleUnloadSet}
+          onPublicSetLoaded={handlePublicSetLoaded}
         />
       </div>
       <div className="flex flex-1 min-h-0 border-coffee">

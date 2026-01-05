@@ -1,9 +1,10 @@
 import type { Lobby } from "@shared/types";
 import { socket } from "../socket";
 import { supabase } from "../supabaseClient";
-import { loadPublicSet } from "../utils/loadPublicSet";
+import { loadPublicSet, type LoadedPublicSet } from "../utils/loadPublicSet";
 import { useState, useEffect, useRef } from "react";
 import { UserStatusHeader } from "./UserStatusHeader";
+import { GenerateModal } from "./GenerateModal";
 
 interface LobbyHeaderProps {
   code: string;
@@ -15,7 +16,17 @@ interface LobbyHeaderProps {
   isSetLoading?: boolean;
   activeTab?: "personal" | "community";
   onTabChange?: (tab: "personal" | "community") => void;
+  onUnloadSet?: () => void;
+  onPublicSetLoaded?: (set: LoadedPublicSet) => void;
 }
+
+const LOADING_PHRASES = [
+  "Analyzing terms and definitions...",
+  "Contextualizing knowledge base...",
+  "Crafting plausible distractors...",
+  "Optimizing difficulty levels...",
+  "Polishing multiple choice options...",
+];
 
 export function LobbyHeader({
   code,
@@ -26,20 +37,15 @@ export function LobbyHeader({
   isSetLoading,
   activeTab,
   onTabChange,
+  onUnloadSet,
+  onPublicSetLoaded,
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
   const [isLoadingRandom, setIsLoadingRandom] = useState(false);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const LOADING_PHRASES = [
-    "Analyzing terms and definitions...",
-    "Contextualizing knowledge base...",
-    "Crafting plausible distractors...",
-    "Optimizing difficulty levels...",
-    "Polishing multiple choice options...",
-  ];
 
   const isGenerating = lobby.distractorStatus === "generating";
 
@@ -88,7 +94,12 @@ export function LobbyHeader({
     socket.emit("startGame");
   };
 
-  const handleGenerateMultipleChoice = () => {
+  const handleOpenGenerateModal = () => {
+    setShowGenerateModal(true);
+  };
+
+  const handleConfirmGenerate = () => {
+    setShowGenerateModal(false);
     const mode = lobby.settings.answerByTerm ? "term" : "definition";
     socket.emit("generateMultipleChoice", mode);
   };
@@ -144,7 +155,10 @@ export function LobbyHeader({
         if (fetchError) throw fetchError;
         
         if (data) {
-          await loadPublicSet(data.id);
+          const set = await loadPublicSet(data.id);
+          if (set) {
+            onPublicSetLoaded?.(set);
+          }
         }
       }
     } catch (err) {
@@ -273,20 +287,6 @@ export function LobbyHeader({
                 </svg>
               </button>
             </div>
-          ) : needsGeneration && lobby.status === "waiting" && !isPublicSet ? (
-            <div className="flex flex-col items-center gap-2">
-              <button
-                onClick={canGenerate ? handleGenerateMultipleChoice : undefined}
-                disabled={isGenerating || !canGenerate || isSetLoading}
-                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-gradient-to-r from-[#b4cded] via-[#e7c8dd] to-[#b4cded] bg-[length:200%_200%] animate-gradient-shift -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
-                  {canGenerate
-                    ? "Generate Multiple Choice with AI"
-                    : "Max 200 flashcards for generation"}
-                </span>
-              </button>
-            </div>
           ) : lobby.distractorStatus === "error" ? (
             <div className="font-bold text-lg tracking-wide text-terracotta">
               Error occurred while generating choices
@@ -294,39 +294,112 @@ export function LobbyHeader({
           ) : lobby.status === "waiting" ? (
             <div className="flex gap-4 items-center">
               <button
-                onClick={handleStartGame}
+                onClick={onUnloadSet}
                 disabled={isGenerating || isSetLoading}
-                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
               >
-                <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
-                  Start Game
+                <span className="block w-full h-full rounded-md border-2 border-coffe items-center justify-center text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 14 4 9l5-5" />
+                    <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
+                  </svg>
                 </span>
               </button>
-              {isPublicSet && (
-                <button
-                  onClick={handleRandomSet}
-                  disabled={isGenerating || isSetLoading || isLoadingRandom}
-                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
-                    Random Set
-                  </span>
-                </button>
-              )}
-              {lobby.settings.multipleChoice && !isPublicSet && (
+
+              {needsGeneration && !isPublicSet ? (
                 <button
                   onClick={
-                    canGenerate ? handleGenerateMultipleChoice : undefined
+                    canGenerate ? handleOpenGenerateModal : undefined
                   }
                   disabled={isGenerating || !canGenerate || isSetLoading}
-                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-gradient-to-r from-[#b4cded] via-[#e7c8dd] to-[#b4cded] bg-[length:200%_200%] animate-gradient-shift -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
                     {canGenerate
-                      ? "Regenerate Multiple Choice"
+                      ? "Generate Multiple Choice with AI"
                       : "Max 200 flashcards for generation"}
                   </span>
                 </button>
+              ) : (
+                <button
+                  onClick={handleStartGame}
+                  disabled={isGenerating || isSetLoading}
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                    Start Game
+                  </span>
+                </button>
+              )}
+
+              {isPublicSet ? (
+                <button
+                  onClick={handleRandomSet}
+                  disabled={isGenerating || isSetLoading || isLoadingRandom}
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
+                >
+                  <span className="block w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                      <path d="M16 8h.01" />
+                      <path d="M8 8h.01" />
+                      <path d="M8 16h.01" />
+                      <path d="M16 16h.01" />
+                      <path d="M12 12h.01" />
+                    </svg>
+                  </span>
+                </button>
+              ) : (
+                lobby.settings.multipleChoice &&
+                !needsGeneration && (
+                  <button
+                    onClick={
+                      canGenerate ? handleOpenGenerateModal : undefined
+                    }
+                    disabled={isGenerating || !canGenerate || isSetLoading}
+                    className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
+                    title="Regenerate Multiple Choice"
+                  >
+                    <span className="block w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                        <path d="M16 21h5v-5" />
+                      </svg>
+                    </span>
+                  </button>
+                )
               )}
             </div>
           ) : lobby.status === "finished" ? (
@@ -360,6 +433,11 @@ export function LobbyHeader({
       </div>
 
       <UserStatusHeader />
+      <GenerateModal
+        isOpen={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
+        onGenerate={handleConfirmGenerate}
+      />
     </div>
   );
 }

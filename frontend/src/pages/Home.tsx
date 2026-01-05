@@ -177,7 +177,7 @@ export default function Home() {
                 <div className="w-14 h-6 bg-terracotta border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
                   {/* Knob */}
                   <div
-                    className={`absolute h-6 w-6 bg-vanilla border-2 border-coffee rounded-md shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -top-[5px] -left-[2px] group-hover:-translate-y-[0.09rem] ${isCreateMode ? "translate-x-[32px]" : ""}`}
+                    className={`absolute h-6 w-6 bg-vanilla border-2 border-coffee rounded-md shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -top-[5px] -left-0.5 group-hover:-translate-y-[0.09rem] ${isCreateMode ? "translate-x-8" : ""}`}
                   ></div>
                 </div>
               </label>
@@ -191,7 +191,7 @@ export default function Home() {
            </div>
 
            {/* Flipping Card Area */}
-           <div className="w-full aspect-[4/3] perspective-1000">
+           <div className="w-full aspect-4/3 perspective-1000">
               <div className={`relative w-full h-full transition-transform duration-700 transform-3d ${isCreateMode ? 'rotate-y-180' : ''}`}>
                  
                  {/* Front: Join */}
