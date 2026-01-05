@@ -9,13 +9,13 @@ export function About() {
       <div className="p-4 text-coffee text-center">
         <div className="text-sm font-medium space-y-4 mb-8">
           <p>
-            Welcome to RaceCard! This is a fast-paced flashcard racing game to make casual trivia or intense studying competitive.
+            Welcome to RaceCard!.
           </p>
           <p>
-            You can upload sets of flashcards from your notes, letting our AI generate multiple choice options and study with friends.
+            Choose a community RaceCard set on the left, or upload one of your own and let our AI generate multiple choice options.
           </p>
           <p>
-            Or you can browse the community RaceCards, challenge yourself, and publish your own to contribute.
+            Then invite your friends to join the lobby with the link above.
           </p>
         </div>
 

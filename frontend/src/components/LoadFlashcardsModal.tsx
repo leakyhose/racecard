@@ -78,6 +78,10 @@ export function LoadFlashcardsModal({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+
   // Request ID to prevent stale responses from updating state
   const requestIdRef = useRef(0);
 
@@ -92,6 +96,8 @@ export function LoadFlashcardsModal({
     setSets([]);
     setPage(0);
     setHasMore(true);
+    setSearchQuery("");
+    setSubmittedQuery("");
   }, [activeTab]);
 
   const fetchSets = async (
@@ -137,14 +143,21 @@ export function LoadFlashcardsModal({
           : [];
         fetchError = result.error;
       } else {
-        const result = await supabase
+        let query = supabase
           .from("public_flashcard_sets")
           .select(
             "id, name, description, created_at, updated_at, plays, user_id, username",
-          )
-          .order("plays", { ascending: false })
-          .order("id", { ascending: true })
-          .range(from, to);
+          );
+
+        if (submittedQuery.trim()) {
+          query = query.textSearch("search_vector", submittedQuery);
+        } else {
+          query = query
+            .order("plays", { ascending: false })
+            .order("id", { ascending: true });
+        }
+
+        const result = await query.range(from, to);
 
         data = result.data
           ? result.data.map((item) => ({
@@ -245,7 +258,7 @@ export function LoadFlashcardsModal({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, activeTab, refreshTrigger, user]);
+  }, [isOpen, activeTab, refreshTrigger, user, submittedQuery]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -349,6 +362,39 @@ export function LoadFlashcardsModal({
     }
   };
 
+  const handleRandom = async () => {
+    if (loadingSetId) return;
+    setLoadingSetId("random");
+    
+    try {
+      const { count, error: countError } = await supabase
+        .from("public_flashcard_sets")
+        .select("*", { count: "exact", head: true });
+
+      if (countError) throw countError;
+      
+      if (count) {
+        const randomOffset = Math.floor(Math.random() * count);
+        const { data, error: fetchError } = await supabase
+          .from("public_flashcard_sets")
+          .select("id, name")
+          .range(randomOffset, randomOffset)
+          .limit(1)
+          .single();
+
+        if (fetchError) throw fetchError;
+        
+        if (data) {
+          await handleLoadSet(data.id, data.name);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load random set");
+      setLoadingSetId(null);
+    }
+  };
+
   const handleDelete = async (setId: string, setName: string) => {
     if (!confirm(`Are you sure you want to delete "${setName}"?`)) {
       return;
@@ -407,7 +453,7 @@ export function LoadFlashcardsModal({
           e.stopPropagation();
         }}
       >
-        <div className="flex justify-between items-center pb-6 border-b-3 border-coffee shrink-0">
+        <div className={`flex justify-between items-center pb-6 shrink-0 ${activeTab !== "community" ? "border-b-3 border-coffee" : ""}`}>
           {/* Left spacer for centering */}
           <div className="w-48 shrink-0"></div>
 
@@ -485,6 +531,41 @@ export function LoadFlashcardsModal({
             )}
           </div>
         </div>
+
+        {/* Search Bar for Community Tab */}
+        {activeTab === "community" && (
+          <div className="pb-4 flex justify-center border-b-3 border-coffee">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSubmittedQuery(searchQuery);
+              }}
+              className="flex gap-2 w-full max-w-sm items-center"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search public sets..."
+                className="flex-1 px-3 py-1 text-sm border-2 border-coffee rounded-md bg-vanilla focus:outline-none focus:border-terracotta text-coffee placeholder-coffee/50"
+              />
+              <button
+                type="submit"
+                className="px-4 py-1 text-sm bg-powder text-coffee font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee hover:text-light-vanilla transition-colors"
+              >
+                Search
+              </button>
+              <button
+                type="button"
+                onClick={handleRandom}
+                disabled={loadingSetId !== null}
+                className="px-4 py-1 text-sm bg-terracotta text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee transition-colors disabled:opacity-50"
+              >
+                Random
+              </button>
+            </form>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center py-12">

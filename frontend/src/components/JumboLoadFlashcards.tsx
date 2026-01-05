@@ -60,6 +60,10 @@ export function JumboLoadFlashcards({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+
   const fetchSets = useCallback(async (pageToFetch: number, isInitial: boolean = false) => {
     if (isInitial) {
       setLoading(true);
@@ -96,12 +100,19 @@ export function JumboLoadFlashcards({
           : [];
         fetchError = result.error;
       } else {
-        const result = await supabase
+        let query = supabase
           .from("public_flashcard_sets")
-          .select("id, name, created_at, plays, user_id, username")
-          .order("plays", { ascending: false })
-          .order("id", { ascending: true })
-          .range(from, to);
+          .select("id, name, created_at, plays, user_id, username");
+
+        if (submittedQuery.trim()) {
+          query = query.textSearch("search_vector", submittedQuery);
+        } else {
+          query = query
+            .order("plays", { ascending: false })
+            .order("id", { ascending: true });
+        }
+
+        const result = await query.range(from, to);
 
         data = result.data
           ? result.data.map((item) => ({
@@ -156,13 +167,21 @@ export function JumboLoadFlashcards({
       setLoading(false);
       setIsLoadingMore(false);
     }
-  }, [activeTab, user]);
+  }, [activeTab, user, submittedQuery]);
+
+  useEffect(() => {
+    setPage(0);
+    setHasMore(true);
+    setSearchQuery("");
+    setSubmittedQuery("");
+    fetchSets(0, true);
+  }, [activeTab, fetchSets]);
 
   useEffect(() => {
     setPage(0);
     setHasMore(true);
     fetchSets(0, true);
-  }, [fetchSets, refreshTrigger]);
+  }, [refreshTrigger, submittedQuery, fetchSets]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
@@ -248,10 +267,44 @@ export function JumboLoadFlashcards({
     }
   };
 
+  const handleRandom = async () => {
+    if (loadingSetId || isLoading) return;
+    setLoadingSetId("random");
+    onLoadingChange?.(true);
+    
+    try {
+      const { count, error: countError } = await supabase
+        .from("public_flashcard_sets")
+        .select("*", { count: "exact", head: true });
+
+      if (countError) throw countError;
+      
+      if (count) {
+        const randomOffset = Math.floor(Math.random() * count);
+        const { data, error: fetchError } = await supabase
+          .from("public_flashcard_sets")
+          .select("id, name")
+          .range(randomOffset, randomOffset)
+          .limit(1)
+          .single();
+
+        if (fetchError) throw fetchError;
+        
+        if (data) {
+          await handleLoadSet(data.id, data.name);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setLoadingSetId(null);
+      onLoadingChange?.(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full relative">
       {/* Header with Toggle Switch */}
-      <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 gap-6 shrink-0 pt-[11.1px]">
+      <div className={`flex justify-center items-center pb-3 gap-6 shrink-0 pt-[11.1px] ${activeTab !== "community" ? "border-b-2 border-coffee/50" : ""}`}>
         <button
           className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
           onClick={() => setActiveTab("personal")}
@@ -309,6 +362,41 @@ export function JumboLoadFlashcards({
           </svg>
         </button>
       </div>
+
+      {/* Search Bar for Community Tab */}
+      {activeTab === "community" && (
+        <div className="pb-3 flex justify-center border-b-2 border-coffee/50">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSubmittedQuery(searchQuery);
+            }}
+            className="flex gap-2 w-full max-w-xs items-center px-4"
+          >
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search public sets..."
+              className="flex-1 px-3 py-1 text-sm border-2 border-coffee rounded-md bg-vanilla focus:outline-none focus:border-terracotta text-coffee placeholder-coffee/50"
+            />
+            <button
+              type="submit"
+              className="px-4 py-1 text-sm bg-coffee text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-terracotta hover:border-terracotta transition-colors"
+            >
+              Search
+            </button>
+            <button
+              type="button"
+              onClick={handleRandom}
+              disabled={loadingSetId !== null || isLoading}
+              className="px-4 py-1 text-sm bg-terracotta text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee transition-colors disabled:opacity-50"
+            >
+              Random
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Content */}
       <div

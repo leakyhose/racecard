@@ -1,5 +1,7 @@
 import type { Lobby } from "@shared/types";
 import { socket } from "../socket";
+import { supabase } from "../supabaseClient";
+import { loadPublicSet } from "../utils/loadPublicSet";
 import { useState, useEffect, useRef } from "react";
 import { UserStatusHeader } from "./UserStatusHeader";
 
@@ -23,7 +25,30 @@ export function LobbyHeader({
 }: LobbyHeaderProps) {
   const [showCopyMessage, setShowCopyMessage] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const [isLoadingRandom, setIsLoadingRandom] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const LOADING_PHRASES = [
+    "Analyzing terms and definitions...",
+    "Contextualizing knowledge base...",
+    "Crafting plausible distractors...",
+    "Optimizing difficulty levels...",
+    "Polishing multiple choice options...",
+  ];
+
+  const isGenerating = lobby.distractorStatus === "generating";
+
+  useEffect(() => {
+    if (isGenerating) {
+      const interval = setInterval(() => {
+        setLoadingTextIndex((prev) => (prev + 1) % LOADING_PHRASES.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingTextIndex(0);
+    }
+  }, [isGenerating]);
 
   useEffect(() => {
     const handleNewFlashcard = () => {
@@ -78,8 +103,6 @@ export function LobbyHeader({
     lobby.flashcards.length > 0 &&
     !allCardsGenerated;
 
-  const isGenerating = lobby.distractorStatus === "generating";
-
   const isPrivilegedUser = userId === "d0c1b157-eb1f-42a9-bf67-c6384b7ca278";
   const isLargeSet = lobby.flashcards.length >= 200;
   const canGenerate = !isLargeSet || isPrivilegedUser;
@@ -91,6 +114,39 @@ export function LobbyHeader({
       setTimeout(() => setShowCopyMessage(false), 2000);
     } catch (err) {
       console.error("Failed to copy code:", err);
+    }
+  };
+
+  const handleRandomSet = async () => {
+    if (isLoadingRandom || isSetLoading) return;
+    setIsLoadingRandom(true);
+    
+    try {
+      const { count, error: countError } = await supabase
+        .from("public_flashcard_sets")
+        .select("*", { count: "exact", head: true });
+
+      if (countError) throw countError;
+      
+      if (count) {
+        const randomOffset = Math.floor(Math.random() * count);
+        const { data, error: fetchError } = await supabase
+          .from("public_flashcard_sets")
+          .select("id")
+          .range(randomOffset, randomOffset)
+          .limit(1)
+          .single();
+
+        if (fetchError) throw fetchError;
+        
+        if (data) {
+          await loadPublicSet(data.id);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load random set:", err);
+    } finally {
+      setIsLoadingRandom(false);
     }
   };
 
@@ -141,9 +197,16 @@ export function LobbyHeader({
 
       <div className="absolute left-1/2 -translate-x-1/2 text-coffee">
         {isGenerating ? (
-          <div className="font-bold text-lg tracking-wide text-terracotta flex flex-col items-center">
-            {lobby.generationProgress && (
-              <div className="text-sm mt-0">{lobby.generationProgress}</div>
+          <div className="font-bold text-lg tracking-wide flex flex-col items-center gap-2">
+            {(!lobby.generationProgress ||
+              !lobby.generationProgress.toLowerCase().includes("batch")) ? (
+              <div className="text-coffee">
+                {LOADING_PHRASES[loadingTextIndex]}
+              </div>
+            ) : (
+              <div className="text-coffee">
+                {lobby.generationProgress.replace("batches complete", "Batches Generated")}
+              </div>
             )}
           </div>
         ) : isLeader ? (
@@ -158,9 +221,9 @@ export function LobbyHeader({
                 disabled={isGenerating || !canGenerate || isSetLoading}
                 className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-gradient-to-r from-[#b4cded] via-[#e7c8dd] to-[#b4cded] bg-[length:200%_200%] animate-gradient-shift -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
                   {canGenerate
-                    ? "Generate Multiple Choice"
+                    ? "Generate Multiple Choice with AI"
                     : "Max 200 flashcards for generation"}
                 </span>
               </button>
@@ -170,27 +233,38 @@ export function LobbyHeader({
               Error occurred while generating choices
             </div>
           ) : lobby.status === "waiting" ? (
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <button
                 onClick={handleStartGame}
                 disabled={isGenerating || isSetLoading}
-                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
                   Start Game
                 </span>
               </button>
+              {isPublicSet && (
+                <button
+                  onClick={handleRandomSet}
+                  disabled={isGenerating || isSetLoading || isLoadingRandom}
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                    Random Set
+                  </span>
+                </button>
+              )}
               {lobby.settings.multipleChoice && !isPublicSet && (
                 <button
                   onClick={
                     canGenerate ? handleGenerateMultipleChoice : undefined
                   }
                   disabled={isGenerating || !canGenerate || isSetLoading}
-                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-gradient-to-r from-[#b4cded] via-[#e7c8dd] to-[#b4cded] bg-[length:200%_200%] animate-gradient-shift -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
                     {canGenerate
-                      ? "Generate Again"
+                      ? "Regenerate Multiple Choice"
                       : "Max 200 flashcards for generation"}
                   </span>
                 </button>
