@@ -773,6 +773,7 @@ export default function Lobby() {
             gameStatus={lobby.status}
             isLeader={isLeader}
             leader={lobby.leader}
+            isLoading={isSetLoading || lobby.distractorStatus === 'generating'}
           />
 
           <div className="pt-4 flex flex-col gap-4">

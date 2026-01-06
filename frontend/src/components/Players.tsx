@@ -6,6 +6,7 @@ interface PlayersProps {
   gameStatus: string;
   isLeader: boolean;
   leader: string;
+  isLoading?: boolean;
 }
 
 export function Players({
@@ -13,9 +14,10 @@ export function Players({
   gameStatus,
   isLeader,
   leader,
+  isLoading = false,
 }: PlayersProps) {
   const handleUpdateLeader = (nextLeaderId: string) => {
-    if (!isLeader) {
+    if (!isLeader || isLoading) {
       return;
     }
     socket.emit("updateLeader", nextLeaderId);
@@ -48,8 +50,8 @@ export function Players({
               }`}
             >
               <div
-                className={`flex w-full ${isLeader && player.id != socket.id ? "cursor-pointer" : ""}`}
-                onClick={() => isLeader && handleUpdateLeader(player.id)}
+                className={`flex w-full ${isLeader && player.id != socket.id && !isLoading ? "cursor-pointer" : ""}`}
+                onClick={() => isLeader && !isLoading && handleUpdateLeader(player.id)}
               >
                 <div className="flex-1 flex flex-col justify-center min-w-0 px-3 py-1 relative">
                   {hasMiniStatus ? (
@@ -89,7 +91,7 @@ export function Players({
                   )}
                 </div>
               </div>
-              {isLeader && player.id !== socket.id && (
+              {isLeader && player.id !== socket.id && !isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none bg-terracotta text-vanilla font-bold tracking-wider text-sm">
                   Promote
                 </div>

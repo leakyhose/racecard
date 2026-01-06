@@ -25,6 +25,7 @@ interface FlashcardSet {
   has_generated: boolean;
   plays?: number;
   user_id?: string;
+  username?: string;
 }
 
 interface LoadFlashcardsProps {
@@ -104,7 +105,7 @@ export function LoadFlashcards({
           // Fetch public sets
           const result = await supabase
             .from("public_flashcard_sets")
-            .select("id, name, created_at, plays, user_id")
+            .select("id, name, created_at, plays, user_id, username")
             .order("plays", { ascending: false })
             .order("id", { ascending: true })
             .limit(10);

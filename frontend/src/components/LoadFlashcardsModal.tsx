@@ -364,6 +364,32 @@ export function LoadFlashcardsModal({
 
   const handleRandom = async () => {
     if (loadingSetId) return;
+
+    if (!isLeader) {
+      // Find a random card to shake or just show a message
+      // Since we can't easily shake a specific card, we might need a general notification
+      // Or we can just ignore the click. 
+      // User requested "shake and say must be leader".
+      // But the "Random" button is in the search bar.
+      // We can add a shake effect to the button itself or show an error.
+      // For now, let's just return to prevent action.
+      // Ideally we shake the button.
+      const btn = document.getElementById("random-set-btn");
+      if (btn) {
+        btn.classList.add("animate-shake");
+        // Also show tooltip or change text temporarily?
+        const originalText = btn.innerText;
+        btn.innerText = "Leader Only";
+        btn.classList.add("bg-terracotta", "border-terracotta");
+        setTimeout(() => {
+          btn.classList.remove("animate-shake");
+          btn.innerText = originalText;
+          btn.classList.remove("bg-terracotta", "border-terracotta");
+        }, 1000);
+      }
+      return;
+    }
+
     setLoadingSetId("random");
     
     try {
@@ -556,6 +582,7 @@ export function LoadFlashcardsModal({
                 Search
               </button>
               <button
+                id="random-set-btn"
                 type="button"
                 onClick={handleRandom}
                 disabled={loadingSetId !== null}
