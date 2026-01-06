@@ -415,6 +415,9 @@ export default function Lobby() {
             settings: {},
             flashcardCount: lobby.flashcards.length,
             user_id: lobby.flashcardAuthorId,
+            username: lobby.flashcardAuthorName,
+            createdAt: lobby.flashcardCreatedAt,
+            updatedAt: lobby.flashcardUpdatedAt,
           }
         : null);
   }, [publicSetInfo, lobby]);

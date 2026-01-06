@@ -104,7 +104,25 @@ export function SaveFlashcardsModal({
       }
 
       if (isLeader) {
-        socket.emit("updateFlashcard", flashcards, setName.trim(), setData.id);
+        const description = `${user?.user_metadata?.username || "User"}'s private set`;
+        const authorId = user?.id;
+        const authorName = user?.user_metadata?.username || "User";
+        const createdAt = setData.created_at;
+        const updatedAt = setData.created_at;
+
+        socket.emit(
+          "updateFlashcard",
+          flashcards,
+          setName.trim(),
+          setData.id,
+          description,
+          undefined,
+          undefined,
+          authorId,
+          authorName,
+          createdAt,
+          updatedAt,
+        );
       }
 
       onSaveSuccess?.(setData.id);

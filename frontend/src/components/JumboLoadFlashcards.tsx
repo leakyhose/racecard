@@ -24,6 +24,8 @@ interface FlashcardSet {
   id: string;
   name: string;
   created_at: string;
+  updated_at?: string;
+  description?: string;
   flashcard_count: number;
   has_generated: boolean;
   term_generated?: boolean;
@@ -104,7 +106,7 @@ export function JumboLoadFlashcards({
         }
         let query = supabase
           .from("flashcard_sets")
-          .select("id, name, created_at, user_id")
+          .select("id, name, description, created_at, updated_at, user_id")
           .eq("user_id", user.id);
 
         if (submittedQuery.trim()) {
@@ -128,7 +130,9 @@ export function JumboLoadFlashcards({
       } else {
         let query = supabase
           .from("public_flashcard_sets")
-          .select("id, name, created_at, plays, user_id, username");
+          .select(
+            "id, name, description, created_at, updated_at, plays, user_id, username",
+          );
 
         if (submittedQuery.trim()) {
           query = query.textSearch("search_vector", submittedQuery);
@@ -299,7 +303,28 @@ export function JumboLoadFlashcards({
         definitionGenerated: card.definition_generated || false,
       }));
 
-      socket.emit("updateFlashcard", flashcards, setName, setId, undefined, undefined, undefined, user?.id);
+      const selectedSet = sets.find((s) => s.id === setId);
+      const description =
+        selectedSet?.description ||
+        `${user?.user_metadata?.username || "User"}'s private set`;
+      const authorId = user?.id;
+      const authorName = user?.user_metadata?.username || "User";
+      const createdAt = selectedSet?.created_at;
+      const updatedAt = selectedSet?.updated_at;
+
+      socket.emit(
+        "updateFlashcard",
+        flashcards,
+        setName,
+        setId,
+        description,
+        undefined,
+        undefined,
+        authorId,
+        authorName,
+        createdAt,
+        updatedAt,
+      );
       onPrivateSetLoaded?.(true);
     } catch {
       console.error("Failed to load set");

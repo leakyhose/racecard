@@ -261,7 +261,7 @@ export default function Home() {
            </div>
 
            {notFound && (
-            <div className="text-terracotta font-bold text-xl bg-vanilla px-4 py-2 border-2 border-coffee shadow-[4px_4px_0px_0px_var(--color-coffee)]">
+            <div className="text-terracotta font-bold text-xl">
               Lobby not found!
             </div>
            )}

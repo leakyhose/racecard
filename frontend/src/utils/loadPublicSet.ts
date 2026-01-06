@@ -93,6 +93,9 @@ export async function loadPublicSet(
       setData.allow_view,
       setData.allow_save,
       setData.user_id,
+      setData.username,
+      setData.created_at,
+      setData.updated_at,
     );
 
     const settings: Partial<Settings> = {};

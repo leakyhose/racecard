@@ -36,6 +36,7 @@ interface FlashcardSet {
   id: string;
   name: string;
   created_at: string;
+  updated_at?: string;
   flashcard_count: number;
   has_generated: boolean;
   term_generated?: boolean;
@@ -128,7 +129,7 @@ export function LoadFlashcardsModal({
         }
         let query = supabase
           .from("flashcard_sets")
-          .select("id, name, created_at, user_id")
+          .select("id, name, description, created_at, updated_at, user_id")
           .eq("user_id", user.id);
 
         if (submittedQuery.trim()) {
@@ -360,8 +361,14 @@ export function LoadFlashcardsModal({
         definitionGenerated: card.definition_generated || false,
       }));
 
-      const description = `${user?.user_metadata?.username || "User"}'s private set`;
+      const selectedSet = sets.find((s) => s.id === setId);
+      const description =
+        selectedSet?.description ||
+        `${user?.user_metadata?.username || "User"}'s private set`;
       const authorId = user?.id;
+      const authorName = user?.user_metadata?.username || "User";
+      const createdAt = selectedSet?.created_at;
+      const updatedAt = selectedSet?.updated_at;
 
       socket.emit(
         "updateFlashcard",
@@ -372,6 +379,9 @@ export function LoadFlashcardsModal({
         undefined,
         undefined,
         authorId,
+        authorName,
+        createdAt,
+        updatedAt,
       );
       onSetLoaded?.(true);
       onClose();

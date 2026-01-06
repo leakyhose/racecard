@@ -166,7 +166,7 @@ export function FlashcardStudy({
 
                   {/* Top Card (Cover) */}
                   <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
-                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6 select-text">
+                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6 select-none">
                       {/* Title Section */}
                       <div className="w-full flex flex-col items-center justify-center">
                         {publicSetInfo?.user_id ===
@@ -227,7 +227,7 @@ export function FlashcardStudy({
 
                     {/* Top Card (Front) */}
                     <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
-                      <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4 select-text">
+                      <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4 select-none">
                         <div className="text-center w-full">
                           <div className="text-sm text-coffee/60 mb-4 font-bold">
                             {safeIndex + 1} of {flashcards.length}
@@ -251,7 +251,7 @@ export function FlashcardStudy({
 
                     {/* Top Card (Back) */}
                     <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
-                      <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-4 select-text">
+                      <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-4 select-none">
                         <div className="w-full">
                           <div className="text-sm text-coffee/60 mb-4 font-bold text-center">
                             Answer
