@@ -148,6 +148,9 @@ io.on("connection", (socket) => {
       allowView,
       allowSave,
       authorId,
+      authorName,
+      createdAt,
+      updatedAt,
     ) => {
       const lobby = updateFlashcard(
         socket.id,
@@ -158,6 +161,9 @@ io.on("connection", (socket) => {
         allowView,
         allowSave,
         authorId,
+        authorName,
+        createdAt,
+        updatedAt,
       );
       if (!lobby) {
         console.log(`Failed to update flashcards`);
@@ -174,6 +180,9 @@ io.on("connection", (socket) => {
         lobby.allowView,
         lobby.allowSave,
         lobby.flashcardAuthorId,
+        lobby.flashcardAuthorName,
+        lobby.flashcardCreatedAt,
+        lobby.flashcardUpdatedAt,
       );
       // Ensure full state sync to avoid potential race conditions or missed updates
       io.to(lobby.code).emit("lobbyUpdated", lobby);
@@ -247,6 +256,9 @@ io.on("connection", (socket) => {
         lobby.allowView,
         lobby.allowSave,
         lobby.flashcardAuthorId,
+        lobby.flashcardAuthorName,
+        lobby.flashcardCreatedAt,
+        lobby.flashcardUpdatedAt,
       );
       io.to(lobby.code).emit("distractorStatusUpdated", "ready");
     } catch (error) {
@@ -636,4 +648,6 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("playersUpdated", lobby.players);
   });
 });
-httpServer.listen(3000, () => console.log("Server running on :3000"));
+
+const PORT = process.env.PORT || 3000;
+httpServer.listen(PORT, () => console.log(`Server running on :${PORT}`));

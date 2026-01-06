@@ -40,6 +40,9 @@ export function createLobby(hostID: string, hostName: string): Lobby {
     flashcardName: "",
     flashcardDescription: "",
     flashcardAuthorId: "",
+    flashcardAuthorName: "",
+    flashcardCreatedAt: "",
+    flashcardUpdatedAt: "",
     status: "waiting",
     settings: {
       shuffle: true,
@@ -69,6 +72,9 @@ export function updateFlashcard(
   allowView: boolean = true,
   allowSave: boolean = true,
   authorId: string = "",
+  authorName: string = "",
+  createdAt: string = "",
+  updatedAt: string = "",
 ) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) {
@@ -81,6 +87,9 @@ export function updateFlashcard(
   lobby.allowView = allowView;
   lobby.allowSave = allowSave;
   lobby.flashcardAuthorId = authorId;
+  lobby.flashcardAuthorName = authorName;
+  lobby.flashcardCreatedAt = createdAt;
+  lobby.flashcardUpdatedAt = updatedAt;
   lobby.shuffledFlashcards = []; // Reset deck state
 
   // Update pointsToWin default

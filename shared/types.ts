@@ -41,6 +41,9 @@ export interface Lobby {
   flashcardName: string;
   flashcardDescription?: string;
   flashcardAuthorId?: string;
+  flashcardAuthorName?: string;
+  flashcardCreatedAt?: string;
+  flashcardUpdatedAt?: string;
   allowView?: boolean;
   allowSave?: boolean;
   status: GameStatus;
@@ -78,6 +81,9 @@ export interface ServerToClientEvents {
     allowView?: boolean,
     allowSave?: boolean,
     flashcardAuthorId?: string,
+    flashcardAuthorName?: string,
+    flashcardCreatedAt?: string,
+    flashcardUpdatedAt?: string,
   ) => void;
   playersUpdated: (players: Player[]) => void;
   lobbyStatusUpdated: (status: GameStatus) => void;
@@ -114,6 +120,9 @@ export interface ClientToServerEvents {
     allowView?: boolean,
     allowSave?: boolean,
     authorId?: string,
+    authorName?: string,
+    createdAt?: string,
+    updatedAt?: string,
   ) => void;
   updateSettings: (settings: Settings) => void;
   updateLeader: (nextLeaderId: string) => void;

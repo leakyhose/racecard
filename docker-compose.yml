@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: always
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # For local dev with docker compose, browser accesses frontend at localhost:80
+        # and backend at localhost:4000
+        - VITE_BACKEND_URL=http://localhost:4000
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
