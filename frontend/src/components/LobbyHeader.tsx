@@ -295,7 +295,7 @@ export function LobbyHeader({
             <div className="flex gap-4 items-center">
               <button
                 onClick={onUnloadSet}
-                disabled={isGenerating || isSetLoading}
+                disabled={isGenerating || isSetLoading || isLoadingRandom}
                 className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
               >
                 <span className="flex w-full h-full rounded-md border-2 border-coffee items-center justify-center text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
@@ -321,7 +321,7 @@ export function LobbyHeader({
                   onClick={
                     canGenerate ? handleOpenGenerateModal : undefined
                   }
-                  disabled={isGenerating || !canGenerate || isSetLoading}
+                  disabled={isGenerating || !canGenerate || isSetLoading || isLoadingRandom}
                   className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <span className="block w-full h-full rounded-md border-2 border-coffee px-6 py-1 font-bold text-coffee bg-mint -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
@@ -333,7 +333,7 @@ export function LobbyHeader({
               ) : (
                 <button
                   onClick={handleStartGame}
-                  disabled={isGenerating || isSetLoading}
+                  disabled={isGenerating || isSetLoading || isLoadingRandom}
                   className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
                   <span className="block w-full h-full rounded-md border-2 border-coffee px-8 py-1 font-bold text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0 tracking-widest">
@@ -376,7 +376,7 @@ export function LobbyHeader({
                     onClick={
                       canGenerate ? handleOpenGenerateModal : undefined
                     }
-                    disabled={isGenerating || !canGenerate || isSetLoading}
+                    disabled={isGenerating || !canGenerate || isSetLoading || isLoadingRandom}
                     className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10"
                     title="Regenerate Multiple Choice"
                   >
@@ -410,9 +410,64 @@ export function LobbyHeader({
             </div>
           )
         ) : lobby.flashcards.length == 0 ? (
-          <div className="font-bold text-lg">
-            Waiting for leader to upload...
-          </div>
+            <div className="flex justify-center items-center gap-6">
+              <button
+                className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
+                onClick={() => onTabChange?.("personal")}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 12H5" />
+                  <path d="M12 19l-7-7 7-7" />
+                </svg>
+                <p data-text="Private">Private</p>
+              </button>
+
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={activeTab === "community"}
+                  onChange={() =>
+                    onTabChange?.(activeTab === "personal" ? "community" : "personal")
+                  }
+                />
+
+                {/* Track */}
+                <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
+                  {/* Knob */}
+                  <div
+                    className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
+                  ></div>
+                </div>
+              </label>
+
+              <button
+                className={`tab-btn right-arrow ${activeTab === "community" ? "active" : ""}`}
+                onClick={() => onTabChange?.("community")}
+              >
+                <p data-text="Public">Public</p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14" />
+                  <path d="M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
         ) : lobby.distractorStatus === "error" ? (
           <div className="font-bold text-lg tracking-wide text-terracotta">
             Error occurred while generating choices

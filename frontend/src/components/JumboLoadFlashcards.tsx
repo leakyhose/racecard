@@ -1,10 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../supabaseClient";
 import { socket } from "../socket";
-import type { Flashcard } from "@shared/types";
+import type { Flashcard, Settings } from "@shared/types";
 import { loadPublicSet, type LoadedPublicSet } from "../utils/loadPublicSet";
 import { getRelativeTime } from "../utils/flashcardUtils";
+import { PublishFlashcardsModal } from "./PublishFlashcardsModal";
+import { EditFlashcardsModal } from "./EditFlashcardsModal";
+import { MyPublishedSetsModal } from "./MyPublishedSetsModal";
 
 interface FlashcardDBRow {
   term: string;
@@ -23,6 +26,8 @@ interface FlashcardSet {
   created_at: string;
   flashcard_count: number;
   has_generated: boolean;
+  term_generated?: boolean;
+  definition_generated?: boolean;
   plays?: number;
   user_id?: string;
   username?: string;
@@ -39,6 +44,7 @@ interface JumboLoadFlashcardsProps {
   activeTab: "personal" | "community";
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  currentSettings?: Settings;
 }
 
 export function JumboLoadFlashcards({
@@ -52,12 +58,24 @@ export function JumboLoadFlashcards({
   activeTab,
   searchQuery,
   setSearchQuery,
+  currentSettings = {
+      shuffle: true,
+      fuzzyTolerance: true,
+      answerByTerm: false,
+      multipleChoice: true,
+      roundTime: 15,
+      pointsToWin: 100,
+  },
 }: JumboLoadFlashcardsProps) {
   const { user } = useAuth();
   const [sets, setSets] = useState<FlashcardSet[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingSetId, setLoadingSetId] = useState<string | null>(null);
   const [shakingSetId, setShakingSetId] = useState<string | null>(null);
+  const [publishingSet, setPublishingSet] = useState<FlashcardSet | null>(null);
+  const [editingSet, setEditingSet] = useState<FlashcardSet | null>(null);
+  const [showMyPublishedSets, setShowMyPublishedSets] = useState(false);
+  const requestIdRef = useRef(0);
   
   // Pagination state
   const [page, setPage] = useState(0);
@@ -65,7 +83,7 @@ export function JumboLoadFlashcards({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
-  const fetchSets = useCallback(async (pageToFetch: number, isInitial: boolean = false) => {
+  const fetchSets = useCallback(async (pageToFetch: number, isInitial: boolean = false, currentRequestId: number = 0) => {
     if (isInitial) {
       setLoading(true);
     } else {
@@ -86,7 +104,7 @@ export function JumboLoadFlashcards({
         }
         let query = supabase
           .from("flashcard_sets")
-          .select("id, name, created_at")
+          .select("id, name, created_at, user_id")
           .eq("user_id", user.id);
 
         if (submittedQuery.trim()) {
@@ -132,6 +150,11 @@ export function JumboLoadFlashcards({
         fetchError = result.error;
       }
 
+      // Check if this request is stale
+      if (requestIdRef.current !== currentRequestId && currentRequestId !== 0) {
+          return;
+      }
+      
       if (fetchError) throw fetchError;
 
       if (data.length < PAGE_SIZE) {
@@ -148,21 +171,35 @@ export function JumboLoadFlashcards({
               set.id,
             );
 
-          const { data: generatedCards } = await supabase
+          const { count: termGenCount } = await supabase
             .from("flashcards")
-            .select("term_generated, definition_generated")
+            .select("*", { count: "exact", head: true })
             .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
-            .or("term_generated.eq.true,definition_generated.eq.true")
-            .limit(1);
+            .eq("term_generated", true);
+
+          const { count: defGenCount } = await supabase
+            .from("flashcards")
+            .select("*", { count: "exact", head: true })
+            .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
+            .eq("definition_generated", true);
+
+          const hasTermGen = (termGenCount || 0) > 0;
+          const hasDefGen = (defGenCount || 0) > 0;
 
           return {
             ...set,
             flashcard_count: count || 0,
-            has_generated:
-              (generatedCards && generatedCards.length > 0) || false,
+            has_generated: hasTermGen || hasDefGen,
+            term_generated: hasTermGen,
+            definition_generated: hasDefGen,
           };
         }),
       );
+
+      // Check again if this request is stale
+      if (requestIdRef.current !== currentRequestId && currentRequestId !== 0) {
+        return;
+      }
 
       if (isInitial) {
         setSets(setsWithCounts);
@@ -170,29 +207,28 @@ export function JumboLoadFlashcards({
         setSets((prev) => [...prev, ...setsWithCounts]);
       }
     } catch (err) {
-      console.error("Failed to load flashcard sets", err);
+      if (requestIdRef.current === currentRequestId || currentRequestId === 0) {
+        console.error("Failed to load flashcard sets", err);
+      }
     } finally {
-      setLoading(false);
-      setIsLoadingMore(false);
+      if (requestIdRef.current === currentRequestId || currentRequestId === 0) {
+        setLoading(false);
+        setIsLoadingMore(false);
+      }
     }
   }, [activeTab, user, submittedQuery]);
 
   useEffect(() => {
+    requestIdRef.current += 1;
     setPage(0);
     setHasMore(true);
-    fetchSets(0, true);
-  }, [activeTab, fetchSets]);
-
-  useEffect(() => {
-    setPage(0);
-    setHasMore(true);
-    fetchSets(0, true);
-  }, [refreshTrigger, submittedQuery, fetchSets]);
+    fetchSets(0, true, requestIdRef.current);
+  }, [activeTab, fetchSets, refreshTrigger, submittedQuery]); 
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
     if (scrollHeight - scrollTop <= clientHeight * 1.5 && hasMore && !isLoadingMore && !loading) {
-      fetchSets(page + 1);
+      fetchSets(page + 1, false, requestIdRef.current);
       setPage((prev) => prev + 1);
     }
   };
@@ -263,13 +299,45 @@ export function JumboLoadFlashcards({
         definitionGenerated: card.definition_generated || false,
       }));
 
-      socket.emit("updateFlashcard", flashcards, setName, setId);
+      socket.emit("updateFlashcard", flashcards, setName, setId, undefined, undefined, undefined, user?.id);
       onPrivateSetLoaded?.(true);
     } catch {
       console.error("Failed to load set");
     } finally {
       setLoadingSetId(null);
       onLoadingChange?.(false);
+    }
+  };
+
+  const handleDelete = async (setId: string, setName: string) => {
+    if (!confirm(`Are you sure you want to delete "${setName}"?`)) {
+      return;
+    }
+
+    try {
+      // Delete flashcards first (foreign key constraint)
+      const { error: deleteCardsError } = await supabase
+        .from("flashcards")
+        .delete()
+        .eq("set_id", setId);
+
+      if (deleteCardsError) throw deleteCardsError;
+
+      // Delete the set
+      const { error: deleteSetError } = await supabase
+        .from("flashcard_sets")
+        .delete()
+        .eq("id", setId);
+
+      if (deleteSetError) throw deleteSetError;
+
+      // Refresh the list
+      requestIdRef.current += 1;
+      setPage(0);
+      setHasMore(true);
+      fetchSets(0, true, requestIdRef.current);
+    } catch {
+      console.error("Failed to delete set");
     }
   };
 
@@ -317,14 +385,27 @@ export function JumboLoadFlashcards({
   return (
     <div className="flex flex-col h-full w-full relative">
       {/* Header with Search Bar */}
-      <div className="flex justify-center items-center pb-3 gap-6 shrink-0 pt-2 border-b-2 border-coffee/50">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
-          className="w-64 px-4 h-6 bg-vanilla border-2 border-coffee rounded-md text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out font-bold text-xs outline-none focus:shadow-[inset_0_0_0_1px_var(--color-powder)] select-text text-center"
-        />
+      <div className="flex justify-between items-center pb-3 pt-2 border-b-2 border-coffee/50 px-6 shrink-0">
+        <div className="w-1/4"></div>
+        <div className="flex justify-center items-center w-2/4">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
+            className="w-64 px-4 h-6 bg-vanilla border-2 border-coffee rounded-md text-coffee placeholder:text-coffee/30 -translate-y-0.5 transition-transform duration-100 ease-out font-bold text-xs outline-none focus:shadow-[inset_0_0_0_1px_var(--color-powder)] select-text text-center ml-auto mr-auto"
+          />
+        </div>
+        <div className="w-1/4 flex justify-end">
+          {user && (
+            <button
+              onClick={() => setShowMyPublishedSets(true)}
+              className="text-xs font-bold text-coffee hover:text-terracotta underline decoration-2 underline-offset-2 whitespace-nowrap"
+            >
+              View my published cards
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search Bar for Community Tab - Removed as it's now in header */}
@@ -422,7 +503,7 @@ export function JumboLoadFlashcards({
                   }`}
                 >
                   <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
-                    <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                    <div className={`absolute inset-0 bg-light-vanilla/20 ${activeTab === "community" ? "shadow-[inset_0_0_0_2px_var(--color-terracotta)]" : "shadow-[inset_0_0_0_2px_var(--color-powder)]"} rounded-[18px]`} />
                     <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
                       {/* Content Container */}
                       <div className="flex-1 flex flex-col items-center justify-center w-full gap-2">
@@ -461,6 +542,84 @@ export function JumboLoadFlashcards({
                               </p>
                             )}
                         </div>
+                        {/* Action Buttons (Only for Personal) */}
+                        {activeTab === "personal" && (
+                          <div
+                            className="flex items-center gap-3 mt-2 z-20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              onClick={() => setPublishingSet(set)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Publish
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => setEditingSet(set)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Edit
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(set.id, set.name)}
+                              disabled={loadingSetId !== null}
+                              className="relative p-2 rounded-full text-coffee disabled:opacity-50 hover:[&>div]:opacity-100"
+                            >
+                              <div className="absolute bottom-full left-1/2 -translate-x-1/2 -mb-0.5 text-coffee text-[10px] font-bold opacity-0 transition-opacity pointer-events-none whitespace-nowrap">
+                                Delete
+                              </div>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
                       </div>
                       
                       {loadingSetId === set.id && (
@@ -481,6 +640,42 @@ export function JumboLoadFlashcards({
           </div>
         )}
       </div>
+    
+      {publishingSet && (
+        <PublishFlashcardsModal
+          isOpen={true}
+          onClose={() => setPublishingSet(null)}
+          setId={publishingSet.id}
+          initialName={publishingSet.name}
+          hasGenerated={publishingSet.has_generated}
+          termGenerated={publishingSet.term_generated}
+          definitionGenerated={publishingSet.definition_generated}
+          currentSettings={currentSettings}
+        />
+      )}
+
+      {editingSet && (
+        <EditFlashcardsModal
+          isOpen={true}
+          onClose={() => setEditingSet(null)}
+          setId={editingSet.id}
+          setName={editingSet.name}
+          onSaveSuccess={() => {
+            requestIdRef.current += 1;
+            setPage(0);
+            setHasMore(true);
+            fetchSets(0, true, requestIdRef.current);
+          }}
+        />
+      )}
+
+      {showMyPublishedSets && (
+        <MyPublishedSetsModal
+          isOpen={true}
+          onClose={() => setShowMyPublishedSets(false)}
+          currentSettings={currentSettings}
+        />
+      )}
     </div>
   );
 }

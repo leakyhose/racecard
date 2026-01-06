@@ -238,10 +238,40 @@ export default function Lobby() {
     prevDistractorStatus.current = lobby?.distractorStatus;
   }, [lobby?.distractorStatus, user, trackedSetId, lobby]);
 
+  // Track the previous flashcard ID to detect external changes
+  const prevFlashcardIdRef = useRef(lobby?.flashcardID);
+
   // Sync trackedSetId with lobby.flashcardID
+  // This runs for ALL clients (including non-leaders) when flashcards are updated
   useEffect(() => {
-    if (lobby?.flashcardID) {
-      setTrackedSetId(lobby.flashcardID);
+    // Always sync trackedSetId with lobby's flashcardID to ensure non-leaders
+    // stay in sync after leadership transfers and when sets are loaded by new leader
+    if (lobby?.flashcardID !== undefined) {
+      // Update trackedSetId to match lobby state (handles both set and clear)
+      setTrackedSetId(lobby.flashcardID || null);
+      
+      // Clear stale local state when flashcard set changes from an external source
+      // (e.g., when another user loads a new set after leadership transfer)
+      // This ensures the UI uses lobby data instead of stale local state
+      const flashcardIdChanged = lobby.flashcardID !== prevFlashcardIdRef.current;
+      if (flashcardIdChanged) {
+        prevFlashcardIdRef.current = lobby.flashcardID;
+        
+        // Only clear publicSetInfo if it's stale (doesn't match the new lobby flashcardID)
+        // This preserves the leader's publicSetInfo when they load a set themselves
+        setPublicSetInfo(prev => {
+          if (prev && prev.id !== lobby.flashcardID) {
+            return null;
+          }
+          return prev;
+        });
+        
+        // Note: We don't clear lockedSettings here because:
+        // 1. It only affects the GameSettings UI for the current leader
+        // 2. The leader who loads a new set will set it via handlePublicSetLoaded
+        // 3. Non-leaders don't interact with locked settings
+        // 4. If an old leader becomes leader again, they'll load a new set anyway
+      }
     }
   }, [lobby?.flashcardID]);
 
@@ -261,13 +291,16 @@ export default function Lobby() {
         return;
       }
 
-      // Prevent flickering during set transition
-      // Only return if lobby ID changed but trackedSetId hasn't synced yet
+      // Prevent flickering during set transition - only guard when the local state
+      // hasn't caught up yet. Once trackedSetId syncs, this condition becomes false.
+      // Note: This guard allows the effect to run normally for non-leaders who
+      // receive flashcard updates via socket after leadership transfer.
       if (
         lobby?.flashcardID &&
         lobby.flashcardID !== prevLobbyIdRef.current &&
         trackedSetId !== lobby.flashcardID
       ) {
+        // Set is transitioning but trackedSetId hasn't synced yet - wait for sync
         return;
       }
 
@@ -381,6 +414,7 @@ export default function Lobby() {
             allow_save: lobby.allowSave,
             settings: {},
             flashcardCount: lobby.flashcards.length,
+            user_id: lobby.flashcardAuthorId,
           }
         : null);
   }, [publicSetInfo, lobby]);

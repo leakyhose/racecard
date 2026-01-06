@@ -126,13 +126,20 @@ export function LoadFlashcardsModal({
           setIsLoadingMore(false);
           return;
         }
-        const result = await supabase
+        let query = supabase
           .from("flashcard_sets")
           .select("id, name, created_at, user_id")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .order("id", { ascending: true })
-          .range(from, to);
+          .eq("user_id", user.id);
+
+        if (submittedQuery.trim()) {
+          query = query.ilike("name", `%${submittedQuery}%`);
+        } else {
+          query = query
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: true });
+        }
+
+        const result = await query.range(from, to);
 
         data = result.data
           ? result.data.map((item) => ({
@@ -238,6 +245,13 @@ export function LoadFlashcardsModal({
       }
     }
   };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSubmittedQuery(searchQuery);
+    }, 200);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (isOpen) {
@@ -346,12 +360,18 @@ export function LoadFlashcardsModal({
         definitionGenerated: card.definition_generated || false,
       }));
 
+      const description = `${user?.user_metadata?.username || "User"}'s private set`;
+      const authorId = user?.id;
+
       socket.emit(
         "updateFlashcard",
         flashcards,
         setName,
         setId,
-        `${user?.user_metadata?.username || "User"}'s private set`,
+        description,
+        undefined,
+        undefined,
+        authorId,
       );
       onSetLoaded?.(true);
       onClose();
@@ -363,35 +383,17 @@ export function LoadFlashcardsModal({
   };
 
   const handleRandom = async () => {
-    if (loadingSetId) return;
+    if (loadingSetId !== null) return;
 
     if (!isLeader) {
-      // Find a random card to shake or just show a message
-      // Since we can't easily shake a specific card, we might need a general notification
-      // Or we can just ignore the click. 
-      // User requested "shake and say must be leader".
-      // But the "Random" button is in the search bar.
-      // We can add a shake effect to the button itself or show an error.
-      // For now, let's just return to prevent action.
-      // Ideally we shake the button.
-      const btn = document.getElementById("random-set-btn");
-      if (btn) {
-        btn.classList.add("animate-shake");
-        // Also show tooltip or change text temporarily?
-        const originalText = btn.innerText;
-        btn.innerText = "Leader Only";
-        btn.classList.add("bg-terracotta", "border-terracotta");
-        setTimeout(() => {
-          btn.classList.remove("animate-shake");
-          btn.innerText = originalText;
-          btn.classList.remove("bg-terracotta", "border-terracotta");
-        }, 1000);
-      }
+      setShakingId("random");
+      setTimeout(() => setShakingId(null), 500);
       return;
     }
 
     setLoadingSetId("random");
-    
+    setError("");
+
     try {
       const { count, error: countError } = await supabase
         .from("public_flashcard_sets")
@@ -479,7 +481,7 @@ export function LoadFlashcardsModal({
           e.stopPropagation();
         }}
       >
-        <div className={`flex justify-between items-center pb-6 shrink-0 ${activeTab !== "community" ? "border-b-3 border-coffee" : ""}`}>
+        <div className={`flex justify-between items-center pb-6 shrink-0`}>
           {/* Left spacer for centering */}
           <div className="w-48 shrink-0"></div>
 
@@ -558,41 +560,16 @@ export function LoadFlashcardsModal({
           </div>
         </div>
 
-        {/* Search Bar for Community Tab */}
-        {activeTab === "community" && (
-          <div className="pb-4 flex justify-center border-b-3 border-coffee">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setSubmittedQuery(searchQuery);
-              }}
-              className="flex gap-2 w-full max-w-sm items-center"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search public sets..."
-                className="flex-1 px-3 py-1 text-sm border-2 border-coffee rounded-md bg-vanilla focus:outline-none focus:border-terracotta text-coffee placeholder-coffee/50"
-              />
-              <button
-                type="submit"
-                className="px-4 py-1 text-sm bg-powder text-coffee font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee hover:text-light-vanilla transition-colors"
-              >
-                Search
-              </button>
-              <button
-                id="random-set-btn"
-                type="button"
-                onClick={handleRandom}
-                disabled={loadingSetId !== null}
-                className="px-4 py-1 text-sm bg-terracotta text-vanilla font-bold rounded-md border-2 border-coffee hover:bg-coffee hover:border-coffee transition-colors disabled:opacity-50"
-              >
-                Random
-              </button>
-            </form>
-          </div>
-        )}
+        {/* Search Bar */}
+        <div className="pb-4 flex justify-center border-b-3 border-coffee gap-2 w-full items-center">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={activeTab === "personal" ? "Search private sets..." : "Search public sets..."}
+              className="w-full max-w-sm px-3 py-1 text-sm border-2 border-coffee rounded-md bg-vanilla focus:outline-none focus:border-terracotta text-coffee placeholder-coffee/50"
+            />
+        </div>
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center py-12">
@@ -618,6 +595,52 @@ export function LoadFlashcardsModal({
         ) : (
           <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 pt-6 pb-6 px-2">
+            {/* Random Set Card */}
+            {activeTab === "community" && !submittedQuery && (
+              <div
+                onClick={handleRandom}
+                className={`group relative h-80 w-full perspective-[1000px] ${
+                  loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
+                } ${shakingId === "random" ? "animate-shake" : ""}`}
+              >
+                {/* Under Card */}
+                <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
+                  <div className={`text-center text-[9px] font-bold tracking-[0.2em] ${shakingId === "random" ? "text-terracotta" : "text-coffee/80"}`}>
+                    {shakingId === "random"
+                      ? "MUST BE LEADER"
+                      : "CLICK FOR RANDOM SET"}
+                  </div>
+                </div>
+
+                {/* Top Card */}
+                <div
+                  className={`h-full w-full transition-transform duration-300 ease-out ${
+                    !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
+                  }`}
+                >
+                  <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
+                    <div className="absolute inset-0 bg-light-vanilla/20 shadow-[inset_0_0_0_2px_var(--color-terracotta)] rounded-[18px]" />
+                    <div className="relative h-full w-full p-6 flex flex-col items-center justify-center text-center">
+                        <div className="text-4xl mb-4">🎲</div>
+                        <h3 className="text-2xl font-bold text-coffee line-clamp-3 wrap-break-words w-full px-2">
+                          Random Set
+                        </h3>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <p className="text-sm text-coffee/70 font-bold">
+                            Surprise me!
+                          </p>
+                        </div>
+                      
+                      {loadingSetId === "random" && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-vanilla/50 rounded-[18px]">
+                          <div className="w-6 h-6 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
               {sets.map((set) => (
                 <div
                   key={set.id}
@@ -657,7 +680,7 @@ export function LoadFlashcardsModal({
                     }`}
                   >
                     <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
-                      <div className={`absolute inset-0 ${activeTab === "community" ? "shadow-[inset_0_0_0_3px_var(--color-powder)]" : "shadow-[inset_0_0_0_2px_var(--color-terracotta)]"} rounded-[18px]`} />
+                      <div className={`absolute inset-0 ${activeTab === "community" ? "shadow-[inset_0_0_0_2px_var(--color-terracotta)]" : "shadow-[inset_0_0_0_3px_var(--color-powder)]"} rounded-[18px]`} />
                       <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
                         {/* Content Container */}
                         <div className="flex-1 flex flex-col items-center justify-center w-full gap-2 overflow-hidden">

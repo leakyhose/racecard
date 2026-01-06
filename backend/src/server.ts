@@ -140,7 +140,15 @@ io.on("connection", (socket) => {
   // Loads flashcards
   socket.on(
     "updateFlashcard",
-    async (cards, setName, setID, description, allowView, allowSave) => {
+    async (
+      cards,
+      setName,
+      setID,
+      description,
+      allowView,
+      allowSave,
+      authorId,
+    ) => {
       const lobby = updateFlashcard(
         socket.id,
         cards,
@@ -149,6 +157,7 @@ io.on("connection", (socket) => {
         description,
         allowView,
         allowSave,
+        authorId,
       );
       if (!lobby) {
         console.log(`Failed to update flashcards`);
@@ -164,7 +173,10 @@ io.on("connection", (socket) => {
         lobby.flashcardDescription,
         lobby.allowView,
         lobby.allowSave,
+        lobby.flashcardAuthorId,
       );
+      // Ensure full state sync to avoid potential race conditions or missed updates
+      io.to(lobby.code).emit("lobbyUpdated", lobby);
       io.to(lobby.code).emit("settingsUpdated", lobby.settings);
     },
   );
@@ -231,6 +243,10 @@ io.on("connection", (socket) => {
         lobby.flashcards,
         lobby.flashcardID,
         lobby.flashcardName,
+        lobby.flashcardDescription,
+        lobby.allowView,
+        lobby.allowSave,
+        lobby.flashcardAuthorId,
       );
       io.to(lobby.code).emit("distractorStatusUpdated", "ready");
     } catch (error) {
