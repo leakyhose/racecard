@@ -17,7 +17,7 @@ const distractorStatus = new Map<
   { ready: boolean; generating: boolean }
 >();
 
-// Generate distractors for flashcards using OpenAI
+// Generate distractors for flashcards using Gemini API
 export async function generateDistractors(
   lobbyCode: string,
   mode: "term" | "definition" | "both",
