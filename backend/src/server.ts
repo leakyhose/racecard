@@ -51,6 +51,7 @@ app.get("/status", (req, res) => {
   res.json({
     status: "Running",
     timestamp: new Date().toISOString(),
+    message: "CI/CD pipeline is working",
   });
 });
 
