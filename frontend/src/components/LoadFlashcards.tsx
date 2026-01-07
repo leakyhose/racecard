@@ -123,28 +123,25 @@ export function LoadFlashcards({
 
         if (fetchError) throw fetchError;
 
+        // Optimized: combine count and generation check into single query per set
+        const setIdField = activeTab === "personal" ? "set_id" : "public_set_id";
         const setsWithCounts = await Promise.all(
           (data || []).map(async (set) => {
-            const { count } = await supabase
+            // Single query to get count and check for generated cards
+            const { data: flashcardData, count } = await supabase
               .from("flashcards")
-              .select("*", { count: "exact", head: true })
-              .eq(
-                activeTab === "personal" ? "set_id" : "public_set_id",
-                set.id,
-              );
+              .select("term_generated, definition_generated", { count: "exact" })
+              .eq(setIdField, set.id)
+              .limit(1000);
 
-            const { data: generatedCards } = await supabase
-              .from("flashcards")
-              .select("term_generated, definition_generated")
-              .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
-              .or("term_generated.eq.true,definition_generated.eq.true")
-              .limit(1);
+            const hasGenerated = flashcardData?.some(
+              f => f.term_generated || f.definition_generated
+            ) || false;
 
             return {
               ...set,
               flashcard_count: count || 0,
-              has_generated:
-                (generatedCards && generatedCards.length > 0) || false,
+              has_generated: hasGenerated,
             };
           }),
         );

@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config();
+
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -36,6 +39,8 @@ import {
   processUnansweredPlayers,
   removeCurrentCardFromDeck,
 } from "./gameManager.js";
+
+import { loadMCOptionsFromSupabase } from "./supabaseClient.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -112,7 +117,25 @@ io.on("connection", (socket) => {
     }
     socket.join(code);
     lobby.players = sortPlayersByMetric(lobby);
-    socket.emit("lobbyUpdated", lobby);
+    
+    // For non-viewable sets, send minimal flashcard data to EVERYONE (including leader)
+    // Full content is only needed server-side for gameplay
+    if (lobby.allowView === false) {
+      const lobbyForAll = {
+        ...lobby,
+        flashcards: lobby.flashcards.map(card => ({
+          id: card.id,
+          question: "",
+          answer: "",
+          isGenerated: card.isGenerated ?? false,
+          termGenerated: card.termGenerated ?? false,
+          definitionGenerated: card.definitionGenerated ?? false,
+        })),
+      };
+      socket.emit("lobbyUpdated", lobbyForAll);
+    } else {
+      socket.emit("lobbyUpdated", lobby);
+    }
     socket.to(code).emit("playersUpdated", lobby.players);
     // Send join notification to chat
     io.to(code).emit("chatMessage", {
@@ -172,21 +195,52 @@ io.on("connection", (socket) => {
       }
 
       lobby.distractorStatus = "idle";
-      io.to(lobby.code).emit(
-        "flashcardsUpdated",
-        lobby.flashcards,
-        lobby.flashcardID,
-        lobby.flashcardName,
-        lobby.flashcardDescription,
-        lobby.allowView,
-        lobby.allowSave,
-        lobby.flashcardAuthorId,
-        lobby.flashcardAuthorName,
-        lobby.flashcardCreatedAt,
-        lobby.flashcardUpdatedAt,
-      );
-      // Ensure full state sync to avoid potential race conditions or missed updates
-      io.to(lobby.code).emit("lobbyUpdated", lobby);
+      
+      // For sets with allowView=false, send minimal data to EVERYONE (including leader)
+      // Full flashcards are kept server-side only and used during gameplay
+      if (lobby.allowView === false) {
+        const flashcardsForBroadcast = lobby.flashcards.map(card => ({
+            id: card.id,
+            question: "", // Hide question content
+            answer: "",   // Hide answer content
+            isGenerated: card.isGenerated ?? false,
+            termGenerated: card.termGenerated ?? false,
+            definitionGenerated: card.definitionGenerated ?? false,
+            // Omit trickTerms and trickDefinitions to reduce payload
+          }));
+        
+        // Send minimal data to everyone in the lobby
+        io.to(lobby.code).emit(
+          "flashcardsUpdated",
+          flashcardsForBroadcast,
+          lobby.flashcardID,
+          lobby.flashcardName,
+          lobby.flashcardDescription,
+          lobby.allowView,
+          lobby.allowSave,
+          lobby.flashcardAuthorId,
+          lobby.flashcardAuthorName,
+          lobby.flashcardCreatedAt,
+          lobby.flashcardUpdatedAt,
+        );
+      } else {
+        // For viewable sets, send full data to everyone
+        io.to(lobby.code).emit(
+          "flashcardsUpdated",
+          lobby.flashcards,
+          lobby.flashcardID,
+          lobby.flashcardName,
+          lobby.flashcardDescription,
+          lobby.allowView,
+          lobby.allowSave,
+          lobby.flashcardAuthorId,
+          lobby.flashcardAuthorName,
+          lobby.flashcardCreatedAt,
+          lobby.flashcardUpdatedAt,
+        );
+      }
+      
+      // Only emit settingsUpdated (removed redundant lobbyUpdated which sent flashcards again)
       io.to(lobby.code).emit("settingsUpdated", lobby.settings);
     },
   );
@@ -248,19 +302,47 @@ io.on("connection", (socket) => {
       });
       lobby.distractorStatus = "ready";
       lobby.generationProgress = undefined;
-      io.to(lobby.code).emit(
-        "flashcardsUpdated",
-        lobby.flashcards,
-        lobby.flashcardID,
-        lobby.flashcardName,
-        lobby.flashcardDescription,
-        lobby.allowView,
-        lobby.allowSave,
-        lobby.flashcardAuthorId,
-        lobby.flashcardAuthorName,
-        lobby.flashcardCreatedAt,
-        lobby.flashcardUpdatedAt,
-      );
+      
+      // For sets with allowView=false, send minimal data to everyone
+      // Full flashcards stay server-side for gameplay only
+      if (lobby.allowView === false) {
+        const flashcardsForBroadcast = lobby.flashcards.map(card => ({
+            id: card.id,
+            question: "",
+            answer: "",
+            isGenerated: card.isGenerated ?? false,
+            termGenerated: card.termGenerated ?? false,
+            definitionGenerated: card.definitionGenerated ?? false,
+          }));
+        
+        io.to(lobby.code).emit(
+          "flashcardsUpdated",
+          flashcardsForBroadcast,
+          lobby.flashcardID,
+          lobby.flashcardName,
+          lobby.flashcardDescription,
+          lobby.allowView,
+          lobby.allowSave,
+          lobby.flashcardAuthorId,
+          lobby.flashcardAuthorName,
+          lobby.flashcardCreatedAt,
+          lobby.flashcardUpdatedAt,
+        );
+      } else {
+        io.to(lobby.code).emit(
+          "flashcardsUpdated",
+          lobby.flashcards,
+          lobby.flashcardID,
+          lobby.flashcardName,
+          lobby.flashcardDescription,
+          lobby.allowView,
+          lobby.allowSave,
+          lobby.flashcardAuthorId,
+          lobby.flashcardAuthorName,
+          lobby.flashcardCreatedAt,
+          lobby.flashcardUpdatedAt,
+        );
+      }
       io.to(lobby.code).emit("distractorStatusUpdated", "ready");
     } catch (error) {
       console.error("Error generating distractors:", error);
@@ -283,7 +365,29 @@ io.on("connection", (socket) => {
   // Gets lobby data, used to check when lobby exists too when null is emitted
   socket.on("getLobby", (code) => {
     const lobby = getLobbyByCode(code);
-    socket.emit("lobbyData", lobby || null);
+    if (!lobby) {
+      socket.emit("lobbyData", null);
+      return;
+    }
+    
+    // For non-viewable sets, send minimal flashcard data to EVERYONE
+    // Full content stays server-side for gameplay only
+    if (lobby.allowView === false) {
+      const lobbyMinimal = {
+        ...lobby,
+        flashcards: lobby.flashcards.map(card => ({
+          id: card.id,
+          question: "",
+          answer: "",
+          isGenerated: card.isGenerated ?? false,
+          termGenerated: card.termGenerated ?? false,
+          definitionGenerated: card.definitionGenerated ?? false,
+        })),
+      };
+      socket.emit("lobbyData", lobbyMinimal);
+    } else {
+      socket.emit("lobbyData", lobby);
+    }
   });
 
   // Handles disconnection
@@ -360,7 +464,7 @@ io.on("connection", (socket) => {
   });
 
   // Starts game, and gameplay loop
-  socket.on("startGame", () => {
+  socket.on("startGame", async () => {
     const lobby = startGame(socket.id);
     if (!lobby) {
       console.log("Failed to start game: lobby not found");
@@ -374,6 +478,34 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("lobbyStatusUpdated", "starting");
     io.to(lobby.code).emit("playersUpdated", lobby.players);
     io.to(lobby.code).emit("endGameVotesUpdated", []);
+
+    // Lazy-load MC options if needed (for public sets where we skipped loading them initially)
+    const needsMCOptions = lobby.settings.multipleChoice && 
+      lobby.flashcardID && 
+      lobby.flashcards.length > 0 &&
+      lobby.flashcards.some(f => 
+        (f.termGenerated || f.definitionGenerated) && 
+        (!f.trickTerms?.length && !f.trickDefinitions?.length)
+      );
+    
+    if (needsMCOptions) {
+      console.log(`[startGame] Lazy-loading MC options for ${lobby.flashcardID}...`);
+      io.to(lobby.code).emit("startCountdown", "Loading MC options...");
+      
+      const mcOptions = await loadMCOptionsFromSupabase(lobby.flashcardID);
+      if (mcOptions) {
+        // Merge MC options into flashcards
+        for (const flashcard of lobby.flashcards) {
+          const idx = parseInt(flashcard.id);
+          const options = mcOptions.get(idx);
+          if (options) {
+            flashcard.trickTerms = options.trickTerms;
+            flashcard.trickDefinitions = options.trickDefinitions;
+          }
+        }
+        console.log(`[startGame] MC options loaded for ${mcOptions.size} cards`);
+      }
+    }
 
     shuffleGameCards(lobby.code);
 

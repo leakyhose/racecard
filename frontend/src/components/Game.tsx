@@ -75,21 +75,11 @@ export function Game({ lobby }: GameProps) {
         hasUpdatedPlays.current = true;
         const updatePlays = async () => {
           try {
-            const { data, error } = await supabase
-              .from("public_flashcard_sets")
-              .select("plays")
-              .eq("id", lobby.flashcardID)
-              .single();
-
-            if (error || !data) return;
-
-            const currentPlays = data.plays || 0;
+            // Increment plays for each player in the lobby
             const increment = lobby.players.length;
-
-            await supabase
-              .from("public_flashcard_sets")
-              .update({ plays: currentPlays + increment })
-              .eq("id", lobby.flashcardID);
+            for (let i = 0; i < increment; i++) {
+              await supabase.rpc("increment_plays", { set_id: lobby.flashcardID });
+            }
           } catch (err) {
             console.error("Failed to update plays:", err);
           }

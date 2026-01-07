@@ -28,13 +28,12 @@ export async function loadPublicSet(
 
     if (setError) throw setError;
 
-
-
+    // OPTIMIZATION: Only fetch essential fields initially (skip trick_terms/trick_definitions)
+    // These arrays can be huge and are only needed when playing MC mode
+    // They'll be lazy-loaded when the game starts via loadMCOptions()
     type CardData = {
       term: string;
       definition: string;
-      trick_terms?: string[];
-      trick_definitions?: string[];
       is_generated?: boolean;
       term_generated?: boolean;
       definition_generated?: boolean;
@@ -49,11 +48,11 @@ export async function loadPublicSet(
       const { data, error: fetchError } = await supabase
         .from("flashcards")
         .select(
-          "term, definition, trick_terms, trick_definitions, is_generated, term_generated, definition_generated, order_index",
+          "term, definition, is_generated, term_generated, definition_generated, order_index",
         )
         .eq("public_set_id", setId)
         .order("order_index", { ascending: true })
-        .order("id", { ascending: true }) // Fallback
+        .order("id", { ascending: true })
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
       if (fetchError) throw fetchError;
@@ -74,8 +73,8 @@ export async function loadPublicSet(
       id: index.toString(),
       question: card.term,
       answer: card.definition,
-      trickTerms: card.trick_terms || [],
-      trickDefinitions: card.trick_definitions || [],
+      trickTerms: [], // Lazy loaded later via loadMCOptions()
+      trickDefinitions: [], // Lazy loaded later via loadMCOptions()
       isGenerated:
         (card.term_generated && card.definition_generated) ||
         card.is_generated ||
@@ -83,6 +82,16 @@ export async function loadPublicSet(
       termGenerated: card.term_generated || false,
       definitionGenerated: card.definition_generated || false,
     }));
+
+    // Debug: Log loaded flashcards
+    console.log(`[loadPublicSet] Loaded ${flashcards.length} flashcards for set "${setData.name}" (${setId})`);
+    console.log("[loadPublicSet] First 5 flashcards:", flashcards.slice(0, 5).map(f => ({
+      id: f.id,
+      question: f.question?.substring(0, 50) + (f.question?.length > 50 ? "..." : ""),
+      answer: f.answer?.substring(0, 50) + (f.answer?.length > 50 ? "..." : ""),
+      termGenerated: f.termGenerated,
+      definitionGenerated: f.definitionGenerated,
+    })));
 
     socket.emit(
       "updateFlashcard",
@@ -131,6 +140,66 @@ export async function loadPublicSet(
     };
   } catch (err) {
     console.error("Error loading public set:", err);
+    return null;
+  }
+}
+
+/**
+ * Lazy-load MC options (trick_terms/trick_definitions) for a public set.
+ * Call this when the game is about to start and MC mode is enabled.
+ * Returns a map of order_index -> { trick_terms, trick_definitions }
+ */
+export async function loadMCOptions(
+  setId: string,
+): Promise<Map<number, { trickTerms: string[]; trickDefinitions: string[] }> | null> {
+  try {
+    console.log(`[loadMCOptions] Loading MC options for set ${setId}...`);
+    const startTime = Date.now();
+    
+    type MCData = {
+      order_index: number;
+      trick_terms?: string[];
+      trick_definitions?: string[];
+    };
+    let allData: MCData[] = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from("flashcards")
+        .select("order_index, trick_terms, trick_definitions")
+        .eq("public_set_id", setId)
+        .order("order_index", { ascending: true })
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        allData = [...allData, ...data];
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } else {
+        hasMore = false;
+      }
+    }
+
+    const mcMap = new Map<number, { trickTerms: string[]; trickDefinitions: string[] }>();
+    for (const card of allData) {
+      mcMap.set(card.order_index, {
+        trickTerms: card.trick_terms || [],
+        trickDefinitions: card.trick_definitions || [],
+      });
+    }
+
+    console.log(`[loadMCOptions] Loaded MC options for ${mcMap.size} cards in ${Date.now() - startTime}ms`);
+    return mcMap;
+  } catch (err) {
+    console.error("Error loading MC options:", err);
     return null;
   }
 }

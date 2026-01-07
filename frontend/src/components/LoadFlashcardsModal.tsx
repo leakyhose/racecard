@@ -188,29 +188,19 @@ export function LoadFlashcardsModal({
         setHasMore(false);
       }
 
-      // Get flashcard counts for each set
+      // Optimized: combine count and generation check into single query per set (3 queries -> 1)
+      const setIdField = tab === "personal" ? "set_id" : "public_set_id";
       const setsWithCounts = await Promise.all(
         (data || []).map(async (set) => {
-          const { count } = await supabase
+          // Single query to get count and check for generated cards
+          const { data: flashcardData, count } = await supabase
             .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id);
+            .select("term_generated, definition_generated", { count: "exact" })
+            .eq(setIdField, set.id)
+            .limit(1000);
 
-          // Check if any flashcards have generated MC options
-          const { count: termGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id)
-            .eq("term_generated", true);
-
-          const { count: defGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(tab === "personal" ? "set_id" : "public_set_id", set.id)
-            .eq("definition_generated", true);
-
-          const hasTermGen = (termGenCount || 0) > 0;
-          const hasDefGen = (defGenCount || 0) > 0;
+          const hasTermGen = flashcardData?.some(f => f.term_generated) || false;
+          const hasDefGen = flashcardData?.some(f => f.definition_generated) || false;
 
           return {
             ...set,

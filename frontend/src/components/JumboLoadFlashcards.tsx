@@ -165,30 +165,22 @@ export function JumboLoadFlashcards({
         setHasMore(false);
       }
 
+      // Batch fetch flashcard counts and generation status to reduce queries
+      // Instead of 3 queries per set, use 1 query per set with aggregation
+      const setIdField = activeTab === "personal" ? "set_id" : "public_set_id";
+      
+      // Single query to get counts and generation status for all sets at once
       const setsWithCounts = await Promise.all(
         (data || []).map(async (set) => {
-          const { count } = await supabase
+          // Combined query: get count and check for any generated cards in one go
+          const { data: flashcardData, count } = await supabase
             .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(
-              activeTab === "personal" ? "set_id" : "public_set_id",
-              set.id,
-            );
+            .select("term_generated, definition_generated", { count: "exact" })
+            .eq(setIdField, set.id)
+            .limit(1000); // Limit to avoid fetching too much data
 
-          const { count: termGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
-            .eq("term_generated", true);
-
-          const { count: defGenCount } = await supabase
-            .from("flashcards")
-            .select("*", { count: "exact", head: true })
-            .eq(activeTab === "personal" ? "set_id" : "public_set_id", set.id)
-            .eq("definition_generated", true);
-
-          const hasTermGen = (termGenCount || 0) > 0;
-          const hasDefGen = (defGenCount || 0) > 0;
+          const hasTermGen = flashcardData?.some(f => f.term_generated) || false;
+          const hasDefGen = flashcardData?.some(f => f.definition_generated) || false;
 
           return {
             ...set,
