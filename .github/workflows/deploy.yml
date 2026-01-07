@@ -18,5 +18,6 @@ jobs:
         script: |
           cd ~/RaceCard
           git pull origin main
+          docker-compose -f docker-compose.prod.yml down
           docker-compose -f docker-compose.prod.yml up -d --build
-          echo "Deployed successfully"
+          echo "✅ Deployed successfully!"
