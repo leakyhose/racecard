@@ -95,13 +95,19 @@ export default function Lobby() {
     setTrackedSetId(set.id);
 
     if (isLeader && lobby) {
+      // If 25 or fewer cards, default to "play all" (flashcardCount * 10 points)
+      // If more than 25 cards, default to "play until 100"
+      const defaultPointsToWin = set.flashcardCount <= 25 
+        ? set.flashcardCount * 10 
+        : 100;
+
       const defaultPublicSettings: Settings = {
         shuffle: true,
         fuzzyTolerance: true,
         answerByTerm: false,
         multipleChoice: true,
         roundTime: 15,
-        pointsToWin: set.flashcardCount <= 50 ? 500 : 100,
+        pointsToWin: defaultPointsToWin,
       };
 
       const newSettings: Settings = {
