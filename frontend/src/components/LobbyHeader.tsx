@@ -203,7 +203,7 @@ export function LobbyHeader({
               className={`absolute inset-0 w-5 h-5 transition-opacity duration-300 ${
                 showCopyMessage
                   ? "opacity-0"
-                  : "opacity-0 group-hover:opacity-50"
+                  : "opacity-50"
               }`}
             >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />

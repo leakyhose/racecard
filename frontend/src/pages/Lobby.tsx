@@ -536,22 +536,49 @@ export default function Lobby() {
 
   if (!nickname || !isInLobby) {
     return (
-      <div className="select-none">
-        <h2>Join Lobby: {lobby.code}</h2>
-        <p>Please enter your nickname to join:</p>
-        <input
-          maxLength={15}
-          type="text"
-          placeholder="Your nickname"
-          value={nicknameInput}
-          onChange={(e) => setNicknameInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleJoinLobby();
-          }}
-          autoFocus
-          className="select-text"
-        />
-        <button onClick={handleJoinLobby}>Join</button>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative gap-6 select-none">
+        <div className="flex flex-col items-center w-full max-w-md z-10">
+          {/* Title */}
+          <h1 className="text-5xl md:text-6xl font-black text-coffee tracking-tighter mb-6 text-center">RaceCard</h1>
+          
+          {/* Card */}
+          <div className="w-full perspective-1000">
+            <div className="relative w-full">
+              {/* Under Card */}
+              <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla -z-10"></div>
+              
+              {/* Top Card */}
+              <div className="w-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-coffee">Join Lobby</h2>
+                  <p className="text-lg font-bold text-coffee/70 mt-1">{lobby.code}</p>
+                </div>
+                <div className="w-full space-y-4">
+                  <input
+                    maxLength={15}
+                    type="text"
+                    placeholder="Your nickname"
+                    value={nicknameInput}
+                    onChange={(e) => setNicknameInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleJoinLobby();
+                    }}
+                    autoFocus
+                    className="w-full p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-terracotta font-bold text-coffee select-text"
+                  />
+                </div>
+                <button
+                  onClick={handleJoinLobby}
+                  className="group relative w-full rounded-md bg-coffee border-none p-0 cursor-pointer outline-none"
+                >
+                  <span className="block w-full h-full rounded-md border-2 border-coffee px-2 py-3 font-bold text-lg text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                    Join Lobby
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
