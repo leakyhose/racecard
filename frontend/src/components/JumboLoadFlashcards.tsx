@@ -438,12 +438,12 @@ export function JumboLoadFlashcards({
             <div className="w-8 h-8 border-2 border-coffee border-t-transparent border-b-transparent rounded-full animate-spin"></div>
           </div>
         ) : sets.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-coffee/70 font-bold italic">
+          <div className="flex items-center justify-center h-full text-coffee/70 font-bold">
             {activeTab === "personal"
               ? !user
                 ? "Log in to save flashcards!"
-                : "No flashcard sets found."
-              : "No public sets found."}
+                : "No flashcard sets found. Upload some at the bottom right!"
+              : "No public sets found. Make your own and publish them!"}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 pb-6">

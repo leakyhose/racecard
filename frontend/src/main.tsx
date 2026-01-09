@@ -6,7 +6,6 @@ import Home from "./pages/Home.tsx";
 import Lobby from "./pages/Lobby.tsx";
 import Auth from "./pages/Auth.tsx";
 import Confirm from "./pages/Confirm.tsx";
-import AuthCallback from "./pages/AuthCallback.tsx";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const router = createBrowserRouter([
@@ -21,10 +20,6 @@ const router = createBrowserRouter([
   {
     path: "/auth",
     element: <Auth />,
-  },
-  {
-    path: "/auth/callback",
-    element: <AuthCallback />,
   },
   {
     path: "/confirm",

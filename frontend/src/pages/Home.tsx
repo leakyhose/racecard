@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { socket } from "../socket";
 import type { Lobby } from "@shared/types";
 import { useAuth } from "../hooks/useAuth";
+import { UsernameModal } from "../components/UsernameModal";
 
 export default function Home() {
   const location = useLocation();
@@ -113,6 +114,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative gap-8 select-none">
+      {/* Username Modal for OAuth users */}
+      <UsernameModal />
+      
       {/* Auth Buttons */}
       {user ? (
         <div className="absolute top-4 right-4 flex items-center gap-4 z-20">
