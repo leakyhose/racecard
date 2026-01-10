@@ -5,20 +5,15 @@ import { addPlayer, removePlayer } from "./playerManager.js";
 const lobbies = new Map<string, Lobby>();
 const socketToLobby = new Map<string, string>();
 
-// Tracks a socket's lobby membership
-// MUST BE USED IN ANY FUNCTION CHANGING PLAYERS IN AND OUT OF LOBBIES
+
 export function trackSocket(socketId: string, code: string) {
   socketToLobby.set(socketId, code);
 }
 
-// Untracks a socket (for when they leave/disconnect)
-// MUST BE USED IN ANY FUNCTION CHANGING PLAYERS IN AND OUT OF LOBBIES
 export function untrackSocket(socketId: string) {
   socketToLobby.delete(socketId);
 }
 
-// Creates a lobby
-// @returns new updated lobby
 export function createLobby(hostID: string, hostName: string): Lobby {
   const code = generateCode();
   const newLobby: Lobby = {
@@ -51,7 +46,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
       multipleChoice: true,
       roundTime: 15,
       pointsToWin: 100,
-    }, // Default lobby settings
+    },
     leader: hostID,
     endGameVotes: [],
     shuffledFlashcards: [],
@@ -61,8 +56,7 @@ export function createLobby(hostID: string, hostName: string): Lobby {
   return newLobby;
 }
 
-// Updates flashcards in a lobby
-// @returns updated lobby
+
 export function updateFlashcard(
   socketId: string,
   flashcards: Flashcard[],
@@ -90,12 +84,11 @@ export function updateFlashcard(
   lobby.flashcardAuthorName = authorName;
   lobby.flashcardCreatedAt = createdAt;
   lobby.flashcardUpdatedAt = updatedAt;
-  lobby.shuffledFlashcards = []; // Reset deck state
+  lobby.shuffledFlashcards = [];
 
-  // Update pointsToWin default
   const maxPoints = flashcards.length * 10;
   if (maxPoints <= 750) {
-    lobby.settings.pointsToWin = maxPoints; // Default to Play All
+    lobby.settings.pointsToWin = maxPoints;
   } else {
     lobby.settings.pointsToWin = 100;
   }
@@ -105,7 +98,7 @@ export function updateFlashcard(
   return lobby;
 }
 
-// Resets player stats in a lobby
+
 export function resetPlayerStats(code: string) {
   const lobby = lobbies.get(code);
   if (!lobby) return;
@@ -124,8 +117,6 @@ export function resetPlayerStats(code: string) {
   return lobby;
 }
 
-// Updates settings in a lobby
-// @returns updated lobby
 export function updateSettings(socketId: string, settings: Settings) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) {
@@ -135,14 +126,10 @@ export function updateSettings(socketId: string, settings: Settings) {
   return lobby;
 }
 
-// Adds player to lobby
-// @returns updated lobby
 export function addPlayerToLobby(code: string, id: string, name: string) {
   return addPlayer(code, id, name);
 }
 
-// Adds player to lobby
-// @returns updated lobby, null if lobby is deleted
 export function removePlayerFromLobby(socketId: string) {
   const lobby = removePlayer(socketId);
 
@@ -154,7 +141,6 @@ export function removePlayerFromLobby(socketId: string) {
   return lobby;
 }
 
-// Wipes miniStatus for all players in a lobby
 export function wipeMiniStatus(lobbyCode: string) {
   const lobby = getLobbyByCode(lobbyCode);
 
@@ -166,7 +152,6 @@ export function wipeMiniStatus(lobbyCode: string) {
   return lobby;
 }
 
-// Updates leader in a lobby
 export function updateLeader(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) {
@@ -176,30 +161,27 @@ export function updateLeader(socketId: string) {
   return lobby;
 }
 
-// Deletes a lobby
+
 export function deleteLobby(code: string) {
   deleteCode(code);
   lobbies.delete(code);
 }
 
-// Returns lobby from code
 export function getLobbyByCode(code: string) {
   return lobbies.get(code) || null;
 }
 
-// Returns lobby from socket
+
 export function getLobbyBySocket(socketId: string): Lobby | null {
   const lobbyCode = socketToLobby.get(socketId);
   if (!lobbyCode) return null;
   return getLobbyByCode(lobbyCode);
 }
 
-// Gets list of all lobbies
 export function getAllLobbies() {
   return Array.from(lobbies.values());
 }
 
-// Sorts players in lobby with metric
 export function sortPlayersByMetric(lobby: Lobby): Player[] {
   const players = [...lobby.players];
 

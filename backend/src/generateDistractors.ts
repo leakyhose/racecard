@@ -7,9 +7,8 @@ import fs from "fs";
 const distractorPrompt = fs.readFileSync("./src/distractorPrompt.md", "utf-8");
 
 const MODEL_NAME = "gemini-2.5-flash";
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 25;
 
-// Load environment variables
 config();
 
 let client: GoogleGenerativeAI | null = null;
@@ -28,7 +27,6 @@ for (let i = 0; i < BATCH_SIZE; i++) {
 
 const DistractorsPerCard = z.array(z.string().min(1)).length(3);
 
-// Generic function to generate distractors for any field
 async function generateDistractors(
   apiClient: GoogleGenerativeAI,
   pairs: { question: string; answer: string }[],
@@ -41,13 +39,11 @@ async function generateDistractors(
     totalTokens: number;
   };
 }> {
-  // Create a map to store results by original index
   const resultsByIndex = new Map<number, string[]>();
   let totalPromptTokens = 0;
   let totalCompletionTokens = 0;
   let totalTokens = 0;
 
-  // Split into batches and process in parallel
   const batches: {
     id: string;
     originalIndex: number;
@@ -55,7 +51,6 @@ async function generateDistractors(
     answer: string;
   }[][] = [];
 
-  // Initialize batches
   for (let i = 0; i < Math.ceil(pairs.length / BATCH_SIZE); i++) {
     batches[i] = [];
   }
@@ -66,7 +61,7 @@ async function generateDistractors(
     const pair = pairs[i]!;
     batches[batchIndex]!.push({
       id: `c${idInBatch}`,
-      originalIndex: i, // Store original index
+      originalIndex: i,
       question: pair.question,
       answer: pair.answer,
     });
@@ -75,7 +70,6 @@ async function generateDistractors(
   let completedBatches = 0;
   const totalBatches = batches.length;
 
-  // Process all batches in parallel
   const batchPromises = batches.map(async (initialBatch, batchIndex) => {
     const MAX_RETRIES = 3;
     let currentBatch = initialBatch;
@@ -86,7 +80,6 @@ async function generateDistractors(
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        // Create schema dynamically based on current batch IDs
         const batchSchema: Record<string, typeof DistractorsPerCard> = {};
         for (const item of currentBatch) {
           batchSchema[item.id] = DistractorsPerCard;
@@ -136,7 +129,6 @@ async function generateDistractors(
         const parsedRaw = JSON.parse(content);
         const parsed = DistractorSet.parse(parsedRaw);
 
-        // Track token usage
         if (response.usageMetadata) {
           totalPromptTokens += response.usageMetadata.promptTokenCount;
           totalCompletionTokens += response.usageMetadata.candidatesTokenCount;
@@ -149,7 +141,6 @@ async function generateDistractors(
           );
         }
 
-        // Match IDs from LLM response to requested IDs
         const nextBatch: {
           id: string;
           originalIndex: number;
@@ -157,18 +148,15 @@ async function generateDistractors(
           answer: string;
         }[] = [];
 
-        // Process each item in current batch
         for (const item of currentBatch) {
           const llmDistractors = parsed.distractors[item.id];
 
           if (llmDistractors) {
-            // LLM provided distractors for this ID - store with original index
             batchResults.set(item.id, {
               distractors: llmDistractors,
               originalIndex: item.originalIndex,
             });
           } else {
-            // LLM didn't provide distractors, add to next batch
             nextBatch.push(item);
           }
         }
@@ -191,25 +179,21 @@ async function generateDistractors(
           };
         }
 
-        // If this is the last retry and we still have missing items, throw error
         if (attempt === MAX_RETRIES - 1) {
           throw new Error(
             `Failed to get distractors for ${nextBatch.length} items in batch ${batchIndex + 1} after ${MAX_RETRIES} attempts. Missing IDs: ${nextBatch.map((item) => item.id).join(", ")}`,
           );
         }
 
-        // Update current batch to only retry missing items
         currentBatch = nextBatch;
         console.warn(
           `Batch ${batchIndex + 1} attempt ${attempt + 1}: Retrying ${nextBatch.length} missing items...`,
         );
       } catch (error: any) {
-        // Handle Rate Limiting
         if (error.status === 429) {
           let retryAfterMs = error.headers?.["retry-after-ms"];
           let retryAfter = error.headers?.["retry-after"];
 
-          // Handle Headers object if present
           if (
             !retryAfterMs &&
             !retryAfter &&
@@ -220,7 +204,7 @@ async function generateDistractors(
             retryAfter = error.headers.get("retry-after");
           }
 
-          let waitTime = 1000; // Default 1s
+          let waitTime = 1000;
           if (retryAfterMs) {
             waitTime = parseInt(retryAfterMs, 10);
           } else if (retryAfter) {
@@ -234,7 +218,6 @@ async function generateDistractors(
           );
           await new Promise((resolve) => setTimeout(resolve, waitTime));
 
-          // Don't count this as a failed attempt
           attempt--;
           continue;
         }
@@ -254,14 +237,12 @@ async function generateDistractors(
 
   const results = await Promise.all(batchPromises);
 
-  // Accumulate token usage
   results.forEach((result) => {
     totalPromptTokens += result.usage.promptTokens;
     totalCompletionTokens += result.usage.completionTokens;
     totalTokens += result.usage.totalTokens;
   });
 
-  // Build final array in original order
   const allDistractors: string[][] = [];
   for (let i = 0; i < pairs.length; i++) {
     const distractors = resultsByIndex.get(i);
@@ -308,10 +289,9 @@ export async function generateResponse(
     onProgress?.(`${completedBatches}/${totalBatches} batches complete`);
   };
 
-  // Create pairs for both term and definition generation
   const termPairs = flashcards.map((card) => ({
-    question: card.question, // Question provides context
-    answer: card.answer, // AI matches answer (term) format
+    question: card.question,
+    answer: card.answer,
   }));
 
   const definitionPairs = flashcards.map((card) => ({
@@ -346,7 +326,6 @@ export async function generateResponse(
     definitionResult = results[1];
   }
 
-  // Calculate total usage
   const totalUsage = {
     promptTokens:
       (termResult?.usage.promptTokens || 0) +

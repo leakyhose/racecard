@@ -6,9 +6,6 @@ import {
   untrackSocket,
 } from "./lobbyManager.js";
 
-// Adds player to lobby
-// @returns lobby, whether player was added or not, but null when lobby doesnt exist
-// Eventually will add functionality for when duplicate players exist
 export function addPlayer(
   code: string,
   id: string,
@@ -32,14 +29,11 @@ export function addPlayer(
   return lobby;
 }
 
-// Removes player from lobby
-// @returns updated lobby, or null if lobby doesn't exist
 export function removePlayer(socketId: string): Lobby | null {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) return null;
   lobby.players = lobby.players.filter((p: Player) => p.id !== socketId);
 
-  // Remove from endGameVotes if present
   if (lobby.endGameVotes) {
     lobby.endGameVotes = lobby.endGameVotes.filter((id) => id !== socketId);
   }

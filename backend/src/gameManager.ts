@@ -11,13 +11,11 @@ import { normalizeForFuzzy } from "./fuzzySearch.js";
 
 const codeToGamestate = new Map<string, Gamestate>();
 
-// Track distractor generation status
 const distractorStatus = new Map<
   string,
   { ready: boolean; generating: boolean }
 >();
 
-// Generate distractors for flashcards using Gemini
 export async function generateDistractors(
   lobbyCode: string,
   mode: "term" | "definition" | "both",
@@ -26,7 +24,6 @@ export async function generateDistractors(
   const lobby = getLobbyByCode(lobbyCode);
   if (!lobby) return;
 
-  // Check if already generating for this lobby
   const status = distractorStatus.get(lobbyCode);
   if (status?.generating) {
     console.log(
@@ -35,8 +32,6 @@ export async function generateDistractors(
     return;
   }
 
-  // Work with lobby flashcards directly, not gamestate (gamestate may not exist yet)
-  // Create a shallow copy to ensure order is preserved during generation
   const flashcardsToGenerate = [...lobby.flashcards];
   if (!flashcardsToGenerate || flashcardsToGenerate.length === 0) return;
 
@@ -60,7 +55,6 @@ export async function generateDistractors(
       definitionDistractors?: string[][];
     } = JSON.parse(response);
 
-    // Validate the response
     if (
       ((mode === "definition" || mode === "both") &&
         (!Array.isArray(parsedResponse.termDistractors) ||
@@ -76,7 +70,6 @@ export async function generateDistractors(
       throw new Error("Invalid distractors format");
     }
 
-    // Assign distractors to each flashcard in the lobby
     flashcardsToGenerate.forEach((flashcard, index) => {
       if (mode === "definition" || mode === "both") {
         const termDistractors = parsedResponse.termDistractors![index];
@@ -117,36 +110,28 @@ export async function generateDistractors(
   }
 }
 
-// Check if distractors are ready
 export function areDistractorsReady(lobbyCode: string): boolean {
   const status = distractorStatus.get(lobbyCode);
   return status?.ready ?? true; // Default to true if not tracked
 }
 
-// Check if distractors are currently generating
 export function areDistractorsGenerating(lobbyCode: string): boolean {
   const status = distractorStatus.get(lobbyCode);
   return status?.generating ?? false;
 }
 
-// Clean up distractor status
 export function cleanupDistractorStatus(lobbyCode: string) {
   distractorStatus.delete(lobbyCode);
 }
 
-// Initialize game for a lobby
 export function startGame(socketId: string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) return null;
 
-  // If shuffle is disabled, always start fresh from the original order
   if (!lobby.settings.shuffle) {
     lobby.shuffledFlashcards = [];
   }
 
-  // Ensure the deck is fully replenished for the session
-  // If we have a partial deck (leftovers), we keep them at the front
-  // Then we append the missing cards (shuffled if needed) to reach the full set size
   if (!lobby.shuffledFlashcards) {
     lobby.shuffledFlashcards = [];
   }
@@ -158,10 +143,8 @@ export function startGame(socketId: string) {
     missingCards = shuffle(missingCards);
   }
 
-  // Append missing cards to form a full game deck
   lobby.shuffledFlashcards = [...lobby.shuffledFlashcards, ...missingCards];
 
-  // Use the saved deck state for this game
   const gameFlashcards = [...lobby.shuffledFlashcards];
 
   codeToGamestate.set(lobby.code, {
@@ -176,20 +159,16 @@ export function startGame(socketId: string) {
   return lobby;
 }
 
-// Shuffle cards for a lobby (called after countdown)
 export function shuffleGameCards(lobbyCode: string) {
-  // Shuffling is now handled in startGame to persist deck state across games
   return;
 }
 
-// Set round start time when question is emitted
 export function setRoundStart(lobbyCode: string) {
   const gs = codeToGamestate.get(lobbyCode);
   if (!gs) return;
   gs.roundStart = Date.now();
 }
 
-// Get the current question for a lobby
 export function getCurrentQuestion(
   lobbyCode: string,
 ): {
@@ -208,7 +187,6 @@ export function getCurrentQuestion(
   const isMultipleChoice = lobby?.settings.multipleChoice ?? false;
   const answerByTerm = lobby?.settings.answerByTerm ?? false;
 
-  // Dynamically determine what to show based on mode
   const question = answerByTerm
     ? currentFlashcard.answer
     : currentFlashcard.question;
@@ -222,8 +200,6 @@ export function getCurrentQuestion(
     : currentFlashcard.definitionGenerated;
 
   if (isMultipleChoice && isSideGenerated) {
-    // answerByTerm: show term, need definition distractors (trickDefinitions)
-    // answerByDefinition: show definition, need term distractors (trickTerms)
     const distractors = answerByTerm
       ? currentFlashcard.trickTerms
       : currentFlashcard.trickDefinitions;
@@ -241,7 +217,6 @@ export function getCurrentQuestion(
   };
 }
 
-// Validate an answer from a player
 export function validateAnswer(socketId: string, answerText: string) {
   const lobby = getLobbyBySocket(socketId);
   if (!lobby) return null;
@@ -255,7 +230,6 @@ export function validateAnswer(socketId: string, answerText: string) {
   const player = lobby.players.find((p) => p.id === socketId);
   if (!player) return null;
 
-  // Check if player already submitted in MC mode
   if (
     lobby.settings.multipleChoice &&
     gs.submittedPlayers.includes(player.id)
@@ -263,9 +237,8 @@ export function validateAnswer(socketId: string, answerText: string) {
     return null;
   }
 
-  const timeTaken = Math.max(307, Date.now() - gs.roundStart) - 300; // Buffer for animation of the card fliping into position.
+  const timeTaken = Math.max(307, Date.now() - gs.roundStart) - 300;
 
-  // Determine correct answer based on mode
   const answerByTerm = lobby.settings.answerByTerm ?? false;
   const correctAnswer = answerByTerm
     ? currentFlashcard.question
@@ -324,7 +297,6 @@ export function validateAnswer(socketId: string, answerText: string) {
   return { isCorrect, timeTaken, lobby };
 }
 
-// Check if all players have answered correctly
 export function allPlayersAnsweredCorrectly(lobbyCode: string): boolean {
   const lobby = getLobbyByCode(lobbyCode);
   const gs = codeToGamestate.get(lobbyCode);
@@ -336,7 +308,6 @@ export function allPlayersAnsweredCorrectly(lobbyCode: string): boolean {
   return submittedPlayers >= totalPlayers;
 }
 
-// Get results for current round
 export function getRoundResults(lobbyCode: string) {
   const gs = codeToGamestate.get(lobbyCode);
   const lobby = getLobbyByCode(lobbyCode);
@@ -357,7 +328,6 @@ export function getRoundResults(lobbyCode: string) {
   };
 }
 
-// Advance to next flashcard
 export function advanceToNextFlashcard(
   lobbyCode: string,
 ): {
@@ -372,7 +342,6 @@ export function advanceToNextFlashcard(
     return null;
 
   gs.flashcards.shift();
-  // Also remove from the persistent shuffled deck
   if (lobby.shuffledFlashcards && lobby.shuffledFlashcards.length > 0) {
     lobby.shuffledFlashcards.shift();
   }
@@ -381,14 +350,11 @@ export function advanceToNextFlashcard(
   gs.wrongAnswers = [];
   gs.submittedPlayers = [];
   gs.cardsPlayed++;
-  // roundStart will be set when newFlashcard is emitted
 
-  // If we have played the full set of cards for this session, end the game
   if (gs.cardsPlayed >= lobby.flashcards.length) {
     return null;
   }
 
-  // If we run out of cards (shouldn't happen if logic is correct), end game
   if (!gs.flashcards[0]) {
     return null;
   }
@@ -396,7 +362,6 @@ export function advanceToNextFlashcard(
   return getCurrentQuestion(lobbyCode);
 }
 
-// Process stats for players who didn't answer
 export function processUnansweredPlayers(lobbyCode: string) {
   const lobby = getLobbyByCode(lobbyCode);
   const gs = codeToGamestate.get(lobbyCode);
@@ -410,7 +375,6 @@ export function processUnansweredPlayers(lobbyCode: string) {
   });
 }
 
-// Remove the current card from the persistent deck (used when game ends prematurely)
 export function removeCurrentCardFromDeck(lobbyCode: string) {
   const lobby = getLobbyByCode(lobbyCode);
   if (
@@ -422,7 +386,6 @@ export function removeCurrentCardFromDeck(lobbyCode: string) {
   }
 }
 
-// Clean up game state when game ends
 export function endGame(lobbyCode: string) {
   codeToGamestate.delete(lobbyCode);
   cleanupDistractorStatus(lobbyCode);

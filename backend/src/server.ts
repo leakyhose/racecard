@@ -50,7 +50,6 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
   maxHttpBufferSize: 1e7, // 10MB
 });
 
-// Testing
 app.use(express.json());
 app.get("/status", (req, res) => {
   res.json({
@@ -60,7 +59,6 @@ app.get("/status", (req, res) => {
   });
 });
 
-// Store callbacks for active rounds to enable event-driven early ending
 const activeRounds = new Map<
   string,
   {
@@ -70,7 +68,6 @@ const activeRounds = new Map<
   }
 >();
 
-// Store active timers for each lobby to allow clearing them on forced end
 const lobbyTimers = new Map<string, Set<NodeJS.Timeout>>();
 
 function setLobbyTimeout(code: string, fn: () => void, delay: number) {
@@ -96,19 +93,15 @@ function clearLobbyTimers(code: string) {
   }
 }
 
-// NOTE: THERE ARE SOME INCONSISTENCIES WITH FUNCTIONS TAKING IN CODE OR LOBBY ID,
-// MAKE SURE THEY MATCH THE ONES IN THE MANAGER FILES
 io.on("connection", (socket) => {
   console.log(`connected to: ${socket.id}`);
 
-  // Creates lobby
   socket.on("createLobby", (nickname) => {
     const lobby = createLobby(socket.id, nickname);
     socket.join(lobby.code);
     socket.emit("lobbyUpdated", lobby);
   });
 
-  // Joins a lobby
   socket.on("joinLobby", (code, nickname) => {
     const lobby = addPlayerToLobby(code, socket.id, nickname);
     if (!lobby) {
@@ -118,8 +111,6 @@ io.on("connection", (socket) => {
     socket.join(code);
     lobby.players = sortPlayersByMetric(lobby);
     
-    // For non-viewable sets, send minimal flashcard data to EVERYONE (including leader)
-    // Full content is only needed server-side for gameplay
     if (lobby.allowView === false) {
       const lobbyForAll = {
         ...lobby,
@@ -137,14 +128,12 @@ io.on("connection", (socket) => {
       socket.emit("lobbyUpdated", lobby);
     }
     socket.to(code).emit("playersUpdated", lobby.players);
-    // Send join notification to chat
     io.to(code).emit("chatMessage", {
       player: "System",
       id: "system",
       text: `${nickname} joined the lobby`,
     });
 
-    // Sync new player with current game state
     if (lobby.status === "ongoing") {
       const questionData = getCurrentQuestion(code);
       if (questionData) {
@@ -155,13 +144,11 @@ io.on("connection", (socket) => {
           questionData.cardsPlayed,
         );
       } else {
-        // Wait for next round
         socket.emit("startCountdown", "Waiting for current round to end");
       }
     }
   });
 
-  // Loads flashcards
   socket.on(
     "updateFlashcard",
     async (
@@ -196,8 +183,6 @@ io.on("connection", (socket) => {
 
       lobby.distractorStatus = "idle";
       
-      // For sets with allowView=false, send minimal data to EVERYONE (including leader)
-      // Full flashcards are kept server-side only and used during gameplay
       if (lobby.allowView === false) {
         const flashcardsForBroadcast = lobby.flashcards.map(card => ({
             id: card.id,
@@ -206,10 +191,8 @@ io.on("connection", (socket) => {
             isGenerated: card.isGenerated ?? false,
             termGenerated: card.termGenerated ?? false,
             definitionGenerated: card.definitionGenerated ?? false,
-            // Omit trickTerms and trickDefinitions to reduce payload
           }));
         
-        // Send minimal data to everyone in the lobby
         io.to(lobby.code).emit(
           "flashcardsUpdated",
           flashcardsForBroadcast,
@@ -224,7 +207,6 @@ io.on("connection", (socket) => {
           lobby.flashcardUpdatedAt,
         );
       } else {
-        // For viewable sets, send full data to everyone
         io.to(lobby.code).emit(
           "flashcardsUpdated",
           lobby.flashcards,
@@ -240,12 +222,10 @@ io.on("connection", (socket) => {
         );
       }
       
-      // Only emit settingsUpdated (removed redundant lobbyUpdated which sent flashcards again)
       io.to(lobby.code).emit("settingsUpdated", lobby.settings);
     },
   );
 
-  // Updates settings
   socket.on("updateSettings", async (settings) => {
     const lobby = updateSettings(socket.id, settings);
     if (!lobby) {
@@ -256,7 +236,6 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("settingsUpdated", lobby.settings);
   });
 
-  // Manual generation of multiple choice options
   socket.on("generateMultipleChoice", async (mode) => {
     const lobby = getLobbyBySocket(socket.id);
     if (!lobby) {
@@ -275,7 +254,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Check if already generating
     if (areDistractorsGenerating(lobby.code)) {
       console.log(
         `Distractors already generating for ${lobby.code}, skipping...`,
@@ -303,8 +281,6 @@ io.on("connection", (socket) => {
       lobby.distractorStatus = "ready";
       lobby.generationProgress = undefined;
       
-      // For sets with allowView=false, send minimal data to everyone
-      // Full flashcards stay server-side for gameplay only
       if (lobby.allowView === false) {
         const flashcardsForBroadcast = lobby.flashcards.map(card => ({
             id: card.id,
@@ -352,7 +328,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Updates leader
   socket.on("updateLeader", (nextLeaderId) => {
     const lobby = updateLeader(nextLeaderId);
     if (!lobby) {
@@ -362,7 +337,6 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("leaderUpdated", lobby.leader);
   });
 
-  // Gets lobby data, used to check when lobby exists too when null is emitted
   socket.on("getLobby", (code) => {
     const lobby = getLobbyByCode(code);
     if (!lobby) {
@@ -370,8 +344,6 @@ io.on("connection", (socket) => {
       return;
     }
     
-    // For non-viewable sets, send minimal flashcard data to EVERYONE
-    // Full content stays server-side for gameplay only
     if (lobby.allowView === false) {
       const lobbyMinimal = {
         ...lobby,
@@ -390,7 +362,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handles disconnection
   socket.on("disconnect", () => {
     const lobbyBeforeRemoval = getLobbyBySocket(socket.id);
     const playerName = lobbyBeforeRemoval?.players.find(
@@ -399,11 +370,9 @@ io.on("connection", (socket) => {
     const lobby = removePlayerFromLobby(socket.id);
 
     if (!lobby) {
-      // Lobby was deleted, as it became empty
       return;
     }
 
-    // Remove player's vote if they had voted
     if (lobby.endGameVotes) {
       lobby.endGameVotes = lobby.endGameVotes.filter((id) => id !== socket.id);
     }
@@ -422,7 +391,6 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("playersUpdated", lobby.players);
     io.to(lobby.code).emit("leaderUpdated", lobby.leader);
 
-    // Check if game should end due to new player count
     if (lobby.status === "ongoing") {
       const totalPlayers = lobby.players.length;
       const votes = lobby.endGameVotes?.length || 0;
@@ -453,7 +421,6 @@ io.on("connection", (socket) => {
       io.to(lobby.code).emit("endGameVotesUpdated", lobby.endGameVotes || []);
     }
 
-    // Send leave notification to chat
     if (playerName) {
       io.to(lobby.code).emit("chatMessage", {
         player: "System",
@@ -463,7 +430,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Starts game, and gameplay loop
   socket.on("startGame", async () => {
     const lobby = startGame(socket.id);
     if (!lobby) {
@@ -471,7 +437,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    lobby.endGameVotes = []; // Reset votes for new game
+    lobby.endGameVotes = [];
 
     lobby.status = "starting";
     lobby.players = sortPlayersByMetric(lobby);
@@ -479,7 +445,6 @@ io.on("connection", (socket) => {
     io.to(lobby.code).emit("playersUpdated", lobby.players);
     io.to(lobby.code).emit("endGameVotesUpdated", []);
 
-    // Lazy-load MC options if needed (for public sets where we skipped loading them initially)
     const needsMCOptions = lobby.settings.multipleChoice && 
       lobby.flashcardID && 
       lobby.flashcards.length > 0 &&
@@ -494,7 +459,6 @@ io.on("connection", (socket) => {
       
       const mcOptions = await loadMCOptionsFromSupabase(lobby.flashcardID);
       if (mcOptions) {
-        // Merge MC options into flashcards
         for (const flashcard of lobby.flashcards) {
           const idx = parseInt(flashcard.id);
           const options = mcOptions.get(idx);
@@ -509,7 +473,6 @@ io.on("connection", (socket) => {
 
     shuffleGameCards(lobby.code);
 
-    // Start countdown
     let countdown = 3;
     io.to(lobby.code).emit("startCountdown", countdown);
     countdown--;
@@ -521,7 +484,6 @@ io.on("connection", (socket) => {
       } else {
         clearInterval(countdownInterval);
 
-        // Set status to ongoing before starting game loop
         lobby.status = "ongoing";
         lobby.players = sortPlayersByMetric(lobby);
         io.to(lobby.code).emit("lobbyStatusUpdated", "ongoing");
@@ -547,7 +509,6 @@ io.on("connection", (socket) => {
             return;
           }
 
-          // Set round start time when emitting question
           setRoundStart(lobbyCode);
           io.to(lobbyCode).emit(
             "newFlashcard",
@@ -560,7 +521,6 @@ io.on("connection", (socket) => {
           const ROUND_DURATION = (currentLobby.settings.roundTime || 10) * 1000;
           let roundEnded = false;
 
-          // Ends round, is also called when everyone answers correctly
           const endRound = () => {
             if (roundEnded) return;
             roundEnded = true;
@@ -576,11 +536,9 @@ io.on("connection", (socket) => {
             const lobby = wipeMiniStatus(lobbyCode);
             if (lobby) io.to(lobbyCode).emit("playersUpdated", lobby.players);
 
-            // Wait 5 seconds to show results
             setLobbyTimeout(
               lobbyCode,
               () => {
-                // Check for winner based on points
                 const currentLobby = getLobbyByCode(lobbyCode);
                 const pointsToWin = currentLobby?.settings.pointsToWin || 100;
                 const winner = currentLobby?.players.find(
@@ -606,10 +564,8 @@ io.on("connection", (socket) => {
                 const nextQuestionData = advanceToNextFlashcard(lobbyCode);
 
                 if (nextQuestionData) {
-                  // Continue to next round
                   runGameplayLoop(lobbyCode);
                 } else {
-                  // Game over
                   const finalLobby = getLobbyByCode(lobbyCode);
                   if (finalLobby) {
                     finalLobby.status = "finished";
@@ -628,7 +584,6 @@ io.on("connection", (socket) => {
             );
           };
 
-          // Store round info, callback endRound is called if answers are given faster than round
           activeRounds.set(lobbyCode, { endRound, roundStartTime, roundEnded });
 
           setLobbyTimeout(
@@ -677,7 +632,6 @@ io.on("connection", (socket) => {
     result.lobby.players = sortPlayersByMetric(result.lobby);
     io.to(result.lobby.code).emit("playersUpdated", result.lobby.players);
 
-    // Check if all players have answered correctly or someone won
     const pointsToWin = result.lobby.settings.pointsToWin || 100;
     const someoneWon = result.lobby.players.some((p) => p.score >= pointsToWin);
 
@@ -704,7 +658,7 @@ io.on("connection", (socket) => {
 
     if (lobby.status !== "ongoing") return;
 
-    if (!lobby.endGameVotes) lobby.endGameVotes = []; // Safety check
+    if (!lobby.endGameVotes) lobby.endGameVotes = [];
 
     if (!lobby.endGameVotes.includes(socket.id)) {
       lobby.endGameVotes.push(socket.id);
@@ -725,7 +679,7 @@ io.on("connection", (socket) => {
           activeRounds.delete(lobby.code);
         }
 
-        clearLobbyTimers(lobby.code); // Clear any pending game loop timers
+        clearLobbyTimers(lobby.code);
 
         io.to(lobby.code).emit("lobbyStatusUpdated", "finished");
         io.to(lobby.code).emit("playersUpdated", lobby.players);
@@ -737,7 +691,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle chat messages
   socket.on("sendChat", (msg) => {
     const lobby = getLobbyBySocket(socket.id);
     if (!lobby) {
@@ -756,7 +709,6 @@ io.on("connection", (socket) => {
     });
   });
 
-  // Signal to continue game
   socket.on("continueGame", () => {
     const lobby = getLobbyBySocket(socket.id);
     if (!lobby) {

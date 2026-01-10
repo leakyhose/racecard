@@ -1,6 +1,5 @@
 const activeCodes = new Set<string>();
 
-// Generates random code, default length of 4
 export function generateCode(length: number = 4) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let code = "";
@@ -15,7 +14,6 @@ export function generateCode(length: number = 4) {
   return code;
 }
 
-// Deletes code from set
 export function deleteCode(code: string) {
   activeCodes.delete(code);
 }
