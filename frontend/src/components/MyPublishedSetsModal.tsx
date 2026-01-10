@@ -56,13 +56,11 @@ export function MyPublishedSetsModal({
   const [error, setError] = useState("");
   const mouseDownOnBackdrop = useRef(false);
 
-  // Pagination state
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
-  // Edit state
   const [editingSet, setEditingSet] = useState<PublicFlashcardSet | null>(null);
   const [flashcards, setFlashcards] = useState<EditableFlashcard[]>([]);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -73,7 +71,6 @@ export function MyPublishedSetsModal({
   const [isLoadingMoreCards, setIsLoadingMoreCards] = useState(false);
   const CARD_PAGE_SIZE = 50;
 
-  // Edit settings state
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [allowView, setAllowView] = useState(false);
@@ -122,7 +119,6 @@ export function MyPublishedSetsModal({
           setHasMore(false);
         }
 
-        // Get flashcard counts and generated status
         const setsWithCounts = await Promise.all(
           (data || []).map(async (set) => {
             const { count } = await supabase
@@ -267,7 +263,6 @@ export function MyPublishedSetsModal({
     setFlashcards([]);
     setError("");
 
-    // Initialize settings based on existing set values
     const termValue = set.use_term;
     const mcValue = set.use_mc;
     const fuzzyValue = set.fuzzy_tolerance;
@@ -317,7 +312,6 @@ export function MyPublishedSetsModal({
     value: boolean
   ) => {
     setSettings((prev) => {
-      // Prevent changing term if MC is on and generated options constrain it
       if (key === "term" && field === "value" && prev.mc.value) {
         if (editingSet?.term_generated && !editingSet?.definition_generated && !value) {
           return prev;
@@ -344,20 +338,17 @@ export function MyPublishedSetsModal({
             : null,
         };
 
-        // If MC is locked to ON, disable Fuzzy (lock it to OFF)
         if (key === "mc" && value && newSettings.mc.value) {
           newSettings.fuzzy = { locked: true, value: false };
         }
       } else {
         newSettings[key] = { ...newSettings[key], value };
 
-        // If MC value changes to ON and is locked, disable Fuzzy
         if (key === "mc" && newSettings.mc.locked && value) {
           newSettings.fuzzy = { locked: true, value: false };
         }
       }
 
-      // Enforce Term/Definition consistency if MC is ON
       if (newSettings.mc.value) {
         if (editingSet?.term_generated && !editingSet?.definition_generated) {
           newSettings.term = { ...newSettings.term, value: true };
@@ -423,7 +414,6 @@ export function MyPublishedSetsModal({
     setError("");
 
     try {
-      // 1. Update the public set metadata
       const { data: updateData, error: updateSetError } = await supabase
         .from("public_flashcard_sets")
         .update({
@@ -455,7 +445,6 @@ export function MyPublishedSetsModal({
         return;
       }
 
-      // 2. Delete removed flashcards
       if (deletedIds.length > 0) {
         const { error: deleteError } = await supabase
           .from("flashcards")
@@ -464,7 +453,6 @@ export function MyPublishedSetsModal({
         if (deleteError) throw deleteError;
       }
 
-      // 3. Update flashcards
       const updates = flashcards.map((card, index) => ({
         id: card.id,
         public_set_id: editingSet.id,
@@ -485,7 +473,6 @@ export function MyPublishedSetsModal({
         if (updateError) throw updateError;
       }
 
-      // Refresh the sets list
       setEditingSet(null);
       setPage(0);
       setHasMore(true);
@@ -508,7 +495,7 @@ export function MyPublishedSetsModal({
     setError("");
 
     try {
-      // Delete flashcards first (foreign key constraint)
+      // FK constraint requires deleting cards first
       const { error: deleteCardsError } = await supabase
         .from("flashcards")
         .delete()
@@ -519,7 +506,6 @@ export function MyPublishedSetsModal({
         throw deleteCardsError;
       }
 
-      // Delete the public set
       const { data: deleteData, error: deleteSetError } = await supabase
         .from("public_flashcard_sets")
         .delete()
@@ -540,7 +526,6 @@ export function MyPublishedSetsModal({
         return;
       }
 
-      // Refresh the list
       setPage(0);
       setHasMore(true);
       fetchSets(0, true);
@@ -552,7 +537,6 @@ export function MyPublishedSetsModal({
 
   if (!isOpen) return null;
 
-  // Editing view
   if (editingSet) {
     return (
       <div
@@ -598,7 +582,6 @@ export function MyPublishedSetsModal({
           )}
 
           <div className="flex-1 overflow-y-auto pr-2" onScroll={handleCardScroll}>
-            {/* Set Details */}
             <div className="space-y-4 mb-6">
               <div>
                 <label className="block text-coffee font-bold mb-2 text-sm">
@@ -658,7 +641,6 @@ export function MyPublishedSetsModal({
                 </div>
               </div>
 
-              {/* Game Settings */}
               <div>
                 <label className="block text-coffee font-bold mb-4 text-sm border-b-2 border-coffee/20 pb-2">
                   Game Settings
@@ -780,7 +762,6 @@ export function MyPublishedSetsModal({
               </div>
             </div>
 
-            {/* Flashcards */}
             <div className="border-t-2 border-coffee/20 pt-4">
               <h3 className="font-bold text-lg mb-4">Flashcards</h3>
               {cardLoading ? (
@@ -915,7 +896,6 @@ export function MyPublishedSetsModal({
     );
   }
 
-  // List view
   return (
     <div
       className="fixed inset-0 flex items-center justify-center z-60 bg-coffee/50 cursor-not-allowed"

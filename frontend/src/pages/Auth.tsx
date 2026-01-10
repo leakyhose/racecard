@@ -16,12 +16,10 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const closeTab = searchParams.get("closeTab") === "true";
 
-  // Set page title
   useEffect(() => {
     document.title = "RaceCard";
   }, []);
 
-  // Redirect if already logged in
   useEffect(() => {
     if (user) {
       navigate("/");
@@ -59,7 +57,7 @@ export default function Auth() {
       setEmail("");
       setPassword("");
     } else if (isLogin && closeTab) {
-      // Successful login with closeTab flag - close the window
+      // Close popup window
       window.close();
     }
   };
@@ -72,19 +70,15 @@ export default function Auth() {
       setError(error.message);
       setGoogleLoading(false);
     }
-    // Don't set loading to false on success - redirect will happen
+    // Redirect will happen
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative gap-6 select-none">
-      {/* Main Content Column */}
       <div className="flex flex-col items-center w-full max-w-md z-10">
-        {/* Title */}
         <h1 className="text-5xl md:text-6xl font-black text-coffee tracking-tighter mb-6 text-center">RaceCard</h1>
 
-        {/* Toggle & Form Container */}
         <div className="w-full flex flex-col items-center space-y-6">
-          {/* Toggle */}
           <div className="flex items-center gap-4 text-coffee font-bold text-xl">
             <span 
               className={`transition-opacity duration-300 cursor-pointer ${isLogin ? "opacity-100" : "opacity-50"}`}
@@ -100,9 +94,7 @@ export default function Auth() {
                 checked={!isLogin}
                 onChange={() => { setIsLogin(!isLogin); setError(""); setSuccess(""); }}
               />
-              {/* Track */}
               <div className="w-14 h-6 bg-terracotta border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-                {/* Knob */}
                 <div
                   className={`absolute h-6 w-6 bg-vanilla border-2 border-coffee rounded-md shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -top-[5px] -left-0.5 group-hover:-translate-y-[0.09rem] ${!isLogin ? "translate-x-8" : ""}`}
                 ></div>
@@ -117,16 +109,12 @@ export default function Auth() {
             </span>
           </div>
 
-          {/* Flipping Card Area */}
           <div className="w-full perspective-1000">
             <div className={`relative w-full transition-transform duration-700 transform-3d ${!isLogin ? 'rotate-y-180' : ''}`} style={{ minHeight: '480px' }}>
-              
-              {/* Front: Login */}
+
               <div className="absolute inset-0 backface-hidden w-full h-full">
-                {/* Under Card */}
                 <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla -z-10"></div>
-                
-                {/* Top Card */}
+
                 <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-5">
                   <h2 className="text-2xl font-bold text-coffee">Welcome Back</h2>
                   <form onSubmit={handleSubmit} className="w-full space-y-4">
@@ -162,15 +150,13 @@ export default function Auth() {
                       </span>
                     </button>
                   </form>
-                  
-                  {/* Divider */}
+
                   <div className="w-full flex items-center gap-4">
                     <div className="flex-1 h-0.5 bg-coffee/30"></div>
                     <span className="text-coffee/50 text-sm font-bold">or</span>
                     <div className="flex-1 h-0.5 bg-coffee/30"></div>
                   </div>
-                  
-                  {/* Google Sign In */}
+
                   <button
                     type="button"
                     onClick={handleGoogleSignIn}
@@ -190,12 +176,9 @@ export default function Auth() {
                 </div>
               </div>
 
-              {/* Back: Sign Up */}
               <div className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full">
-                {/* Under Card */}
                 <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla -z-10"></div>
-                
-                {/* Top Card */}
+
                 <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-3">
                   <h2 className="text-2xl font-bold text-coffee">Create Account</h2>
                   <form onSubmit={handleSubmit} className="w-full space-y-2">
@@ -245,15 +228,13 @@ export default function Auth() {
                       </span>
                     </button>
                   </form>
-                  
-                  {/* Divider */}
+
                   <div className="w-full flex items-center gap-4">
                     <div className="flex-1 h-0.5 bg-coffee/30"></div>
                     <span className="text-coffee/50 text-sm font-bold">or</span>
                     <div className="flex-1 h-0.5 bg-coffee/30"></div>
                   </div>
-                  
-                  {/* Google Sign In */}
+
                   <button
                     type="button"
                     onClick={handleGoogleSignIn}
@@ -275,7 +256,6 @@ export default function Auth() {
             </div>
           </div>
 
-          {/* Back to Home */}
           <button
             onClick={() => navigate("/")}
             className="text-coffee font-bold hover:text-terracotta transition-colors text-sm"

@@ -76,7 +76,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         className="bg-light-vanilla border-3 border-coffee p-6 max-w-5xl w-full h-[80vh] flex flex-col select-text"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b-3 border-coffee pb-2">
           <div>
             <h2 className="text-2xl font-bold tracking-wide text-coffee">
@@ -92,7 +91,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         </div>
 
         <div className="flex flex-1 gap-8 overflow-hidden text-coffee">
-          {/* Left Column - Only in Simple Mode */}
           {mode === "simple" && (
             <div className="w-3/7 border-r-3 border-coffee pr-6 overflow-y-auto">
               <h3 className="font-bold text-lg mb-4">
@@ -134,7 +132,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
             </div>
           )}
 
-          {/* Right Column / Full Width */}
           <div
             className={`${mode === "simple" ? "w-4/7" : "w-full"} flex flex-col overflow-hidden`}
           >
@@ -179,7 +176,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 </div>
               </div>
 
-              {/* Row Separator */}
               <div>
                 <h3 className="font-bold mb-2">Between rows</h3>
                 <div className="space-y-1 font-bold">
@@ -220,7 +216,6 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 </div>
               </div>
 
-              {/* Advanced Mode Instructions */}
               {mode === "advanced" && (
                 <div className="flex-1 flex flex-col justify-center text-sm font-bold text-coffee">
                   <p className="mb-2">

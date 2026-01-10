@@ -57,14 +57,12 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full relative">
-      {/* Game Header */}
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50">
         <div className="h-4 flex items-center">
           <span className="text-sm font-bold text-coffee">Game</span>
         </div>
       </div>
 
-      {/* Flashcard Info Section */}
       <div className="flex flex-col w-full mb-4 text-center px-4 pt-2">
         <h2 className="text-lg font-bold text-coffee wrap-break-words w-full">
           {lobby.flashcardName || "Unnamed Flashcard Set"}
@@ -74,7 +72,6 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
         </p>
       </div>
 
-      {/* Stats Section */}
       <div className="flex flex-col w-full">
         <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 pt-2">
           <div className="h-4 flex items-center">
@@ -109,7 +106,6 @@ export function GameControls({ lobby, userId }: GameControlsProps) {
         </div>
       </div>
 
-      {/* Vote Button */}
       <div className="flex flex-col w-full mt-2 p-4 pt-0 items-center">
         {lobby.status === "ongoing" ? (
           <button

@@ -41,7 +41,7 @@ export function FlashcardStudy({
     } else {
       setCurrentIndex(0);
     }
-    // Reset flip state when switching to a different set
+    // Reset on new set
     setIsFlipped(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [publicSetInfo?.id, flashcardDescription]);
@@ -127,7 +127,6 @@ export function FlashcardStudy({
               disabled={!allowView}
               className={!allowView ? "cursor-not-allowed opacity-50" : ""}
             />
-            {/* Flashcard */}
             <div
               className="peer group relative w-full max-w-3xl min-h-[60vh] flex flex-col perspective-[1000px] z-40"
               onMouseEnter={() => setIsHovered(true)}
@@ -142,9 +141,7 @@ export function FlashcardStudy({
             `}
             >
               {currentIndex === -1 && (publicSetInfo || flashcardDescription) ? (
-                // Cover Card
                 <div className="col-start-1 row-start-1 backface-hidden relative w-full h-full">
-                  {/* Under Card (Cover) */}
                   <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
                     <div className="text-center text-coffee/80 text-[0.69rem] font-bold tracking-wider flex gap-2 px-4">
                       {publicSetInfo?.username && (
@@ -164,10 +161,8 @@ export function FlashcardStudy({
                     </div>
                   </div>
 
-                  {/* Top Card (Cover) */}
                   <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
                     <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6 select-none">
-                      {/* Title Section */}
                       <div className="w-full flex flex-col items-center justify-center">
                         {publicSetInfo?.user_id ===
                           "d0c1b157-eb1f-42a9-bf67-c6384b7ca278" && (
@@ -195,7 +190,6 @@ export function FlashcardStudy({
                         </div>
                       </div>
 
-                      {/* Description Section */}
                       <div className="flex items-center justify-center w-full px-8">
                         <div className="text-lg text-center font-bold text-coffee/80 whitespace-pre-wrap wrap-break-word hyphens-auto w-full max-w-full overflow-hidden">
                           {publicSetInfo?.description ||
@@ -207,7 +201,6 @@ export function FlashcardStudy({
                         </div>
                       </div>
 
-                      {/* Metadata Section */}
                       <div className="w-full flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-coffee/60 font-bold">
                         <span>{flashcards.length} flashcards</span>
                       </div>
@@ -216,16 +209,13 @@ export function FlashcardStudy({
                 </div>
               ) : (
                 <>
-                  {/* Front Face */}
                   <div className="col-start-1 row-start-1 backface-hidden relative w-full h-full">
-                    {/* Under Card (Front) */}
                     <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
                       <div className="text-center text-coffee/80 text-[0.69rem] font-bold tracking-[0.2em]">
                         click for answer
                       </div>
                     </div>
 
-                    {/* Top Card (Front) */}
                     <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
                       <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-4 select-none">
                         <div className="text-center w-full">
@@ -240,16 +230,13 @@ export function FlashcardStudy({
                     </div>
                   </div>
 
-                  {/* Back Face */}
                   <div className="col-start-1 row-start-1 backface-hidden transform-[rotateY(180deg)] relative w-full h-full">
-                    {/* Under Card (Back) */}
                     <div className="border-2 border-coffee absolute inset-0 rounded-[20px] bg-vanilla flex items-end justify-center pb-1 -z-10">
                       <div className="text-center text-coffee/80 text-[0.69rem] font-bold tracking-[0.2em]">
                         click for question
                       </div>
                     </div>
 
-                    {/* Top Card (Back) */}
                     <div className="w-full h-full transition-transform duration-400 group-hover:-translate-y-[23px]">
                       <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[20px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-4 select-none">
                         <div className="w-full">
@@ -280,7 +267,6 @@ export function FlashcardStudy({
                                 ))}
                             </div>
                           ) : (
-                            // Simple answer view
                             <div className="text-xl font-bold text-coffee text-center whitespace-pre-wrap warp-break-words hyphens-auto w-full max-w-full overflow-hidden">
                               {answer}
                             </div>

@@ -34,7 +34,7 @@ export function Game({ lobby }: GameProps) {
   const [isResultsVisible, setIsResultsVisible] = useState(false);
   const hasUpdatedPlays = useRef(false);
 
-  // Handle delayed visibility for results to prevent scrolling issues
+  // Prevents layout issues
   useEffect(() => {
     if (showResults) {
       setIsResultsVisible(true);
@@ -44,14 +44,12 @@ export function Game({ lobby }: GameProps) {
     }
   }, [showResults]);
 
-  // Reset scroll position when new question arrives
   useEffect(() => {
     if (currentQuestion && scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
   }, [currentQuestion]);
 
-  // Focus management
   useEffect(() => {
     if (hasAnswered || showResults) {
       document.getElementById("chat-input")?.focus();
@@ -68,14 +66,12 @@ export function Game({ lobby }: GameProps) {
     };
   }, []);
 
-  // Update play count for public sets
   useEffect(() => {
     if (showResults) {
       if (isLeader && lobby?.flashcardID && !hasUpdatedPlays.current) {
         hasUpdatedPlays.current = true;
         const updatePlays = async () => {
           try {
-            // Increment plays for each player in the lobby
             const increment = lobby.players.length;
             for (let i = 0; i < increment; i++) {
               await supabase.rpc("increment_plays", { set_id: lobby.flashcardID });
@@ -92,7 +88,6 @@ export function Game({ lobby }: GameProps) {
     }
   }, [showResults, isLeader, lobby?.flashcardID, lobby?.players.length]);
 
-  // Update countdown message when lobby status changes to ongoing (for hot joins)
   useEffect(() => {
     if (
       lobby?.status === "ongoing" &&

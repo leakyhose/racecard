@@ -92,7 +92,6 @@ export function PublishFlashcardsModal({
           termValue = false;
         }
       } else {
-        // If they turn MC ON, ensure Term is correct.
       }
 
       setSettings({
@@ -146,20 +145,17 @@ export function PublishFlashcardsModal({
             : null,
         };
 
-        // If MC is locked to ON, disable Fuzzy (lock it to OFF)
         if (key === "mc" && value && newSettings.mc.value) {
           newSettings.fuzzy = { locked: true, value: false };
         }
       } else {
         newSettings[key] = { ...newSettings[key], value };
 
-        // If MC value changes to ON and is locked, disable Fuzzy
         if (key === "mc" && newSettings.mc.locked && value) {
           newSettings.fuzzy = { locked: true, value: false };
         }
       }
 
-      // Enforce Term/Definition consistency if MC is ON (whether locked or value changed)
       if (newSettings.mc.value) {
         if (termGenerated && !definitionGenerated) {
           newSettings.term = { ...newSettings.term, value: true };
@@ -183,7 +179,7 @@ export function PublishFlashcardsModal({
     setError("");
 
     try {
-      // 1. Create public set
+
       const { data: publicSet, error: createError } = await supabase
         .from("public_flashcard_sets")
         .insert({
@@ -205,7 +201,6 @@ export function PublishFlashcardsModal({
 
       if (createError) throw createError;
 
-      // 2. Fetch original flashcards with pagination to handle >1000 cards
       let allOriginalCards: FlashcardDBRow[] = [];
       let page = 0;
       const pageSize = 1000;
@@ -238,7 +233,6 @@ export function PublishFlashcardsModal({
         throw new Error("No flashcards found to publish");
       }
 
-      // 3. Insert copies linked to public set
       const cardsToInsert = allOriginalCards.map((card, index) => ({
         public_set_id: publicSet.id,
         term: card.term,
@@ -251,7 +245,6 @@ export function PublishFlashcardsModal({
         order_index: card.order_index ?? index,
       }));
 
-      // Batch insert
       const BATCH_SIZE = 100;
       for (let i = 0; i < cardsToInsert.length; i += BATCH_SIZE) {
         const batch = cardsToInsert.slice(i, i + BATCH_SIZE);

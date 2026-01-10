@@ -38,7 +38,6 @@ export function UsernameModal() {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-md">
-        {/* Top Card */}
         <div className="w-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-powder),0_0_10px_rgba(0,0,0,0.2)] flex flex-col items-center justify-center gap-5">
           <h2 className="text-2xl font-bold text-coffee">Choose Your Username</h2>
           <p className="text-coffee/70 text-center text-sm">

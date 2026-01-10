@@ -76,7 +76,6 @@ export function FlashcardPreview({
                 {answerByTerm ? flashcard.answer : flashcard.question}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {/* Show correct answer and trick options */}
                 {answerByTerm ? (
                   <>
                     <div className="p-2 border border-coffee bg-mint/30 text-sm text-center">

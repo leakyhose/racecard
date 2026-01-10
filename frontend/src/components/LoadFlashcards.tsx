@@ -92,7 +92,6 @@ export function LoadFlashcards({
             .order("id", { ascending: true })
             .limit(10);
 
-          // Map result to FlashcardSet type
           data = result.data
             ? result.data.map((item) => ({
                 ...item,
@@ -102,7 +101,6 @@ export function LoadFlashcards({
             : [];
           fetchError = result.error;
         } else {
-          // Fetch public sets
           const result = await supabase
             .from("public_flashcard_sets")
             .select("id, name, created_at, plays, user_id, username")
@@ -110,7 +108,6 @@ export function LoadFlashcards({
             .order("id", { ascending: true })
             .limit(10);
 
-          // Map result to FlashcardSet type
           data = result.data
             ? result.data.map((item) => ({
                 ...item,
@@ -123,11 +120,9 @@ export function LoadFlashcards({
 
         if (fetchError) throw fetchError;
 
-        // Optimized: combine count and generation check into single query per set
-        const setIdField = activeTab === "personal" ? "set_id" : "public_set_id";
+      const setIdField = activeTab === "personal" ? "set_id" : "public_set_id";
         const setsWithCounts = await Promise.all(
           (data || []).map(async (set) => {
-            // Single query to get count and check for generated cards
             const { data: flashcardData, count } = await supabase
               .from("flashcards")
               .select("term_generated, definition_generated", { count: "exact" })
@@ -192,7 +187,6 @@ export function LoadFlashcards({
     }
 
     try {
-      // Fetch flashcards with pagination to handle >1000 cards
       let allData: FlashcardDBRow[] = [];
       let page = 0;
       const pageSize = 1000;
@@ -206,7 +200,7 @@ export function LoadFlashcards({
           )
           .eq("set_id", setId)
           .order("order_index", { ascending: true })
-          .order("id", { ascending: true }) // Fallback for old cards
+          .order("id", { ascending: true })
           .range(page * pageSize, (page + 1) * pageSize - 1);
 
         if (fetchError) throw fetchError;
@@ -256,7 +250,6 @@ export function LoadFlashcards({
       {(isGenerating || isLoading) && (
         <div className="-translate-y-1 absolute inset-0 bg-light-vanilla/60 z-50 cursor-not-allowed pointer-events-auto"></div>
       )}
-      {/* Toggle Switch */}
       <div className="flex justify-center items-center pb-3 border-b-2 border-coffee/50 gap-6">
         <button
           className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
@@ -290,9 +283,7 @@ export function LoadFlashcards({
             }
           />
 
-          {/* Track */}
           <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-            {/* Knob */}
             <div
               className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
             ></div>
@@ -322,7 +313,6 @@ export function LoadFlashcards({
         </button>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 [direction:rtl] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40 [&::-webkit-scrollbar]:absolute [&::-webkit-scrollbar]:left-0">
         <div className="flex flex-col space-y-2 [direction:ltr] min-h-full mb-1">
           {activeTab === "personal" && !user ? (

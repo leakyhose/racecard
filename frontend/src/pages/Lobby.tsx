@@ -55,12 +55,10 @@ export default function Lobby() {
   const studyRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Resizable sidebar logic
-  const [splitRatio, setSplitRatio] = useState(0.55); // DEFAULT RATIO (Change this to set default position)
+  const [splitRatio, setSplitRatio] = useState(0.55);
   const [isDragging, setIsDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Global tooltip state
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
   const [tooltipText, setTooltipText] = useState<string | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -95,8 +93,7 @@ export default function Lobby() {
     setTrackedSetId(set.id);
 
     if (isLeader && lobby) {
-      // If 25 or fewer cards, default to "play all" (flashcardCount * 10 points)
-      // If more than 25 cards, default to "play until 100"
+      // <=25 cards: play all; >25 cards: play until 100
       const defaultPointsToWin = set.flashcardCount <= 25 
         ? set.flashcardCount * 10 
         : 100;
@@ -150,7 +147,6 @@ export default function Lobby() {
 
       const sidebarRect = sidebarRef.current.getBoundingClientRect();
       const relativeY = e.clientY - sidebarRect.top;
-      // MIN/MAX RATIOS (Change 0.2 and 0.8 to set min/max limits)
       const newRatio = Math.min(
         Math.max(relativeY / sidebarRect.height, 0.2),
         0.8,
@@ -186,10 +182,8 @@ export default function Lobby() {
   const lobby = useLobbyData(code);
   const prevDistractorStatus = useRef(lobby?.distractorStatus);
 
-  // Auto-adjust split ratio when game starts/ends
   useEffect(() => {
     if (lobby?.status === "waiting") {
-      // Reset to default when back in waiting room
       setSplitRatio(0.5);
     }
   }, [lobby?.status]);
@@ -199,7 +193,6 @@ export default function Lobby() {
       if (!user || !trackedSetId) return;
 
       try {
-        // Delete old flashcards
         const { error: deleteError } = await supabase
           .from("flashcards")
           .delete()
@@ -207,7 +200,6 @@ export default function Lobby() {
 
         if (deleteError) throw deleteError;
 
-        // Insert new flashcards
         const flashcardsToInsert = lobby!.flashcards.map((card, index) => ({
           set_id: trackedSetId,
           term: card.question,
@@ -226,7 +218,6 @@ export default function Lobby() {
 
         if (insertError) throw insertError;
 
-        // Update local state
         setIsSaved(true);
         setRefreshTrigger((prev) => prev + 1);
       } catch (err) {
@@ -244,46 +235,28 @@ export default function Lobby() {
     prevDistractorStatus.current = lobby?.distractorStatus;
   }, [lobby?.distractorStatus, user, trackedSetId, lobby]);
 
-  // Track the previous flashcard ID to detect external changes
   const prevFlashcardIdRef = useRef(lobby?.flashcardID);
 
-  // Sync trackedSetId with lobby.flashcardID
-  // This runs for ALL clients (including non-leaders) when flashcards are updated
   useEffect(() => {
-    // Always sync trackedSetId with lobby's flashcardID to ensure non-leaders
-    // stay in sync after leadership transfers and when sets are loaded by new leader
     if (lobby?.flashcardID !== undefined) {
-      // Update trackedSetId to match lobby state (handles both set and clear)
       setTrackedSetId(lobby.flashcardID || null);
-      
-      // Clear stale local state when flashcard set changes from an external source
-      // (e.g., when another user loads a new set after leadership transfer)
-      // This ensures the UI uses lobby data instead of stale local state
+
       const flashcardIdChanged = lobby.flashcardID !== prevFlashcardIdRef.current;
       if (flashcardIdChanged) {
         prevFlashcardIdRef.current = lobby.flashcardID;
-        
-        // Only clear publicSetInfo if it's stale (doesn't match the new lobby flashcardID)
-        // This preserves the leader's publicSetInfo when they load a set themselves
+
         setPublicSetInfo(prev => {
           if (prev && prev.id !== lobby.flashcardID) {
             return null;
           }
           return prev;
         });
-        
-        // Note: We don't clear lockedSettings here because:
-        // 1. It only affects the GameSettings UI for the current leader
-        // 2. The leader who loads a new set will set it via handlePublicSetLoaded
-        // 3. Non-leaders don't interact with locked settings
-        // 4. If an old leader becomes leader again, they'll load a new set anyway
       }
     }
   }, [lobby?.flashcardID]);
 
   const prevLobbyIdRef = useRef(lobby?.flashcardID);
 
-  // Check if current flashcard set is saved and if it needs update
   useEffect(() => {
     const checkSavedStatus = async () => {
       if (!trackedSetId || trackedSetId === "UNNAMED") {
@@ -292,25 +265,18 @@ export default function Lobby() {
         return;
       }
 
-      // Avoid checking while generating to prevent flickering
       if (lobby?.distractorStatus === "generating") {
         return;
       }
 
-      // Prevent flickering during set transition - only guard when the local state
-      // hasn't caught up yet. Once trackedSetId syncs, this condition becomes false.
-      // Note: This guard allows the effect to run normally for non-leaders who
-      // receive flashcard updates via socket after leadership transfer.
       if (
         lobby?.flashcardID &&
         lobby.flashcardID !== prevLobbyIdRef.current &&
         trackedSetId !== lobby.flashcardID
       ) {
-        // Set is transitioning but trackedSetId hasn't synced yet - wait for sync
         return;
       }
 
-      // 1. Check if it's a public set (no auth required)
       try {
         const { data: publicSet } = await supabase
           .from("public_flashcard_sets")
@@ -324,10 +290,8 @@ export default function Lobby() {
           return;
         }
       } catch {
-        // Ignore error, proceed to check private sets
       }
 
-      // 2. Check if it's a private set (auth required)
       if (!user) {
         setIsSaved(false);
         setIsPublicSet(false);
@@ -348,7 +312,6 @@ export default function Lobby() {
           return;
         }
 
-        // It is a private set
         setIsPublicSet(false);
 
         const lobbyHasGenerated = lobby?.flashcards.some(
@@ -360,7 +323,6 @@ export default function Lobby() {
           return;
         }
 
-        // Lobby has generated content, check if it matches DB
         const { data: generatedCards } = await supabase
           .from("flashcards")
           .select("term_generated, definition_generated")
@@ -386,12 +348,10 @@ export default function Lobby() {
     lobby?.flashcardID,
   ]);
 
-  // Update prevLobbyIdRef after checkSavedStatus
   useEffect(() => {
     prevLobbyIdRef.current = lobby?.flashcardID;
   }, [lobby?.flashcardID]);
 
-  // Update page title with lobby code
   useEffect(() => {
     if (code) {
       document.title = `RaceCard: ${code.toUpperCase()}`;
@@ -401,13 +361,10 @@ export default function Lobby() {
     };
   }, [code]);
 
-  // Checks if player user is the leader
   useEffect(() => {
     setIsLeader(lobby?.leader === socket.id);
   }, [lobby]);
 
-  // Memoize publicSetInfo to avoid re-creating the object on every render
-  // This prevents FlashcardStudy from resetting its state when unrelated settings change
   const flashcardStudyPublicSetInfo = useMemo(() => {
     if (!lobby) return null;
     return publicSetInfo ||
@@ -538,16 +495,12 @@ export default function Lobby() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative gap-6 select-none">
         <div className="flex flex-col items-center w-full max-w-md z-10">
-          {/* Title */}
           <h1 className="text-5xl md:text-6xl font-black text-coffee tracking-tighter mb-6 text-center">RaceCard</h1>
-          
-          {/* Card */}
+
           <div className="w-full perspective-1000">
             <div className="relative w-full">
-              {/* Under Card */}
               <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla -z-10"></div>
-              
-              {/* Top Card */}
+
               <div className="w-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6">
                 <div className="text-center">
                   <h2 className="text-2xl font-bold text-coffee">Join Lobby</h2>
@@ -585,7 +538,6 @@ export default function Lobby() {
 
   return (
     <div className="flex flex-col h-screen text-coffee font-executive overflow-hidden relative select-none">
-      {/* Global Tooltip */}
       {showTooltip && tooltipText && (
         <div
           className="fixed z-100 pointer-events-none px-2 py-1 bg-coffee text-vanilla text-xs font-bold rounded shadow-lg whitespace-nowrap"
@@ -671,7 +623,6 @@ export default function Lobby() {
                     <div
                       className={`flex items-center justify-center transition-colors duration-200 ${isDragging ? "text-coffee" : "text-coffee/20 group-hover:text-coffee"}`}
                     >
-                      {/* Minimalistic Drag Handle Icon */}
                       <svg
                         width="16"
                         height="16"
@@ -767,7 +718,6 @@ export default function Lobby() {
                 </div>
               ) : (
                 <>
-                  {/* Study section - render when in study mode or transitioning */}
                   {(currentSection === "study" || isTransitioning) && (
                     <div
                       ref={studyRef}
@@ -803,7 +753,6 @@ export default function Lobby() {
                     </div>
                   )}
 
-                  {/* All flashcards section - render when in all mode or transitioning */}
                   {(currentSection === "all" || isTransitioning) && canView && (
                     <div
                       ref={allCardsRef}

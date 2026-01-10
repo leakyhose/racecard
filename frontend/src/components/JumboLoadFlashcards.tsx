@@ -78,8 +78,7 @@ export function JumboLoadFlashcards({
   const [editingSet, setEditingSet] = useState<FlashcardSet | null>(null);
   const [showMyPublishedSets, setShowMyPublishedSets] = useState(false);
   const requestIdRef = useRef(0);
-  
-  // Pagination state
+
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -154,30 +153,25 @@ export function JumboLoadFlashcards({
         fetchError = result.error;
       }
 
-      // Check if this request is stale
       if (requestIdRef.current !== currentRequestId && currentRequestId !== 0) {
           return;
       }
-      
+
       if (fetchError) throw fetchError;
 
       if (data.length < PAGE_SIZE) {
         setHasMore(false);
       }
 
-      // Batch fetch flashcard counts and generation status to reduce queries
-      // Instead of 3 queries per set, use 1 query per set with aggregation
       const setIdField = activeTab === "personal" ? "set_id" : "public_set_id";
-      
-      // Single query to get counts and generation status for all sets at once
+
       const setsWithCounts = await Promise.all(
         (data || []).map(async (set) => {
-          // Combined query: get count and check for any generated cards in one go
           const { data: flashcardData, count } = await supabase
             .from("flashcards")
             .select("term_generated, definition_generated", { count: "exact" })
             .eq(setIdField, set.id)
-            .limit(1000); // Limit to avoid fetching too much data
+            .limit(1000);
 
           const hasTermGen = flashcardData?.some(f => f.term_generated) || false;
           const hasDefGen = flashcardData?.some(f => f.definition_generated) || false;
@@ -192,7 +186,6 @@ export function JumboLoadFlashcards({
         }),
       );
 
-      // Check again if this request is stale
       if (requestIdRef.current !== currentRequestId && currentRequestId !== 0) {
         return;
       }
@@ -332,7 +325,6 @@ export function JumboLoadFlashcards({
     }
 
     try {
-      // Delete flashcards first (foreign key constraint)
       const { error: deleteCardsError } = await supabase
         .from("flashcards")
         .delete()
@@ -340,7 +332,6 @@ export function JumboLoadFlashcards({
 
       if (deleteCardsError) throw deleteCardsError;
 
-      // Delete the set
       const { error: deleteSetError } = await supabase
         .from("flashcard_sets")
         .delete()
@@ -348,7 +339,6 @@ export function JumboLoadFlashcards({
 
       if (deleteSetError) throw deleteSetError;
 
-      // Refresh the list
       requestIdRef.current += 1;
       setPage(0);
       setHasMore(true);
@@ -401,7 +391,6 @@ export function JumboLoadFlashcards({
 
   return (
     <div className="flex flex-col h-full w-full relative">
-      {/* Header with Search Bar */}
       <div className="flex justify-between items-center pb-3 pt-2 border-b-2 border-coffee/50 px-6 shrink-0">
         <div className="w-1/4"></div>
         <div className="flex justify-center items-center w-2/4">
@@ -425,10 +414,6 @@ export function JumboLoadFlashcards({
         </div>
       </div>
 
-      {/* Search Bar for Community Tab - Removed as it's now in header */}
-
-
-      {/* Content */}
       <div
         className="mx-3 flex-1 overflow-y-auto overflow-x-hidden p-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-coffee/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-coffee/40"
         onScroll={handleScroll}
@@ -447,7 +432,6 @@ export function JumboLoadFlashcards({
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 pb-6">
-            {/* Random Set Card */}
             {activeTab === "community" && !submittedQuery && (
               <div
                 onClick={handleRandom}
@@ -455,7 +439,6 @@ export function JumboLoadFlashcards({
                   loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                 } ${shakingSetId === "random" ? "animate-shake" : ""}`}
               >
-                {/* Under Card */}
                 <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                   <div className={`text-center text-[9px] font-bold tracking-[0.2em] ${shakingSetId === "random" ? "text-terracotta" : "text-coffee/80"}`}>
                     {shakingSetId === "random"
@@ -464,7 +447,6 @@ export function JumboLoadFlashcards({
                   </div>
                 </div>
 
-                {/* Top Card */}
                 <div
                   className={`h-full w-full transition-transform duration-300 ease-out ${
                     !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
@@ -502,7 +484,6 @@ export function JumboLoadFlashcards({
                   loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                 } ${shakingSetId === set.id ? "animate-shake" : ""}`}
               >
-                {/* Under Card */}
                 <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla/50 shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                   <div
                     className={`text-center text-[9px] font-bold tracking-[0.2em] ${
@@ -513,7 +494,6 @@ export function JumboLoadFlashcards({
                   </div>
                 </div>
 
-                {/* Top Card */}
                 <div
                   className={`h-full w-full transition-transform duration-300 ease-out ${
                     !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
@@ -522,7 +502,6 @@ export function JumboLoadFlashcards({
                   <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
                     <div className={`absolute inset-0 bg-light-vanilla/20 ${activeTab === "community" ? "shadow-[inset_0_0_0_2px_var(--color-terracotta)]" : "shadow-[inset_0_0_0_2px_var(--color-powder)]"} rounded-[18px]`} />
                     <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
-                      {/* Content Container */}
                       <div className="flex-1 flex flex-col items-center justify-center w-full gap-2">
                         {activeTab === "community" &&
                           set.user_id ===
@@ -559,7 +538,6 @@ export function JumboLoadFlashcards({
                               </p>
                             )}
                         </div>
-                        {/* Action Buttons (Only for Personal) */}
                         {activeTab === "personal" && (
                           <div
                             className="flex items-center gap-3 mt-2 z-20"

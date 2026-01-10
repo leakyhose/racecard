@@ -104,7 +104,6 @@ export function LobbyHeader({
     socket.emit("generateMultipleChoice", mode);
   };
 
-  // Check if all flashcards have generated MC options
   const allCardsGenerated =
     lobby.flashcards.length > 0 &&
     lobby.flashcards.every((card) =>
@@ -259,9 +258,7 @@ export function LobbyHeader({
                   }
                 />
 
-                {/* Track */}
                 <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-                  {/* Knob */}
                   <div
                     className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
                   ></div>
@@ -440,9 +437,7 @@ export function LobbyHeader({
                   }
                 />
 
-                {/* Track */}
                 <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-                  {/* Knob */}
                   <div
                     className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
                   ></div>

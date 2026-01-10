@@ -39,15 +39,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading, setLoading] = useState(true);
   const [needsUsername, setNeedsUsername] = useState(false);
 
-  // Check if user needs to set a username (for OAuth users)
   const checkNeedsUsername = async (currentUser: User) => {
-    // If user already has a username in metadata, they don't need one
     if (currentUser.user_metadata?.username) {
       setNeedsUsername(false);
       return;
     }
 
-    // Check if profile exists in profiles table
     const { data: profile } = await supabase
       .from("profiles")
       .select("username")
@@ -55,7 +52,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       .maybeSingle();
 
     if (profile?.username) {
-      // Profile exists, update user metadata
       await supabase.auth.updateUser({
         data: { username: profile.username },
       });
@@ -63,12 +59,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return;
     }
 
-    // User needs to set a username
     setNeedsUsername(true);
   };
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -78,7 +72,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -95,7 +88,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signUp = async (email: string, password: string, username: string) => {
-    // Check if username exists
     const { data: existingUser } = await supabase
       .from("profiles")
       .select("username")
@@ -152,7 +144,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    // Check if username exists
     const { data: existingUser } = await supabase
       .from("profiles")
       .select("username")
@@ -169,7 +160,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    // Create profile with username
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({ id: user.id, username: username });
@@ -184,14 +174,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       };
     }
 
-    // Update user metadata
     const { error } = await supabase.auth.updateUser({
       data: { username },
     });
 
     if (!error) {
       setNeedsUsername(false);
-      // Refresh user data
       const { data: { user: updatedUser } } = await supabase.auth.getUser();
       setUser(updatedUser);
     }
@@ -205,7 +193,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error("Error signing out:", error);
     } finally {
-      // Force state clear to ensure UI updates
       setSession(null);
       setUser(null);
     }
@@ -213,7 +200,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const updateProfile = async (data: { username?: string }) => {
     if (data.username) {
-      // Check if username exists (excluding current user)
       const { data: existingUser } = await supabase
         .from("profiles")
         .select("username")
@@ -231,7 +217,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         };
       }
 
-      // Update profiles table
       if (user) {
         const { error: profileError } = await supabase
           .from("profiles")
@@ -252,7 +237,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const { error } = await supabase.auth.updateUser({
       data: data,
     });
-    // Manually update local state if successful to reflect changes immediately
     if (!error && user) {
       const {
         data: { user: updatedUser },

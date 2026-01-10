@@ -34,7 +34,6 @@ export function EditFlashcardsModal({
   const [totalCount, setTotalCount] = useState(0);
   const [showExport, setShowExport] = useState(false);
 
-  // Pagination state
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);

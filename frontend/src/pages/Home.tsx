@@ -114,10 +114,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 overflow-hidden relative gap-8 select-none">
-      {/* Username Modal for OAuth users */}
       <UsernameModal />
-      
-      {/* Auth Buttons */}
+
       {user ? (
         <div className="absolute top-4 right-4 flex items-center gap-4 z-20">
           <span className="text-sm text-coffee font-bold hidden sm:inline">
@@ -145,19 +143,12 @@ export default function Home() {
         </div>
       )}
 
-
-
-      {/* Main Content Column */}
       <div className="flex flex-col items-center w-full max-w-md z-10">
-        {/* RaceCat */}
         <img src="/images/racecat.png" alt="RaceCat" className="w-48 md:w-64 lg:w-120 object-contain mb-2" />
-        
-        {/* Title */}
+
         <h1 className="text-6xl md:text-8xl font-black text-coffee tracking-tighter mb-8 text-center">RaceCard</h1>
 
-        {/* Toggle & Form Container */}
         <div className="w-full flex flex-col items-center space-y-6">
-           {/* Toggle */}
            <div className="flex items-center gap-4 text-coffee font-bold text-xl">
               <span 
                 className={`transition-opacity duration-300 cursor-pointer ${!isCreateMode ? "opacity-100" : "opacity-50"}`}
@@ -173,9 +164,7 @@ export default function Home() {
                   checked={isCreateMode}
                   onChange={() => setIsCreateMode(!isCreateMode)}
                 />
-                {/* Track */}
                 <div className="w-14 h-6 bg-terracotta border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-                  {/* Knob */}
                   <div
                     className={`absolute h-6 w-6 bg-vanilla border-2 border-coffee rounded-md shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -top-[5px] -left-0.5 group-hover:-translate-y-[0.09rem] ${isCreateMode ? "translate-x-8" : ""}`}
                   ></div>
@@ -190,16 +179,12 @@ export default function Home() {
               </span>
            </div>
 
-           {/* Flipping Card Area */}
            <div className="w-full aspect-4/3 perspective-1000">
               <div className={`relative w-full h-full transition-transform duration-700 transform-3d ${isCreateMode ? 'rotate-y-180' : ''}`}>
-                 
-                 {/* Front: Join */}
+
                  <div className="absolute inset-0 backface-hidden w-full h-full">
-                    {/* Under Card */}
                     <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla flex items-end justify-center pb-1 -z-10"></div>
-                    
-                    {/* Top Card */}
+
                     <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6">
                         <h2 className="text-3xl font-bold text-coffee">Join a Race</h2>
                         <div className="w-full space-y-4">
@@ -230,12 +215,9 @@ export default function Home() {
                     </div>
                  </div>
 
-                 {/* Back: Create */}
                  <div className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full">
-                    {/* Under Card */}
                     <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla flex items-end justify-center pb-1 -z-10"></div>
-                    
-                    {/* Top Card */}
+
                     <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-6">
                         <h2 className="text-3xl font-bold text-coffee">Start a New Race</h2>
                         <div className="w-full space-y-4">

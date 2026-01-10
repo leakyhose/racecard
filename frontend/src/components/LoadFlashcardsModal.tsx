@@ -73,17 +73,14 @@ export function LoadFlashcardsModal({
   const mouseDownOnBackdrop = useRef(false);
   const prevRefreshTrigger = useRef(refreshTrigger);
 
-  // Pagination state
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const PAGE_SIZE = 20;
 
-  // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
 
-  // Request ID to prevent stale responses from updating state
   const requestIdRef = useRef(0);
 
   useEffect(() => {
@@ -92,7 +89,6 @@ export function LoadFlashcardsModal({
     }
   }, [isOpen, initialTab]);
 
-  // Clear sets immediately when tab changes to prevent mixing
   useEffect(() => {
     setSets([]);
     setPage(0);
@@ -177,7 +173,6 @@ export function LoadFlashcardsModal({
         fetchError = result.error;
       }
 
-      // Check if this request is stale (tab changed during fetch)
       if (requestIdRef.current !== currentRequestId) {
         return;
       }
@@ -188,11 +183,9 @@ export function LoadFlashcardsModal({
         setHasMore(false);
       }
 
-      // Optimized: combine count and generation check into single query per set (3 queries -> 1)
       const setIdField = tab === "personal" ? "set_id" : "public_set_id";
       const setsWithCounts = await Promise.all(
         (data || []).map(async (set) => {
-          // Single query to get count and check for generated cards
           const { data: flashcardData, count } = await supabase
             .from("flashcards")
             .select("term_generated, definition_generated", { count: "exact" })
@@ -212,7 +205,6 @@ export function LoadFlashcardsModal({
         }),
       );
 
-      // Check again if this request is stale after all the async work
       if (requestIdRef.current !== currentRequestId) {
         return;
       }
@@ -223,13 +215,11 @@ export function LoadFlashcardsModal({
         setSets((prev) => [...prev, ...setsWithCounts]);
       }
     } catch (err) {
-      // Only show error if this request is still current
       if (requestIdRef.current === currentRequestId) {
         console.error(err);
         setError("Failed to load flashcard sets");
       }
     } finally {
-      // Only update loading state if this request is still current
       if (requestIdRef.current === currentRequestId) {
         setLoading(false);
         setIsLoadingMore(false);
@@ -247,15 +237,12 @@ export function LoadFlashcardsModal({
   useEffect(() => {
     if (isOpen) {
       const isRefresh = refreshTrigger !== prevRefreshTrigger.current;
-      // Increment request ID to invalidate any in-flight requests
       requestIdRef.current += 1;
       const currentRequestId = requestIdRef.current;
       
-      // Reset pagination state
       setPage(0);
       setHasMore(true);
       
-      // Fetch with current tab and request ID
       fetchSets(activeTab, 0, true, currentRequestId);
       
       if (isRefresh) {
@@ -275,7 +262,6 @@ export function LoadFlashcardsModal({
     ) {
       const nextPage = page + 1;
       setPage(nextPage);
-      // Use the current request ID for pagination
       fetchSets(activeTab, nextPage, false, requestIdRef.current);
     }
   };
@@ -314,7 +300,7 @@ export function LoadFlashcardsModal({
           )
           .eq("set_id", setId)
           .order("order_index", { ascending: true })
-          .order("id", { ascending: true }) // Fallback for old cards
+          .order("id", { ascending: true })
           .range(page * pageSize, (page + 1) * pageSize - 1);
 
         if (fetchError) throw fetchError;
@@ -336,7 +322,6 @@ export function LoadFlashcardsModal({
         return;
       }
 
-      // Convert to Flashcard format and send to server
       const flashcards: Flashcard[] = allData.map((card, index) => ({
         id: index.toString(),
         question: card.term,
@@ -429,7 +414,7 @@ export function LoadFlashcardsModal({
     }
 
     try {
-      // Delete flashcards first (foreign key constraint)
+      // FK constraint
       const { error: deleteCardsError } = await supabase
         .from("flashcards")
         .delete()
@@ -437,7 +422,6 @@ export function LoadFlashcardsModal({
 
       if (deleteCardsError) throw deleteCardsError;
 
-      // Delete the set
       const { error: deleteSetError } = await supabase
         .from("flashcard_sets")
         .delete()
@@ -445,7 +429,6 @@ export function LoadFlashcardsModal({
 
       if (deleteSetError) throw deleteSetError;
 
-      // Refresh the list
       requestIdRef.current += 1;
       setPage(0);
       setHasMore(true);
@@ -482,10 +465,8 @@ export function LoadFlashcardsModal({
         }}
       >
         <div className={`flex justify-between items-center pb-6 shrink-0`}>
-          {/* Left spacer for centering */}
           <div className="w-48 shrink-0"></div>
 
-          {/* Center tabs */}
           <div className="flex justify-center items-center gap-6">
           <button
             className={`tab-btn left-arrow ${activeTab === "personal" ? "active" : ""}`}
@@ -518,9 +499,7 @@ export function LoadFlashcardsModal({
               }
             />
 
-            {/* Track */}
             <div className="w-10 h-4 bg-terracotta/90 border-2 border-coffee rounded-[5px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder box-border relative group">
-              {/* Knob */}
               <div
                 className={`absolute h-4 w-4 bg-vanilla border-2 border-coffee rounded-[5px] shadow-[0px_3px_0px_0px_var(--color-coffee)] group-hover:shadow-[0px_5px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 bottom-[0.75px] group-hover:-translate-y-[0.09rem] ${activeTab === "community" ? "translate-x-[25px]" : ""}`}
               ></div>
@@ -547,7 +526,6 @@ export function LoadFlashcardsModal({
           </button>
           </div>
 
-          {/* Right button */}
           <div className="w-48 shrink-0 flex justify-end">
             {user && (
               <button
@@ -560,7 +538,6 @@ export function LoadFlashcardsModal({
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="pb-4 flex justify-center border-b-3 border-coffee gap-2 w-full items-center">
             <input
               type="text"
@@ -595,7 +572,6 @@ export function LoadFlashcardsModal({
         ) : (
           <div className="flex-1 overflow-y-auto pr-2" onScroll={handleScroll}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 pt-6 pb-6 px-2">
-            {/* Random Set Card */}
             {activeTab === "community" && !submittedQuery && (
               <div
                 onClick={handleRandom}
@@ -603,7 +579,6 @@ export function LoadFlashcardsModal({
                   loadingSetId ? "cursor-not-allowed opacity-70" : "cursor-pointer"
                 } ${shakingId === "random" ? "animate-shake" : ""}`}
               >
-                {/* Under Card */}
                 <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                   <div className={`text-center text-[9px] font-bold tracking-[0.2em] ${shakingId === "random" ? "text-terracotta" : "text-coffee/80"}`}>
                     {shakingId === "random"
@@ -612,7 +587,6 @@ export function LoadFlashcardsModal({
                   </div>
                 </div>
 
-                {/* Top Card */}
                 <div
                   className={`h-full w-full transition-transform duration-300 ease-out ${
                     !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
@@ -658,7 +632,6 @@ export function LoadFlashcardsModal({
                       : "cursor-pointer"
                   } ${shakingId === set.id ? "animate-shake" : ""}`}
                 >
-                  {/* Under Card */}
                   <div className="absolute inset-0 rounded-[20px] border-2 border-coffee bg-vanilla shadow-[0_0_10px_rgba(0,0,0,0.2)] flex items-end justify-center pb-0 -z-10">
                     <div
                       className={`text-center text-[9px] font-bold tracking-[0.2em] ${
@@ -673,7 +646,6 @@ export function LoadFlashcardsModal({
                     </div>
                   </div>
 
-                  {/* Top Card */}
                   <div
                     className={`h-full w-full transition-transform duration-300 ease-out ${
                       !loadingSetId ? "group-hover:-translate-y-[15px]" : ""
@@ -682,7 +654,6 @@ export function LoadFlashcardsModal({
                     <div className="relative h-full w-full rounded-[20px] border-2 border-coffee bg-vanilla overflow-hidden">
                       <div className={`absolute inset-0 ${activeTab === "community" ? "shadow-[inset_0_0_0_2px_var(--color-terracotta)]" : "shadow-[inset_0_0_0_3px_var(--color-powder)]"} rounded-[18px]`} />
                       <div className="relative h-full w-full p-6 flex flex-col items-center justify-between text-center">
-                        {/* Content Container */}
                         <div className="flex-1 flex flex-col items-center justify-center w-full gap-2 overflow-hidden">
                           {activeTab === "community" &&
                             set.user_id ===
@@ -728,7 +699,6 @@ export function LoadFlashcardsModal({
                           )}
                         </div>
 
-                        {/* Action Buttons (Only for Personal) */}
                         {activeTab === "personal" && (
                           <div
                             className="flex items-center gap-3 mt-2 z-20"

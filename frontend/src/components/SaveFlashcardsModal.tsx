@@ -67,7 +67,6 @@ export function SaveFlashcardsModal({
     setError("");
 
     try {
-      // Insert the flashcard set
       const { data: setData, error: setError } = await supabase
         .from("flashcard_sets")
         .insert({
@@ -79,7 +78,6 @@ export function SaveFlashcardsModal({
 
       if (setError) throw setError;
 
-      // Insert all flashcards
       const flashcardsToInsert = flashcards.map((card, index) => ({
         set_id: setData.id,
         term: card.question,
@@ -92,7 +90,7 @@ export function SaveFlashcardsModal({
         order_index: index,
       }));
 
-      // Batch insert in chunks of 100 to avoid payload limits
+      // Batch to avoid payload limits
       const BATCH_SIZE = 100;
       for (let i = 0; i < flashcardsToInsert.length; i += BATCH_SIZE) {
         const batch = flashcardsToInsert.slice(i, i + BATCH_SIZE);
