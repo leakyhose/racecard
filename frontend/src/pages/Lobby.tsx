@@ -290,6 +290,7 @@ export default function Lobby() {
           return;
         }
       } catch {
+        // Not a public set
       }
 
       if (!user) {
