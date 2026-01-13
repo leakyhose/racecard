@@ -33,6 +33,10 @@ export default function Lobby() {
   const [nicknameInput, setNicknameInput] = useState("");
   const [isLeader, setIsLeader] = useState(false);
 
+  // Mobile sidebar states
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+
   useEffect(() => {
     if (user?.user_metadata?.username && !nickname) {
       setNicknameInput(user.user_metadata.username);
@@ -550,6 +554,18 @@ export default function Lobby() {
           {tooltipText}
         </div>
       )}
+
+      {/* Mobile sidebar overlays */}
+      {(leftSidebarOpen || rightSidebarOpen) && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          onClick={() => {
+            setLeftSidebarOpen(false);
+            setRightSidebarOpen(false);
+          }}
+        />
+      )}
+
       <div className="relative z-20">
         <LobbyHeader
           code={code!}
@@ -565,11 +581,50 @@ export default function Lobby() {
           onPublicSetLoaded={handlePublicSetLoaded}
         />
       </div>
-      <div className="flex flex-1 min-h-0 border-coffee">
+      <div className="flex flex-1 min-h-0 border-coffee relative">
+        {/* Left sidebar toggle button - mobile only */}
+        <button
+          onClick={() => setLeftSidebarOpen(!leftSidebarOpen)}
+          className="md:hidden fixed left-0 top-1/2 -translate-y-1/2 z-50 p-1 text-coffee/40 hover:text-coffee transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-200 ${leftSidebarOpen ? 'rotate-180' : ''}`}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+
+        {/* Left sidebar */}
         <div
           ref={sidebarRef}
-          className="w-65 flex flex-col h-full overflow-hidden relative"
+          className={`
+            md:w-65 md:relative md:translate-x-0 md:shadow-none md:border-r-0 md:bg-transparent
+            fixed left-0 top-0 h-full w-72 bg-vanilla z-50
+            transform transition-transform duration-300 ease-out
+            shadow-[4px_0_10px_rgba(0,0,0,0.1)] border-r-2 border-coffee
+            ${leftSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            flex flex-col overflow-hidden pt-10 md:pt-0
+          `}
         >
+          {/* Mobile close button */}
+          <button
+            onClick={() => setLeftSidebarOpen(false)}
+            className="md:hidden absolute top-2 right-2 z-10 w-8 h-8 flex items-center justify-center text-coffee/50 hover:text-coffee"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+
           {lobby.status === "waiting" ? (
             hasFlashcards ? (
               <>
@@ -787,7 +842,48 @@ export default function Lobby() {
           )}
         </div>
 
-        <div className="w-65 flex flex-col p-4">
+        {/* Right sidebar toggle button - mobile only */}
+        <button
+          onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+          className="md:hidden fixed right-0 top-1/2 -translate-y-1/2 z-50 p-1 text-coffee/40 hover:text-coffee transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-200 ${rightSidebarOpen ? '' : 'rotate-180'}`}
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+
+        {/* Right sidebar */}
+        <div 
+          className={`
+            md:w-65 md:relative md:translate-x-0 md:shadow-none md:border-l-0 md:bg-transparent
+            fixed right-0 top-0 h-full w-72 bg-vanilla z-50
+            transform transition-transform duration-300 ease-out
+            shadow-[-4px_0_10px_rgba(0,0,0,0.1)] border-l-2 border-coffee
+            ${rightSidebarOpen ? 'translate-x-0' : 'translate-x-full'}
+            flex flex-col p-4 pt-10 md:pt-4
+          `}
+        >
+          {/* Mobile close button */}
+          <button
+            onClick={() => setRightSidebarOpen(false)}
+            className="md:hidden absolute top-2 left-2 z-10 w-8 h-8 flex items-center justify-center text-coffee/50 hover:text-coffee"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+
           <Players
             players={lobby.players}
             gameStatus={lobby.status}

@@ -117,8 +117,8 @@ export default function Home() {
       <UsernameModal />
 
       {/* Social Icons */}
-      <div className="absolute top-4 left-4 flex items-center gap-3 z-20">
-        <div className="flex items-center gap-2">
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 flex items-center gap-1.5 sm:gap-3 z-20">
+        <div className="flex items-center gap-1 sm:gap-2">
           <a
             href="https://github.com/leakyhose"
             target="_blank"
@@ -128,8 +128,7 @@ export default function Home() {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              className="w-5 h-5 sm:w-6 sm:h-6"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -149,8 +148,7 @@ export default function Home() {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
+              className="w-5 h-5 sm:w-6 sm:h-6"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -164,11 +162,10 @@ export default function Home() {
             </svg>
           </a>
         </div>
-        <div className="flex items-center gap-1 text-coffee/70">
+        <div className="hidden min-[400px]:flex items-center gap-1 text-coffee/70">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            className="w-3 h-3 sm:w-4 sm:h-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -178,31 +175,31 @@ export default function Home() {
           >
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
-          <span className="text-sm font-medium">Check me out!</span>
+          <span className="text-xs sm:text-sm font-medium">Check me out!</span>
         </div>
       </div>
 
       {user ? (
-        <div className="absolute top-4 right-4 flex items-center gap-4 z-20">
-          <span className="text-sm text-coffee font-bold hidden sm:inline">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-2 sm:gap-4 z-20">
+          <span className="text-xs sm:text-sm text-coffee font-bold hidden sm:inline">
             {user.user_metadata.username || user.email}
           </span>
           <button
             onClick={signOut}
             className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none"
           >
-            <span className="block rounded-md border-2 border-coffee px-3 py-1 font-bold text-xs text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+            <span className="block rounded-md border-2 border-coffee px-2 py-0.5 sm:px-3 sm:py-1 font-bold text-[10px] sm:text-xs text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
               Sign Out
             </span>
           </button>
         </div>
       ) : (
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
           <button
             onClick={() => navigate("/auth")}
             className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none"
           >
-            <span className="block rounded-md border-2 border-coffee px-4 py-2 font-bold text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+            <span className="block rounded-md border-2 border-coffee px-2 py-1 sm:px-4 sm:py-2 font-bold text-xs sm:text-base text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
               Sign In
             </span>
           </button>
@@ -251,22 +248,22 @@ export default function Home() {
                  <div className="absolute inset-0 backface-hidden w-full h-full">
                     <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla flex items-end justify-center pb-1 -z-10"></div>
 
-                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-6">
-                        <h2 className="text-3xl font-bold text-coffee">Join a Race</h2>
-                        <div className="w-full space-y-4">
+                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-4 sm:p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-terracotta)] flex flex-col items-center justify-center gap-3 sm:gap-6">
+                        <h2 className="text-xl sm:text-3xl font-bold text-coffee">Join a Race</h2>
+                        <div className="w-full space-y-2 sm:space-y-4">
                             <input
                               type="text"
                               placeholder="Nickname"
                               value={nickname}
                               onChange={(e) => setNickname(e.target.value)}
-                              className="w-full p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-terracotta font-bold text-coffee"
+                              className="w-full p-2 sm:p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-terracotta font-bold text-coffee text-sm sm:text-base"
                             />
                             <input
                               type="text"
                               placeholder="Lobby Code"
                               value={codeInput}
                               onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-                              className="w-full p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-terracotta uppercase font-bold text-coffee"
+                              className="w-full p-2 sm:p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-terracotta uppercase font-bold text-coffee text-sm sm:text-base"
                             />
                         </div>
                         <button
@@ -274,7 +271,7 @@ export default function Home() {
                           disabled={joiningLobby}
                           className="group relative w-full rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <span className="block w-full h-full rounded-md border-2 border-coffee px-2 py-3 font-bold text-lg text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                          <span className="block w-full h-full rounded-md border-2 border-coffee px-2 py-2 sm:py-3 font-bold text-base sm:text-lg text-vanilla bg-terracotta -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
                             {joiningLobby ? "Joining..." : "Join Lobby"}
                           </span>
                         </button>
@@ -284,17 +281,17 @@ export default function Home() {
                  <div className="absolute inset-0 backface-hidden rotate-y-180 w-full h-full">
                     <div className="shadow-[0_0_10px_rgba(0,0,0,0.2)] border-2 border-coffee absolute inset-0 rounded-[10px] bg-vanilla flex items-end justify-center pb-1 -z-10"></div>
 
-                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-6">
-                        <h2 className="text-3xl font-bold text-coffee">Start a New Race</h2>
-                        <div className="w-full space-y-4">
+                    <div className="w-full h-full border-2 border-coffee bg-vanilla p-4 sm:p-8 rounded-[10px] shadow-[inset_0_0_0_3px_var(--color-powder)] flex flex-col items-center justify-center gap-3 sm:gap-6">
+                        <h2 className="text-xl sm:text-3xl font-bold text-coffee">Start a New Race</h2>
+                        <div className="w-full space-y-2 sm:space-y-4">
                             <input
                               type="text"
                               placeholder="Nickname"
                               value={nickname}
                               onChange={(e) => setNickname(e.target.value)}
-                              className="w-full p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-powder font-bold text-coffee"
+                              className="w-full p-2 sm:p-3 border-2 border-coffee rounded-md bg-white placeholder-coffee/50 focus:outline-none focus:ring-2 focus:ring-powder font-bold text-coffee text-sm sm:text-base"
                             />
-                            <div className="text-base text-coffee/70 text-center font-medium">
+                            <div className="text-sm sm:text-base text-coffee/70 text-center font-medium">
                                 Create a lobby then invite friends.
                             </div>
                         </div>
@@ -303,7 +300,7 @@ export default function Home() {
                           disabled={creatingLobby}
                           className="group relative w-full rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <span className="block w-full h-full rounded-md border-2 border-coffee px-2 py-3 font-bold text-lg text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                          <span className="block w-full h-full rounded-md border-2 border-coffee px-2 py-2 sm:py-3 font-bold text-base sm:text-lg text-coffee bg-powder -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
                             {creatingLobby ? "Creating..." : "Create Lobby"}
                           </span>
                         </button>

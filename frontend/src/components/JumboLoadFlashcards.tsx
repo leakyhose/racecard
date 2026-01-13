@@ -408,7 +408,8 @@ export function JumboLoadFlashcards({
               onClick={() => setShowMyPublishedSets(true)}
               className="text-xs font-bold text-coffee hover:text-terracotta underline decoration-2 underline-offset-2 whitespace-nowrap"
             >
-              View my published cards
+              <span className="hidden sm:inline">View my published</span>
+              <span className="sm:hidden">Published</span>
             </button>
           )}
         </div>

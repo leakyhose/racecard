@@ -168,15 +168,15 @@ export function LobbyHeader({
   };
 
   return (
-    <div className="flex justify-between relative px-4 py-3 items-center text-coffee">
-      <div className="flex flex-row items-center">
+    <div className="flex justify-between relative px-2 sm:px-4 py-2 sm:py-3 items-center text-coffee">
+      <div className="flex flex-row items-center min-w-0 flex-shrink">
         <div
           onClick={handleCopyCode}
-          className="font-bold text-2xl tracking-widest cursor-pointer flex items-center gap-2 group relative select-none"
+          className="font-bold text-base sm:text-2xl tracking-wider sm:tracking-widest cursor-pointer flex items-center gap-1 sm:gap-2 group relative select-none"
           title="Click to copy link"
         >
-          <span>RaceCard.io/{code}</span>
-          <div className="relative flex items-center justify-center w-5 h-5">
+          <span className="truncate">RaceCard.io/{code}</span>
+          <div className="relative flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -185,7 +185,7 @@ export function LobbyHeader({
               strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`absolute inset-0 w-5 h-5 text-terracotta transition-opacity duration-300 ${
+              className={`absolute inset-0 w-4 h-4 sm:w-5 sm:h-5 text-terracotta transition-opacity duration-300 ${
                 showCopyMessage ? "opacity-100" : "opacity-0"
               }`}
             >
@@ -199,7 +199,7 @@ export function LobbyHeader({
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={`absolute inset-0 w-5 h-5 transition-opacity duration-300 ${
+              className={`absolute inset-0 w-4 h-4 sm:w-5 sm:h-5 transition-opacity duration-300 ${
                 showCopyMessage
                   ? "opacity-0"
                   : "opacity-50"
@@ -212,7 +212,82 @@ export function LobbyHeader({
         </div>
       </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 text-coffee">
+      {/* Mobile center content - simplified */}
+      <div className="flex-1 flex justify-center text-coffee md:hidden">
+        {isGenerating ? (
+          <div className="font-bold text-xs tracking-wide text-center px-2">
+            {(!lobby.generationProgress ||
+              !lobby.generationProgress.toLowerCase().includes("batch")) ? (
+              <span className="text-coffee">Generating...</span>
+            ) : (
+              <span className="text-coffee">
+                {lobby.generationProgress.replace("batches complete", "Batches")}
+              </span>
+            )}
+          </div>
+        ) : lobby.flashcards.length == 0 ? (
+          <div className="flex items-center gap-2">
+            <span 
+              className={`text-xs font-bold cursor-pointer ${activeTab === "personal" ? "text-coffee" : "text-coffee/40"}`}
+              onClick={() => onTabChange?.("personal")}
+            >
+              Private
+            </span>
+            <label className="relative inline-flex items-center cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={activeTab === "community"}
+                onChange={() =>
+                  onTabChange?.(activeTab === "personal" ? "community" : "personal")
+                }
+              />
+              <div className="w-8 h-3 bg-terracotta/90 border border-coffee rounded-[3px] shadow-[1px_1px_0px_0px_var(--color-coffee)] transition-colors duration-300 peer-checked:bg-powder relative">
+                <div
+                  className={`absolute h-3 w-3 bg-vanilla border border-coffee rounded-[3px] shadow-[0px_2px_0px_0px_var(--color-coffee)] transition-all duration-300 -left-0.5 -top-[3px] ${activeTab === "community" ? "translate-x-[20px]" : ""}`}
+                ></div>
+              </div>
+            </label>
+            <span 
+              className={`text-xs font-bold cursor-pointer ${activeTab === "community" ? "text-coffee" : "text-coffee/40"}`}
+              onClick={() => onTabChange?.("community")}
+            >
+              Public
+            </span>
+          </div>
+        ) : lobby.status === "waiting" && !isGenerating ? (
+          <div className="flex items-center gap-2">
+            {needsGeneration && !isPublicSet && isLeader ? (
+              <button
+                onClick={canGenerate ? handleOpenGenerateModal : undefined}
+                disabled={isGenerating || !canGenerate || isSetLoading || isLoadingRandom}
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="block rounded-md border-2 border-coffee px-2 py-0.5 font-bold text-coffee bg-mint text-xs -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                  Generate
+                </span>
+              </button>
+            ) : isLeader ? (
+              <button
+                onClick={handleStartGame}
+                disabled={isGenerating || isSetLoading || isLoadingRandom}
+                className="group relative rounded-md bg-coffee border-none p-0 cursor-pointer outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="block rounded-md border-2 border-coffee px-3 py-0.5 font-bold text-vanilla bg-terracotta text-xs -translate-y-[0.05rem] transition-transform duration-100 ease-out group-hover:-translate-y-[0.175rem] group-active:translate-y-0">
+                  Start
+                </span>
+              </button>
+            ) : null}
+          </div>
+        ) : lobby.status === "ongoing" ? (
+          <span className="font-bold text-lg">{timeLeft !== null ? timeLeft : ""}</span>
+        ) : lobby.status === "finished" ? (
+          <span className="font-bold text-xs">Finished</span>
+        ) : null}
+      </div>
+
+      {/* Desktop center content */}
+      <div className="absolute left-1/2 -translate-x-1/2 text-coffee hidden md:block">
         {isGenerating ? (
           <div className="font-bold text-lg tracking-wide flex flex-col items-center gap-2">
             {(!lobby.generationProgress ||
