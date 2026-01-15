@@ -1,4 +1,4 @@
-# Flashcard
+# RaceCard
 
 A web-based flashcard application with multiplayer game support.
 
