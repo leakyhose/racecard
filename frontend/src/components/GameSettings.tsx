@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { Settings, Lobby } from "@shared/types";
-import { socket } from "../socket";
 
 interface GameSettingsProps {
   isLeader: boolean;
