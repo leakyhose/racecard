@@ -108,10 +108,8 @@ async function generateDistractors(
           ["human", JSON.stringify(inputData)],
         ]);
 
-        // Validate with Zod (already done by withStructuredOutput, but we can double-check)
         const parsed = DistractorResponseSchema.parse(response);
 
-        // Map results by ID
         const responseMap = new Map<string, string[]>();
         for (const item of parsed.results) {
           responseMap.set(item.id, item.distractors);
