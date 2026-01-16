@@ -59,7 +59,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50 bg-coffee/50 cursor-not-allowed"
+      className="fixed inset-0 flex items-center justify-center z-[100] bg-coffee/50 cursor-not-allowed"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) {
           mouseDownOnBackdrop.current = true;
@@ -92,7 +92,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
         <div className="flex flex-1 gap-8 overflow-hidden text-coffee">
           {mode === "simple" && (
-            <div className="w-3/7 border-r-3 border-coffee pr-6 overflow-y-auto">
+            <div className="w-2/5 border-r-3 border-coffee pr-6 overflow-y-auto">
               <h3 className="font-bold text-lg mb-4">
                 How to Import From Quizlet
               </h3>
@@ -133,7 +133,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
           )}
 
           <div
-            className={`${mode === "simple" ? "w-4/7" : "w-full"} flex flex-col overflow-hidden`}
+            className={`${mode === "simple" ? "w-3/5" : "w-full"} flex flex-col overflow-hidden`}
           >
             <div className="flex gap-8 mb-6 shrink-0">
               <div>

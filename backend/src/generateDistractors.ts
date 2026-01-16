@@ -1,6 +1,6 @@
 import { config } from "dotenv";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
-import * as z from "zod";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { z } from "zod";
 import type { Flashcard } from "@shared/types.js";
 import fs from "fs";
 
@@ -11,24 +11,37 @@ const BATCH_SIZE = 25;
 
 config();
 
-let client: GoogleGenerativeAI | null = null;
+let model: ChatGoogleGenerativeAI | null = null;
 
-function getClient() {
-  if (!client && process.env.GEMINI_API_KEY) {
-    client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+function getModel() {
+  if (!model && process.env.GEMINI_API_KEY) {
+    model = new ChatGoogleGenerativeAI({
+      model: MODEL_NAME,
+      apiKey: process.env.GEMINI_API_KEY,
+    });
   }
-  return client;
+  return model;
 }
 
-const ids: string[] = [];
-for (let i = 0; i < BATCH_SIZE; i++) {
-  ids.push(`c${i}`);
-}
+// Zod schema for distractor output - each card gets exactly 3 distractors
+const DistractorItemSchema = z.object({
+  id: z.string().describe("The card ID (e.g., c0, c1, c2)"),
+  distractors: z
+    .array(z.string().min(1))
+    .length(3)
+    .describe("Exactly 3 incorrect alternatives for the answer"),
+});
 
-const DistractorsPerCard = z.array(z.string().min(1)).length(3);
+const DistractorResponseSchema = z.object({
+  results: z
+    .array(DistractorItemSchema)
+    .describe("Array of distractor results for each card"),
+});
+
+type DistractorResponse = z.infer<typeof DistractorResponseSchema>;
 
 async function generateDistractors(
-  apiClient: GoogleGenerativeAI,
+  llm: ChatGoogleGenerativeAI,
   pairs: { question: string; answer: string }[],
   onProgress?: (completed: number, total: number) => void,
 ): Promise<{
@@ -44,6 +57,7 @@ async function generateDistractors(
   let totalCompletionTokens = 0;
   let totalTokens = 0;
 
+  // Create batches
   const batches: {
     id: string;
     originalIndex: number;
@@ -55,7 +69,7 @@ async function generateDistractors(
     batches[i] = [];
   }
 
-  for (let i = 0; i < pairs.length; i += 1) {
+  for (let i = 0; i < pairs.length; i++) {
     const batchIndex = Math.floor(i / BATCH_SIZE);
     const idInBatch = i % BATCH_SIZE;
     const pair = pairs[i]!;
@@ -70,6 +84,9 @@ async function generateDistractors(
   let completedBatches = 0;
   const totalBatches = batches.length;
 
+  // Create structured output model using LangChain's withStructuredOutput
+  const structuredModel = llm.withStructuredOutput(DistractorResponseSchema);
+
   const batchPromises = batches.map(async (initialBatch, batchIndex) => {
     const MAX_RETRIES = 3;
     let currentBatch = initialBatch;
@@ -80,78 +97,32 @@ async function generateDistractors(
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
-        const batchSchema: Record<string, typeof DistractorsPerCard> = {};
-        for (const item of currentBatch) {
-          batchSchema[item.id] = DistractorsPerCard;
-        }
+        const inputData = currentBatch.map((item) => ({
+          id: item.id,
+          question: item.question,
+          answer: item.answer,
+        }));
 
-        const DistractorSet = z.object({
-          distractors: z.object(batchSchema),
-        });
-
-        const model = apiClient.getGenerativeModel({
-          model: MODEL_NAME,
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: SchemaType.OBJECT,
-              properties: {
-                distractors: {
-                  type: SchemaType.OBJECT,
-                  properties: Object.fromEntries(
-                    currentBatch.map((item) => [
-                      item.id,
-                      {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING },
-                      },
-                    ]),
-                  ),
-                  required: currentBatch.map((item) => item.id),
-                },
-              },
-            },
-          },
-        });
-
-        const result = await model.generateContent([
-          distractorPrompt,
-          JSON.stringify(currentBatch),
+        const response = await structuredModel.invoke([
+          ["system", distractorPrompt],
+          ["human", JSON.stringify(inputData)],
         ]);
 
-        const response = result.response;
-        const content = response.text();
+        // Validate with Zod (already done by withStructuredOutput, but we can double-check)
+        const parsed = DistractorResponseSchema.parse(response);
 
-        if (!content) {
-          throw new Error("Empty response from LLM");
+        // Map results by ID
+        const responseMap = new Map<string, string[]>();
+        for (const item of parsed.results) {
+          responseMap.set(item.id, item.distractors);
         }
 
-        const parsedRaw = JSON.parse(content);
-        const parsed = DistractorSet.parse(parsedRaw);
-
-        if (response.usageMetadata) {
-          totalPromptTokens += response.usageMetadata.promptTokenCount;
-          totalCompletionTokens += response.usageMetadata.candidatesTokenCount;
-          totalTokens += response.usageMetadata.totalTokenCount;
-        }
-
-        if (!parsed) {
-          throw new Error(
-            `Failed to parse distractors response for batch ${batchIndex + 1}`,
-          );
-        }
-
-        const nextBatch: {
-          id: string;
-          originalIndex: number;
-          question: string;
-          answer: string;
-        }[] = [];
+        const nextBatch: typeof currentBatch = [];
 
         for (const item of currentBatch) {
-          const llmDistractors = parsed.distractors[item.id];
+          const llmDistractors = responseMap.get(item.id);
 
-          if (llmDistractors) {
+          if (llmDistractors && llmDistractors.length === 3) {
             batchResults.set(item.id, {
               distractors: llmDistractors,
               originalIndex: item.originalIndex,
@@ -190,21 +161,17 @@ async function generateDistractors(
           `Batch ${batchIndex + 1} attempt ${attempt + 1}: Retrying ${nextBatch.length} missing items...`,
         );
       } catch (error: any) {
-        if (error.status === 429) {
-          let retryAfterMs = error.headers?.["retry-after-ms"];
-          let retryAfter = error.headers?.["retry-after"];
-
-          if (
-            !retryAfterMs &&
-            !retryAfter &&
-            error.headers &&
-            typeof error.headers.get === "function"
-          ) {
-            retryAfterMs = error.headers.get("retry-after-ms");
-            retryAfter = error.headers.get("retry-after");
-          }
-
+        // Handle rate limiting
+        if (error.status === 429 || error.message?.includes("429")) {
           let waitTime = 1000;
+
+          const retryAfterMs =
+            error.headers?.["retry-after-ms"] ||
+            error.headers?.get?.("retry-after-ms");
+          const retryAfter =
+            error.headers?.["retry-after"] ||
+            error.headers?.get?.("retry-after");
+
           if (retryAfterMs) {
             waitTime = parseInt(retryAfterMs, 10);
           } else if (retryAfter) {
@@ -212,9 +179,7 @@ async function generateDistractors(
           }
 
           console.warn(
-            `Batch ${
-              batchIndex + 1
-            }: Rate limit hit. Waiting ${waitTime}ms before retrying...`,
+            `Batch ${batchIndex + 1}: Rate limit hit. Waiting ${waitTime}ms before retrying...`,
           );
           await new Promise((resolve) => setTimeout(resolve, waitTime));
 
@@ -267,8 +232,8 @@ export async function generateResponse(
   mode: "term" | "definition" | "both",
   onProgress?: (message: string) => void,
 ) {
-  const apiClient = getClient();
-  if (!apiClient) {
+  const llm = getModel();
+  if (!llm) {
     throw new Error("Gemini API key not configured");
   }
 
@@ -305,13 +270,13 @@ export async function generateResponse(
 
   if (mode === "definition" || mode === "both") {
     promises.push(
-      generateDistractors(apiClient, termPairs, () => updateProgress()),
+      generateDistractors(llm, termPairs, () => updateProgress()),
     );
   }
 
   if (mode === "term" || mode === "both") {
     promises.push(
-      generateDistractors(apiClient, definitionPairs, () => updateProgress()),
+      generateDistractors(llm, definitionPairs, () => updateProgress()),
     );
   }
 

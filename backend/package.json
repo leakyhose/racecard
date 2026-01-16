@@ -13,8 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@langchain/core": "^1.1.15",
+    "@langchain/google-genai": "^2.1.10",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "langchain": "^1.2.10",
     "socket.io": "^4.8.1",
     "zod": "^4.3.5"
   },

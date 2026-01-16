@@ -1,6 +1,5 @@
 import { useState } from "react";
-import type { Settings, Flashcard, Lobby } from "@shared/types";
-import { ImportModal } from "./ImportModal";
+import type { Settings, Lobby } from "@shared/types";
 import { socket } from "../socket";
 
 interface GameSettingsProps {
@@ -9,8 +8,8 @@ interface GameSettingsProps {
   onUpdate: (settings: Settings) => void;
   lobby: Lobby;
   lockedSettings?: Partial<Settings>;
-  onPrivateSetLoaded?: (saved?: boolean) => void;
   isLoading?: boolean;
+  onUploadClick?: () => void;
 }
 
 const CustomCheckbox = ({
@@ -46,10 +45,9 @@ export function GameSettings({
   onUpdate,
   lobby,
   lockedSettings = {},
-  onPrivateSetLoaded,
   isLoading = false,
+  onUploadClick,
 }: GameSettingsProps) {
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [shake, setShake] = useState(false);
 
   const isGenerating = lobby?.distractorStatus === "generating";
@@ -66,17 +64,12 @@ export function GameSettings({
     onUpdate(updatedSettings);
   };
 
-  const handleImport = (flashcards: Flashcard[]) => {
-    socket.emit("updateFlashcard", flashcards, " ", " ", "Unsaved set");
-    onPrivateSetLoaded?.(false);
-  };
-
   const handleUploadClick = () => {
     if (isGenerating || isLoading) {
       setShake(true);
       setTimeout(() => setShake(false), 500);
     } else {
-      setIsImportModalOpen(true);
+      onUploadClick?.();
     }
   };
 
@@ -322,11 +315,6 @@ export function GameSettings({
               Upload Flashcards
             </span>
           </button>
-          <ImportModal
-            isOpen={isImportModalOpen}
-            onClose={() => setIsImportModalOpen(false)}
-            onImport={handleImport}
-          />
         </>
       )}
     </div>

@@ -15,13 +15,14 @@ import { Game } from "../components/Game";
 import { GameControls } from "../components/GameControls";
 import { SaveFlashcardsModal } from "../components/SaveFlashcardsModal";
 import { LoadFlashcardsModal } from "../components/LoadFlashcardsModal";
+import { ImportModal } from "../components/ImportModal";
 import { LoadFlashcards } from "../components/LoadFlashcards";
 import { JumboLoadFlashcards } from "../components/JumboLoadFlashcards";
 import { About } from "../components/About";
 import { ArrowButton } from "../components/ArrowButton";
 import { supabase } from "../supabaseClient";
 import { type LoadedPublicSet } from "../utils/loadPublicSet";
-import type { Settings } from "@shared/types";
+import type { Settings, Flashcard } from "@shared/types";
 
 export default function Lobby() {
   const { code } = useParams();
@@ -45,6 +46,7 @@ export default function Lobby() {
 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showLoadModal, setShowLoadModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [loadModalTab, setLoadModalTab] = useState<"personal" | "community">("personal");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [trackedSetId, setTrackedSetId] = useState<string | null>(null);
@@ -125,6 +127,11 @@ export default function Lobby() {
     setPublicSetInfo(null);
     setLockedSettings({});
     setIsSaved(saved);
+  };
+
+  const handleImportFlashcards = (flashcards: Flashcard[]) => {
+    socket.emit("updateFlashcard", flashcards, " ", " ", "Unsaved set");
+    handlePrivateSetLoaded(false);
   };
 
   const handleUnloadSet = () => {
@@ -899,8 +906,8 @@ export default function Lobby() {
               onUpdate={(settings) => socket.emit("updateSettings", settings)}
               lobby={lobby}
               lockedSettings={lockedSettings}
-              onPrivateSetLoaded={handlePrivateSetLoaded}
               isLoading={isSetLoading}
+              onUploadClick={() => setShowImportModal(true)}
             />
           </div>
         </div>
@@ -930,6 +937,12 @@ export default function Lobby() {
         onPublicSetLoaded={handlePublicSetLoaded}
         isLeader={isLeader}
         initialTab={loadModalTab}
+      />
+
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImportFlashcards}
       />
     </div>
   );
