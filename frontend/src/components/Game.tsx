@@ -158,11 +158,11 @@ export function Game({ lobby }: GameProps) {
 
   if (countdown !== null) {
     return (
-      <div className="flex items-center justify-center h-full p-8">
+      <div className="flex items-center justify-center h-full p-4 md:p-8">
         {typeof countdown === "number" ? (
-          <div className="text-9xl font-bold text-coffee">{countdown}</div>
+          <div className="text-7xl md:text-9xl font-bold text-coffee">{countdown}</div>
         ) : (
-          <div className="text-3xl font-bold text-coffee tracking-wider text-center">
+          <div className="text-xl md:text-3xl font-bold text-coffee tracking-wider text-center">
             {countdown}
           </div>
         )}
@@ -177,8 +177,8 @@ export function Game({ lobby }: GameProps) {
     }));
 
     return (
-      <div className="flex flex-col items-center justify-center h-full p-8 gap-8">
-        <h2 className="text-4xl font-bold text-coffee tracking-widest">
+      <div className="flex flex-col items-center justify-center h-full p-4 md:p-8 gap-4 md:gap-8">
+        <h2 className="text-2xl md:text-4xl font-bold text-coffee tracking-widest">
           Game Finished
         </h2>
         <MiniLeaderboard
@@ -217,21 +217,21 @@ export function Game({ lobby }: GameProps) {
   return (
     <div
       ref={scrollRef}
-      className="absolute inset-0 flex flex-col overflow-hidden w-full"
+      className="absolute inset-0 flex flex-col overflow-y-auto overflow-x-hidden w-full"
       onCopy={(e) => e.preventDefault()}
       onCut={(e) => e.preventDefault()}
       onPaste={(e) => e.preventDefault()}
     >
       <div
-        className={`w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 justify-center ${currentChoices ? "pb-4" : "pb-20"}`}
+        className={`w-full max-w-3xl mx-auto flex flex-col min-h-full p-4 pt-2 justify-center ${currentChoices ? "pb-4" : "pb-20"}`}
       >
         <div
-          className={`my-auto w-full flex flex-col ${currentChoices ? "gap-6" : "gap-14"}`}
+          className={`my-auto w-full flex flex-col ${currentChoices ? "gap-4 md:gap-6" : "gap-8 md:gap-14"}`}
         >
           <div
             className={`
                 relative z-20 w-full transition-all duration-800 ease-in-out perspective-[1000px] shrink-0
-            ${showResults ? "h-[200px]" : "h-[200px] sm:h-[300px] md:h-[450px]"}
+            ${showResults ? "h-[150px] sm:h-[180px] md:h-[200px]" : "h-[150px] sm:h-[250px] md:h-[300px] lg:h-[450px]"}
         `}
           >
             <div
@@ -240,17 +240,17 @@ export function Game({ lobby }: GameProps) {
                 ${showResults ? "transform-[rotateY(180deg)]" : "transform-[rotateY(0deg)]"}
             `}
             >
-              <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)] select-none">
-                <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
+              <div className="absolute inset-0 backface-hidden bg-vanilla border-2 border-coffee rounded-[20px] flex items-center justify-center p-4 md:p-8 shadow-[inset_0_0_0_2px_var(--color-terracotta)] select-none">
+                <div className="text-lg sm:text-2xl md:text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
                   {currentQuestion}
                 </div>
               </div>
 
-              <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-8 shadow-[inset_0_0_0_2px_var(--color-powder)] select-none">
-                <div className="text-sm text-coffee/60 mb-2 font-bold uppercase tracking-widest">
+              <div className="absolute inset-0 backface-hidden transform-[rotateY(180deg)] bg-vanilla border-3 border-coffee rounded-[20px] flex flex-col items-center justify-center p-4 md:p-8 shadow-[inset_0_0_0_2px_var(--color-powder)] select-none">
+                <div className="text-xs md:text-sm text-coffee/60 mb-1 md:mb-2 font-bold uppercase tracking-widest">
                   Correct Answer
                 </div>
-                <div className="text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
+                <div className="text-lg sm:text-2xl md:text-3xl font-bold text-coffee text-center wrap-break-word w-full max-w-full overflow-hidden">
                   {results?.Answer || lastAnswer}
                 </div>
               </div>
@@ -264,12 +264,12 @@ export function Game({ lobby }: GameProps) {
                 ${showResults ? "opacity-0 pointer-events-none" : "opacity-100 z-10"}
             `}
             >
-              <div className="w-full max-w-2xl mx-auto p-6 relative">
+              <div className="w-full max-w-2xl mx-auto p-2 md:p-6 relative">
                 <div
                   className={`${hasAnswered ? "opacity-0 pointer-events-none" : ""}`}
                 >
                   {currentChoices ? (
-                    <div className="grid grid-cols-2 gap-6 auto-rows-fr min-h-46">
+                    <div className="grid grid-cols-2 gap-3 md:gap-6 auto-rows-fr">
                       {Array.from(new Set(currentChoices)).map(
                         (choice, index) => (
                           <button
@@ -277,7 +277,7 @@ export function Game({ lobby }: GameProps) {
                             onClick={() => handleChoiceClick(choice)}
                             className="group relative w-full h-full rounded-lg bg-coffee border-none p-0 cursor-pointer outline-none select-none"
                           >
-                            <span className="w-full h-full rounded-lg border-[0.2rem] border-coffee p-4 text-center -translate-y-0.5 transition-transform duration-100 ease-out group-hover:-translate-y-1 group-active:translate-y-0 flex flex-col justify-center min-h-20 bg-vanilla text-coffee font-bold">
+                            <span className="w-full h-full rounded-lg border-[0.2rem] border-coffee p-2 md:p-4 text-center -translate-y-0.5 transition-transform duration-100 ease-out group-hover:-translate-y-1 group-active:translate-y-0 flex flex-col justify-center min-h-14 md:min-h-20 bg-vanilla text-coffee font-bold">
                               <span
                                 className={`w-full line-clamp-2 wrap-break-word ${getChoiceFontSize(choice)}`}
                               >
@@ -316,25 +316,25 @@ export function Game({ lobby }: GameProps) {
                     <div className="text-center">
                       {isCorrect === true ? (
                         <div>
-                          <div className="text-4xl mb-2 text-coffee">✓</div>
-                          <div className="text-xl font-bold text-coffee tracking-widest">
+                          <div className="text-3xl md:text-4xl mb-1 md:mb-2 text-coffee">✓</div>
+                          <div className="text-lg md:text-xl font-bold text-coffee tracking-widest">
                             Correct
                           </div>
                         </div>
                       ) : (
                         <div>
-                          <div className="text-4xl mb-2 text-terracotta">✗</div>
-                          <div className="text-xl font-bold text-terracotta tracking-widest">
+                          <div className="text-3xl md:text-4xl mb-1 md:mb-2 text-terracotta">✗</div>
+                          <div className="text-lg md:text-xl font-bold text-terracotta tracking-widest">
                             Incorrect
                           </div>
                         </div>
                       )}
                       {answerTime !== null && (
-                        <div className="text-lg text-coffee mt-2 font-bold">
+                        <div className="text-base md:text-lg text-coffee mt-1 md:mt-2 font-bold">
                           {(answerTime / 1000).toFixed(3)}s
                         </div>
                       )}
-                      <div className="text-coffee/50 mt-2 font-bold text-sm">
+                      <div className="text-coffee/50 mt-1 md:mt-2 font-bold text-xs md:text-sm">
                         Please wait for current flashcard to end...
                       </div>
                     </div>
